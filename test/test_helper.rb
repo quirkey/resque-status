@@ -4,6 +4,7 @@ $TESTING = true
 require 'test/unit'
 require 'rubygems'
 require 'shoulda'
+require 'mocha'
 
 require 'resque/status'
 
@@ -44,3 +45,24 @@ end
 puts "Starting redis for testing at localhost:9736..."
 `redis-server #{dir}/redis-test.conf`
 Resque.redis = 'localhost:9736'
+
+
+#### Fixtures
+
+class WorkingJob < Resque::Status::Chore
+  
+  def perform
+    (1..options[:num]).each do |num|
+      at(num, options[:num], "At #{num}")
+    end
+  end
+  
+end
+
+class ErrorJob < Resque::Status::Chore
+  
+  def perform
+    raise "I'm a bad little job"
+  end
+  
+end

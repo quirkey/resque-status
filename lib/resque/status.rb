@@ -2,6 +2,8 @@ require 'resque'
 require 'redisk'
 require 'uuid'
 
+require File.join(File.dirname(__FILE__), 'status', 'chore')
+
 module Resque
   module Status
     
