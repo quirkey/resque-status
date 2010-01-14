@@ -6,7 +6,7 @@ module Resque
   module Status
     
     class << self
-      def create(message)
+      def create(message = nil)
         
       end
       
@@ -22,7 +22,13 @@ module Resque
         
       end
       
+      def statuses
+        
+      end
       
+      def status_ids
+        
+      end
       
     end
     

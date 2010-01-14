@@ -36,7 +36,7 @@ class TestResqueStatus < Test::Unit::TestCase
       end
       
       should "encode objects as json" do
-        assert "{\"1\":\"2\"}", Resque::Status.set(@uuid, {"1": "2"})
+        assert "{\"1\":\"2\"}", Resque::Status.set(@uuid, {"1" => "2"})
       end
             
     end
@@ -46,22 +46,22 @@ class TestResqueStatus < Test::Unit::TestCase
         before = Resque::Status.status_ids.length
         Resque::Status.create
         after = Resque::Status.status_ids.length
-        (after - before).should == 1
+        assert_equal 1, after - before
       end
       
       should "return a uuid" do
-        Resque::Status.create.should match(/^\w{32}$/)
+       assert_match(/^\w{32}$/, Resque::Status.create)
       end
       
       should "store any status passed" do
         uuid = Resque::Status.create("initial status")
-        Resque::Status.get(uuid).should == "initial status"
+        assert_equal "initial status", Resque::Status.get(uuid)
       end
     end
     
     context ".status_ids" do
       should "return an array of job ids" do
-        Resque::Status.status_ids.should be_instance_of(Array)
+        assert Resque::Status.status_ids.is_a?(Array)
       end
     end
     
@@ -69,8 +69,8 @@ class TestResqueStatus < Test::Unit::TestCase
       
       should "return a hash of ids and status objects" do
         statuses = Resque::Status.statuses
-        statuses.should be_instance_of(Hash)
-        statuses.keys.should == [@uuid_with_json, @uuid]
+        assert statuses.is_a?(Hash)
+        assert_same_elements [@uuid_with_json, @uuid], statuses.keys
       end
       
     end
@@ -81,11 +81,11 @@ class TestResqueStatus < Test::Unit::TestCase
       end
       
       should "return a redisk logger" do
-        @logger.should be_kind_of(Redisk::Logger)
+        assert @logger.is_a?(Redisk::Logger)
       end
       
       should "scope the logger to a key" do
-        @logger.name.should match(/#{@uuid}/)
+        assert_match(/#{@uuid}/, @logger.name)
       end
       
     end
