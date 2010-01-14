@@ -32,7 +32,7 @@ class TestResqueStatus < Test::Unit::TestCase
       end
       
       should "return the status" do
-        assert_equal "updated", Resque::Status.set(@uuid, "updated")
+        assert_equal "\"updated\"", Resque::Status.set(@uuid, "updated")
       end
       
       should "encode objects as json" do
@@ -70,7 +70,7 @@ class TestResqueStatus < Test::Unit::TestCase
       should "return a hash of ids and status objects" do
         statuses = Resque::Status.statuses
         assert statuses.is_a?(Hash)
-        assert_same_elements [@uuid_with_json, @uuid], statuses.keys
+        assert_equal [@uuid_with_json, @uuid], statuses.keys
       end
       
     end
