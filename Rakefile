@@ -10,7 +10,7 @@ begin
     gem.email = "aaron@quirkey.com"
     gem.homepage = "http://github.com/quirkey/resque-status"
     gem.authors = ["Aaron Quint"]
-    gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
+    gem.add_development_dependency "shoulda", ">= 0"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new

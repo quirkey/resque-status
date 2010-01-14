@@ -5,7 +5,7 @@ require 'test/unit'
 require 'rubygems'
 require 'shoulda'
 
-require 'resque-status'
+require 'resque/status'
 
 class Test::Unit::TestCase
 end
