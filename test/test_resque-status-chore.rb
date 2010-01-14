@@ -9,7 +9,7 @@ class TestResqueStatusChore < Test::Unit::TestCase
     
     context ".create" do
       setup do
-        @uuid = WorkingJob.create(:num => 100)
+        @uuid = WorkingJob.create('num' => 100)
       end
       
       should "add the job to the queue" do
@@ -18,8 +18,8 @@ class TestResqueStatusChore < Test::Unit::TestCase
       
       should "set the queued object to the current class" do
         job = Resque.pop(:chores)
-        assert_equal uuid, job[:args][:uuid]
-        assert_equal "WorkingJob", job[:class]
+        assert_equal @uuid, job['args'].first
+        assert_equal "WorkingJob", job['class']
       end
       
       should "add the uuid to the statuses" do
@@ -39,11 +39,11 @@ class TestResqueStatusChore < Test::Unit::TestCase
       end
       
       should "add the job with the specific class to the queue" do
-        assert_equal "WorkingJob", @payload[:class]
+        assert_equal "WorkingJob", @payload['class']
       end
       
       should "add the arguments to the options hash" do
-        assert_equal uuid, @payload[:args][:uuid]
+        assert_equal @uuid, @payload['args'].first
       end
       
       should "add the uuid to the statuses" do
@@ -60,7 +60,7 @@ class TestResqueStatusChore < Test::Unit::TestCase
       setup do
         @uuid      = WorkingJob.create(:num => 100)
         @payload   = Resque.pop(:chores)
-        @performed = WorkingJob.perform(*@payload[:args])
+        @performed = WorkingJob.perform(*@payload['args'])
       end
       
       should "load load a new instance of the klass" do
@@ -79,7 +79,7 @@ class TestResqueStatusChore < Test::Unit::TestCase
     
     context "with an invoked chore" do
       setup do
-        @chore = WorkingJob.new('123', {:num => 100})
+        @chore = WorkingJob.new('123', {'num' => 100})
       end
       
       context "#at" do
@@ -88,15 +88,15 @@ class TestResqueStatusChore < Test::Unit::TestCase
         end
         
         should "calculate percent" do
-          assert_equal "50", @chore.status[:pct_complete]
+          assert_equal 50, @chore.status["pct_complete"]
         end
         
         should "set status" do
-          assert_equal 'working', @chore.status[:status]
+          assert_equal 'working', @chore.status["status"]
         end
         
         should "save message" do
-          assert_equal "At 50%", @chore.status[:message]
+          assert_equal "At 50%", @chore.status["message"]
         end
       end
       
@@ -106,11 +106,11 @@ class TestResqueStatusChore < Test::Unit::TestCase
         end
         
         should "set status" do
-          assert_equal 'failed', @chore.status[:status]
+          assert_equal 'failed', @chore.status["status"]
         end
         
         should "set message" do
-          assert_equal "OOOOPS!", @chore.status[:message]
+          assert_equal "OOOOPS!", @chore.status["message"]
         end
       end
       
@@ -120,11 +120,11 @@ class TestResqueStatusChore < Test::Unit::TestCase
         end
         
         should "set status" do
-          assert_equal 'completed', @chore.status[:status]
+          assert_equal 'completed', @chore.status["status"]
         end
         
         should "set message" do
-          assert_match(/complete/i, @chore.status[:message])
+          assert_match(/complete/i, @chore.status["message"])
         end
         
       end
@@ -132,17 +132,13 @@ class TestResqueStatusChore < Test::Unit::TestCase
       context "#safe_perform!" do
         setup do
           @chore = ErrorJob.new("123")
-          assert_raise RuntimeError {
+          assert_raises(RuntimeError) do
             @chore.safe_perform!
-          }
-        end
-        
-        before_should "run perform on the instance" do
-          @chore.expects(:perform).once
+          end
         end
                 
         should "set status as failed" do
-          assert_equal 'failed', @chore.status[:status]
+          assert_equal 'failed', @chore.status["status"]
         end
         
       end

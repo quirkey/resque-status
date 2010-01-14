@@ -52,8 +52,9 @@ Resque.redis = 'localhost:9736'
 class WorkingJob < Resque::Status::Chore
   
   def perform
-    (1..options[:num]).each do |num|
-      at(num, options[:num], "At #{num}")
+    total = options['num']
+    (1..total).each do |num|
+      at(num, total, "At #{num}")
     end
   end
   
