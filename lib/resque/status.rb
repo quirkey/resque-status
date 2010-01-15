@@ -87,7 +87,6 @@ module Resque
 
     hash_accessor :num
     hash_accessor :total
-    hash_accessor :pct_complete
 
     def initialize(*args)
       super({})
@@ -103,6 +102,11 @@ module Resque
         final.merge(m || {})
       end
       self.replace(status_hash)
+    end
+    
+    def pct_complete
+      t = (total == 0 || total.nil?) ? 1 : total
+      pct = (((num || 0).to_f / t.to_f) * 100).to_i
     end
 
     def inspect

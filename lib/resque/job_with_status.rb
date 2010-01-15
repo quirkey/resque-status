@@ -51,10 +51,7 @@ module Resque
     end
 
     def at(num, total, message, more = {})
-      total = (total == 0 || total.nil?) ? 1 : total
-      pct = (((num || 0).to_f / total.to_f) * 100).to_i
       set_status({
-        'pct_complete' => pct, 
         'num' => num, 
         'total' => total, 
         'status' => 'working',
@@ -64,7 +61,6 @@ module Resque
 
     def failed(message, more = {})
       set_status({
-        'pct_complete' => 100,
         'status' => 'failed',
         'message' => message
       }, more)
@@ -72,7 +68,6 @@ module Resque
 
     def completed(message = nil, more = {})
       set_status({
-        'pct_complete' => 100, 
         'status' => 'completed',
         'message' => message || "Completed at #{Time.now}"
       }, more)
