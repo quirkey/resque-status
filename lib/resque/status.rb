@@ -18,11 +18,11 @@ module Resque
       
       def get(uuid)
         val = redis.get(status_key(uuid))
-        val ? Resque.decode(val) : nil
+        val ? decode(val) : nil
       end
       
       def set(uuid, message)
-        val = Resque.encode(message)
+        val = encode(message)
         redis.set(status_key(uuid), val)
         val
       end
