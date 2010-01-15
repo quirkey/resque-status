@@ -2,15 +2,12 @@ require 'resque'
 require 'redisk'
 require 'uuid'
 
-require File.join(File.dirname(__FILE__), 'status', 'chore')
-
 module Resque
-  module Status
+  class Status
+    include Resque::Helpers
+    extend Resque::Helpers
     
     class << self
-      def redis
-        Resque.redis
-      end
       
       def create(message = nil)
         uuid = generate_uuid

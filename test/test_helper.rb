@@ -7,6 +7,7 @@ require 'shoulda'
 require 'mocha'
 
 require 'resque/status'
+require 'resque/job_with_status'
 
 class Test::Unit::TestCase
 end
@@ -49,7 +50,7 @@ Resque.redis = 'localhost:9736'
 
 #### Fixtures
 
-class WorkingJob < Resque::Status::Chore
+class WorkingJob < Resque::JobWithStatus
   
   def perform
     total = options['num']
@@ -60,7 +61,7 @@ class WorkingJob < Resque::Status::Chore
   
 end
 
-class ErrorJob < Resque::Status::Chore
+class ErrorJob < Resque::JobWithStatus
   
   def perform
     raise "I'm a bad little job"
