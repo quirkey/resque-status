@@ -11,8 +11,10 @@ class TestResqueStatus < Test::Unit::TestCase
     end
     
     context ".get" do 
-      should "return the status as a string for the uuid" do
-        assert_equal 'my status', Resque::Status.get(@uuid)
+      should "return the status as a Resque::Status for the uuid" do
+        status = Resque::Status.get(@uuid)
+        assert status.is_a?(Resque::Status)
+        assert_equal 'my status', status.message
       end
       
       should "return false if the status is not set" do
@@ -20,7 +22,7 @@ class TestResqueStatus < Test::Unit::TestCase
       end
       
       should "decode encoded json" do
-        assert_equal({"im" => "json"}, Resque::Status.get(@uuid_with_json))
+        assert_equal("json", Resque::Status.get(@uuid_with_json)['im'])
       end
     end
     
@@ -28,17 +30,13 @@ class TestResqueStatus < Test::Unit::TestCase
         
       should "set the status for the uuid" do
         assert Resque::Status.set(@uuid, "updated")
-        assert_equal "updated", Resque::Status.get(@uuid)
+        assert_equal "updated", Resque::Status.get(@uuid).message
       end
       
       should "return the status" do
-        assert_equal "\"updated\"", Resque::Status.set(@uuid, "updated")
+        assert Resque::Status.set(@uuid, "updated").is_a?(Resque::Status)
       end
-      
-      should "encode objects as json" do
-        assert "{\"1\":\"2\"}", Resque::Status.set(@uuid, {"1" => "2"})
-      end
-            
+                  
     end
     
     context ".create" do
@@ -55,7 +53,9 @@ class TestResqueStatus < Test::Unit::TestCase
       
       should "store any status passed" do
         uuid = Resque::Status.create("initial status")
-        assert_equal "initial status", Resque::Status.get(uuid)
+        status = Resque::Status.get(uuid)
+        assert status.is_a?(Resque::Status)
+        assert_equal "initial status", status.message
       end
     end
     

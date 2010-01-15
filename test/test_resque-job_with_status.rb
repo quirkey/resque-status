@@ -81,22 +81,22 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
       setup do
         @job = WorkingJob.new('123', {'num' => 100})
       end
-      
+            
       context "#at" do
         setup do
           @job.at(50, 100, "At 50%")
         end
         
         should "calculate percent" do
-          assert_equal 50, @job.status["pct_complete"]
+          assert_equal 50, @job.status.pct_complete
         end
         
         should "set status" do
-          assert_equal 'working', @job.status["status"]
+          assert_equal 'working', @job.status.status
         end
         
         should "save message" do
-          assert_equal "At 50%", @job.status["message"]
+          assert_equal "At 50%", @job.status.message
         end
       end
       
@@ -106,11 +106,11 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
         end
         
         should "set status" do
-          assert_equal 'failed', @job.status["status"]
+          assert_equal 'failed', @job.status.status
         end
         
         should "set message" do
-          assert_equal "OOOOPS!", @job.status["message"]
+          assert_equal "OOOOPS!", @job.status.message
         end
       end
       
@@ -120,11 +120,11 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
         end
         
         should "set status" do
-          assert_equal 'completed', @job.status["status"]
+          assert_equal 'completed', @job.status.status
         end
         
         should "set message" do
-          assert_match(/complete/i, @job.status["message"])
+          assert_match(/complete/i, @job.status.message)
         end
         
       end
@@ -138,7 +138,7 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
         end
                 
         should "set status as failed" do
-          assert_equal 'failed', @job.status["status"]
+          assert_equal 'failed', @job.status.status
         end
         
       end
