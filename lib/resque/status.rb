@@ -20,8 +20,8 @@ module Resque
         val ? Resque::Status.new(uuid, decode(val)) : nil
       end
 
-      def set(uuid, message)
-        val = Resque::Status.new(uuid, message)
+      def set(uuid, *messages)
+        val = Resque::Status.new(uuid, *messages)
         redis.set(status_key(uuid), encode(val))
         val
       end

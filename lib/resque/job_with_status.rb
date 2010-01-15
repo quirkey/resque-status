@@ -43,7 +43,7 @@ module Resque
     end
 
     def status=(new_status)
-      Resque::Status.set(uuid, new_status)
+      Resque::Status.set(uuid, *new_status)
     end
     
     def status
@@ -79,11 +79,7 @@ module Resque
     end
 
     def set_status(*args)
-      self.status = args.inject({
-        'time' => Time.now.to_i,
-        'name'  => self.class.to_s,
-        'status' => 'queued'
-      }) {|h, m| h.merge(m || {}) }
+      self.status = [{'name'  => self.class.to_s}, args].flatten
     end
     
   end
