@@ -7,11 +7,12 @@ module Resque
     extend Resque::Helpers
 
     class << self
-
+      
       def create(message = nil)
         uuid = generate_uuid
         set(uuid, message) if message
         redis.zadd(set_key, Time.now.to_i, uuid)
+        redis.zremrangebyscore(set_key, 0, Time.now.to_i - @expire_in) if @expire_in
         uuid
       end
 
@@ -23,6 +24,9 @@ module Resque
       def set(uuid, *messages)
         val = Resque::Status.new(uuid, *messages)
         redis.set(status_key(uuid), encode(val))
+        if expire_in
+          redis.expire(status_key(uuid), expire_in) 
+        end
         val
       end
 
@@ -58,6 +62,14 @@ module Resque
         UUID.generate(:compact)
       end
 
+      def expire_in
+        @expire_in
+      end
+      
+      def expire_in=(seconds)
+        @expire_in = seconds.nil? ? nil : seconds.to_i
+      end
+
       def hash_accessor(name, options = {})
         options[:default] ||= nil 
         coerce = options[:coerce] ? ".#{options[:coerce]}" : ""
@@ -89,10 +101,8 @@ module Resque
     hash_accessor :total
 
     def initialize(*args)
-      super({})
-      if args.length > 1
-        self['uuid'] = args.shift
-      end
+      super nil
+      self['uuid'] = args.shift if args.length > 1
       base_status = {
         'time' => Time.now.to_i,
         'status' => 'queued'
@@ -106,7 +116,7 @@ module Resque
     
     def pct_complete
       t = (total == 0 || total.nil?) ? 1 : total
-      pct = (((num || 0).to_f / t.to_f) * 100).to_i
+      (((num || 0).to_f / t.to_f) * 100).to_i
     end
 
     def inspect

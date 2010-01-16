@@ -5,6 +5,7 @@ class TestResqueStatus < Test::Unit::TestCase
   context "Resque::Status" do
     setup do
       Resque.redis.flush_all
+      Resque::Status.expire_in = nil
       @uuid = Resque::Status.create
       Resque::Status.set(@uuid, "my status")
       @uuid_with_json = Resque::Status.create({"im" => "json"})
@@ -56,6 +57,17 @@ class TestResqueStatus < Test::Unit::TestCase
         status = Resque::Status.get(uuid)
         assert status.is_a?(Resque::Status)
         assert_equal "initial status", status.message
+      end
+      
+      should "expire keys if expire_in is set" do
+        Resque::Status.expire_in = 1
+        uuid = Resque::Status.create("new status")
+        assert_contains Resque::Status.status_ids, uuid
+        assert_equal "new status", Resque::Status.get(uuid).message
+        sleep 2
+        Resque::Status.create
+        assert_does_not_contain Resque::Status.status_ids, uuid
+        assert_nil Resque::Status.get(uuid)
       end
     end
     
