@@ -1,15 +1,19 @@
 require 'rubygems'
 require 'rake'
+require 'lib/resque/status'
 
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "resque-status"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.version = Resque::Status::VERSION
+    gem.summary = %Q{resque-status is an extension to the resque queue system that provides trackable jobs}
+    gem.description = %Q{resque-status is an extension to the resque queue system that provides trackable jobs. It provides a Resque::Status class which can set/get the statuses of jobs and a Resque::JobWithStatus class that when subclassed provides easily trackable/killable jobs.}
     gem.email = "aaron@quirkey.com"
     gem.homepage = "http://github.com/quirkey/resque-status"
     gem.authors = ["Aaron Quint"]
+    gem.add_dependency "uuid"
+    gem.add_dependency "resque", ">=1.3.1"
     gem.add_development_dependency "shoulda", ">= 0"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end

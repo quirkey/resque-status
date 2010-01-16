@@ -1,0 +1,18 @@
+<h1 class='wi'>Statuses</h1>
+<p class='intro'>These are recent jobs created with the JobWithStatus class</p>
+<table class='queues'>
+  <tr>
+    <th>Name</th>
+    <th>Jobs</th>
+  </tr>
+  <% for queue in resque.queues.sort_by { |q| q.to_s } %>
+  <tr>
+    <td class='queue'><a class="queue" href="<%= url "queues/#{queue}" %>"><%= queue %></a></td>
+    <td class='size'><%= resque.size queue %></td>
+  </tr>
+  <% end %>
+  <tr class='failed'>
+    <td class='queue failed'><a class="queue" href="<%= url :failed %>">failed</a></td>
+    <td class='size'><%= Resque::Failure.count %></td>
+  </tr>
+</table>

@@ -69,7 +69,8 @@ module Resque
     end
     
     def tick(*messages)
-      
+      kill! if should_kill?
+      set_status({'status' => 'working'}, *messages)
     end
 
     def failed(*messages)

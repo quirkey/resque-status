@@ -4,6 +4,8 @@ require 'uuid'
 
 module Resque
   class Status < Hash
+    VERSION = '0.1.0'
+    
     extend Resque::Helpers
 
     class << self
