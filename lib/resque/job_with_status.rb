@@ -2,6 +2,7 @@ require 'resque/status'
 
 module Resque
   class JobWithStatus
+    class Killed < RuntimeError; end
     
     attr_reader :uuid, :options
 
@@ -32,6 +33,10 @@ module Resque
 
     def safe_perform!
       perform
+      completed unless status && status.status == 'completed'
+    rescue Killed
+      logger.info "Job #{self} Killed at #{Time.now}"
+      Resque::Status.killed(uuid)
     rescue => e
       logger.error e
       failed("The task failed because of an error: #{e.inspect}")
@@ -50,7 +55,12 @@ module Resque
       Resque::Status.get(uuid)
     end
 
+    def should_kill?
+      Resque::Status.should_kill?(uuid)
+    end
+
     def at(num, total, message, more = {})
+      kill! if should_kill?
       set_status({
         'num' => num, 
         'total' => total, 
@@ -65,12 +75,20 @@ module Resque
         'message' => message
       }, more)
     end
-
+    
     def completed(message = nil, more = {})
       set_status({
         'status' => 'completed',
         'message' => message || "Completed at #{Time.now}"
       }, more)
+    end
+    
+    def kill!
+      set_status({
+        'status' => 'killed',
+        'message' => "Killed"
+      })
+      raise Killed
     end
 
     def set_status(*args)

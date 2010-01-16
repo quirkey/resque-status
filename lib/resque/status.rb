@@ -29,7 +29,7 @@ module Resque
         end
         val
       end
-
+      
       def logger(uuid, options = {})
         Redisk::Logger.new(logger_key(uuid), options)
       end
@@ -45,6 +45,22 @@ module Resque
       def status_ids(num = -1)
         redis.zrevrange set_key, 0, num
       end
+      
+      def kill(uuid)
+        redis.sadd(kill_key, uuid)
+      end
+      
+      def killed(uuid)
+        redis.srem(kill_key, uuid)
+      end
+      
+      def kill_ids
+        redis.smembers(kill_key)
+      end
+      
+      def should_kill?(uuid)
+        redis.sismember(kill_key, uuid)
+      end
 
       def status_key(uuid)
         "status:#{uuid}"
@@ -54,6 +70,9 @@ module Resque
         "_statuses"
       end
 
+      def kill_key
+        "_kill"
+      end
       def logger_key(uuid)
         "_log:#{uuid}"
       end
