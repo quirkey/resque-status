@@ -59,28 +59,28 @@ module Resque
       Resque::Status.should_kill?(uuid)
     end
 
-    def at(num, total, message, more = {})
+    def at(num, total, *messages)
       kill! if should_kill?
       set_status({
         'num' => num, 
         'total' => total, 
         'status' => 'working',
-        'message' => message
-      }, more)
-    end
-
-    def failed(message, more = {})
-      set_status({
-        'status' => 'failed',
-        'message' => message
-      }, more)
+      }, *messages)
     end
     
-    def completed(message = nil, more = {})
+    def tick(*messages)
+      
+    end
+
+    def failed(*messages)
+      set_status({'status' => 'failed'}, *messages)
+    end
+    
+    def completed(*messages)
       set_status({
         'status' => 'completed',
-        'message' => message || "Completed at #{Time.now}"
-      }, more)
+        'message' => "Completed at #{Time.now}"
+      }, *messages)
     end
     
     def kill!
