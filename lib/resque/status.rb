@@ -114,6 +114,7 @@ module Resque
     end
 
     hash_accessor :uuid
+    hash_accessor :name
     hash_accessor :status
     hash_accessor :message
     hash_accessor :time
@@ -138,6 +139,10 @@ module Resque
     def pct_complete
       t = (total == 0 || total.nil?) ? 1 : total
       (((num || 0).to_f / t.to_f) * 100).to_i
+    end
+    
+    def time
+      time? ? Time.at(self['time']) : nil
     end
 
     def inspect

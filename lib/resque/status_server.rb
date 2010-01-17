@@ -7,7 +7,6 @@ module Resque
     
     def self.registered(app)
       
-      
       app.get '/statuses' do
         @statuses = Resque::Status.statuses
         status_view(:statuses)
@@ -20,7 +19,10 @@ module Resque
       end
       
       app.tabs << "Statuses"
+      
     end
 
   end
 end
+
+Resque::Server.register Resque::StatusServer

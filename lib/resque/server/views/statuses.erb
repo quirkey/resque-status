@@ -2,17 +2,21 @@
 <p class='intro'>These are recent jobs created with the JobWithStatus class</p>
 <table>
   <tr>
+    <th>ID</th>
     <th>Name</th>
-    <th>Jobs</th>
+    <th>Status</th>
+    <th>Last Updated</th>
+    <th>% Complete</th>
+    <th>Message</th>
   </tr>
-  <% for queue in resque.queues.sort_by { |q| q.to_s } %>
+  <% @statuses.each do |uuid, status| %>
   <tr>
-    <td class='queue'><a class="queue" href="<%= url "queues/#{queue}" %>"><%= queue %></a></td>
-    <td class='size'><%= resque.size queue %></td>
+    <td><%= status.uuid %></td>
+    <td><%= status.name %></td>
+    <td class="status-<%= status.status %>"><%= status.status %></td>
+    <td class="time"><%= status.time %></td>
+    <td><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></td>
+    <td><%= status.message %></td>
   </tr>
   <% end %>
-  <tr class='failed'>
-    <td class='queue failed'><a class="queue" href="<%= url :failed %>">failed</a></td>
-    <td class='size'><%= Resque::Failure.count %></td>
-  </tr>
 </table>
