@@ -12,7 +12,7 @@ module Resque
       
       def create(message = nil)
         uuid = generate_uuid
-        set(uuid, message) if message
+        set(uuid, message)
         redis.zadd(set_key, Time.now.to_i, uuid)
         redis.zremrangebyscore(set_key, 0, Time.now.to_i - @expire_in) if @expire_in
         uuid
@@ -39,7 +39,8 @@ module Resque
       def statuses(num = -1)
         h = {}
         status_ids(num).each do |id|
-          h[id] = get(id)
+          val = get(id)
+          h[id] = val if val
         end
         h
       end

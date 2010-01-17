@@ -10,6 +10,10 @@ module Resque
       :statused
     end
     
+    def self.name
+      self.to_s
+    end
+    
     def self.create(options = {})
       self.enqueue(self, options)
     end
@@ -93,7 +97,7 @@ module Resque
     end
 
     def set_status(*args)
-      self.status = [{'name'  => self.class.to_s}, args].flatten
+      self.status = [{'name'  => self.name}, args].flatten
     end
     
   end
