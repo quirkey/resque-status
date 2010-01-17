@@ -79,10 +79,10 @@ class TestResqueStatus < Test::Unit::TestCase
     
     context ".statuses" do
       
-      should "return a hash of ids and status objects" do
+      should "return an array status objects" do
         statuses = Resque::Status.statuses
-        assert statuses.is_a?(Hash)
-        assert_same_elements [@uuid_with_json, @uuid], statuses.keys
+        assert statuses.is_a?(Array)
+        assert_same_elements [@uuid_with_json, @uuid], statuses.collect {|s| s.uuid }
       end
       
     end
