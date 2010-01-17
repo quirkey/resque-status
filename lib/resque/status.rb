@@ -125,11 +125,11 @@ module Resque
 
     def initialize(*args)
       super nil
-      self['uuid'] = args.shift if args.length > 1
       base_status = {
         'time' => Time.now.to_i,
         'status' => 'queued'
       }
+      base_status['uuid'] = args.shift if args.length > 1
       status_hash = args.inject(base_status) do |final, m|
         m = {'message' => m} if m.is_a?(String)
         final.merge(m || {})
@@ -144,6 +144,12 @@ module Resque
     
     def time
       time? ? Time.at(self['time']) : nil
+    end
+
+    def to_json
+      h = self.dup
+      h['pct_complete'] = pct_complete
+      self.class.encode(h)
     end
 
     def inspect
