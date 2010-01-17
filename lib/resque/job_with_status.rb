@@ -59,6 +59,10 @@ module Resque
       Resque::Status.get(uuid)
     end
 
+    def name
+      self.class.name
+    end
+
     def should_kill?
       Resque::Status.should_kill?(uuid)
     end

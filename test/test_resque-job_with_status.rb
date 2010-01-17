@@ -71,6 +71,11 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
         assert_equal @uuid, @performed.uuid
       end
       
+      should "set the status" do
+        assert @performed.status.is_a?(Resque::Status)
+        assert_equal 'WorkingJob', @performed.status.name
+      end
+      
       before_should "call perform on the inherited class" do
         WorkingJob.any_instance.expects(:perform).once
       end
