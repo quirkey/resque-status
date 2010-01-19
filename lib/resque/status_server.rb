@@ -12,9 +12,20 @@ module Resque
         status_view(:statuses)
       end
       
+      app.get '/statuses/:id.json' do
+        @status = Resque::Status.get(params[:id])
+        content_type :js
+        @status.to_json
+      end
+      
+      app.get '/statuses/:id' do
+        @status = Resque::Status.get(params[:id])
+        status_view(:status)
+      end
+      
       app.helpers do
-        def status_view(filename)
-          erb(File.read(File.join(VIEW_PATH, "#{filename}.erb")))
+        def status_view(filename, options = {}, locals = {})
+          erb(File.read(File.join(VIEW_PATH, "#{filename}.erb")), options, locals)
         end
       end
       

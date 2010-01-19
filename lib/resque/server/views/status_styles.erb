@@ -1,0 +1,88 @@
+<style type="text/css" media="screen">
+  th.progress {
+    width: 100px;
+  }
+  td.progress {
+    position: relative;
+    width: 100px;
+    display:block;
+  }
+  td.status {
+    font-weight: bold;
+  }
+  td.progress .progress-bar {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background: #999;
+    display:block;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.5;
+    -moz-opacity: 0.5;
+    -webkit-opacity: 0.5;
+  }
+  td.progress .progress-pct {
+    z-index: 10;
+    color: #333;
+  }
+  
+  .status-holder {
+    background: #F7F7F7;
+    border: 1px solid #E5E5E5;
+    padding: 20px;
+    font-size: 110%;
+    margin-bottom: 40px;
+  }
+  .status-progress {
+    width: 100%;
+    height: 30px;
+    border: 1px solid #CCC;
+    background: #E5E5E5;
+    position:relative;
+    margin: 5px 0px;
+  }
+  .status-progress-bar {
+    position:absolute;
+    top: 0px;
+    left: 0px;
+    height: 30px;
+    background: #CCC;
+  }
+  .status-progress p {
+    position:absolute;
+    top: 5px;
+    left: 10px;
+    z-index: 15;
+    display:block;
+    color: #FFF;
+    padding: 0px;
+    font-weight: bold;
+  }
+  .status-message {
+    font-weight: bold;
+  }
+  .status-time {
+    font-size: 70%;
+    padding: 10px 0px;
+    color: #999;
+  }
+  .status-progress-bar.status-completed {
+    background:#61BF55;
+  }
+  .status-progress-bar.status-failed {
+   background: #E47E74;
+  }
+  .status-progress-bar.status-working {
+    background: #528499;
+  }
+  .status-completed {
+    color:#61BF55;
+  }
+  .status-failed {
+    color: #E47E74;
+  }
+  .status-working {
+    color: #528499;
+  }
+</style>

@@ -1,0 +1,13 @@
+<%= status_view :status_styles, :layout => false %>
+
+<h1 class='wi'>Statuses: <%= @status.uuid %>/<%= @status.name %></h1>
+<p class='intro'>Viewing a specific job created with JobWithStatus. <a href="/statuses">Return to the list of statuses</a></p>
+
+<div class="status-holder" rel="<%= @status.status %>" id="job_<%= @status.uuid %>">
+  <div class="status-progress">
+    <div class="status-progress-bar status-<%= @status.status %>" style="width: <%= @status.pct_complete %>%;"></div>
+    <p><%= @status.pct_complete %>%</p>
+  </div>
+  <div class="status-message"><%= @status.message %></div>
+  <div class="status-time"><%= @status.time? ? @status.time : 'Not started' %></div>
+</div>

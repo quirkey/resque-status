@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-  s.date = %q{2010-01-16}
+  s.date = %q{2010-01-19}
   s.description = %q{resque-status is an extension to the resque queue system that provides trackable jobs. It provides a Resque::Status class which can set/get the statuses of jobs and a Resque::JobWithStatus class that when subclassed provides easily trackable/killable jobs.}
   s.email = %q{aaron@quirkey.com}
   s.extra_rdoc_files = [
@@ -22,10 +22,12 @@ Gem::Specification.new do |s|
      "LICENSE",
      "README.rdoc",
      "Rakefile",
+     "examples/sleep_job.rb",
+     "init.rb",
      "lib/resque/job_with_status.rb",
+     "lib/resque/server/views/status.erb",
      "lib/resque/server/views/statuses.erb",
      "lib/resque/status.rb",
-     "lib/resque/status_config.rb",
      "lib/resque/status_server.rb",
      "resque-status.gemspec",
      "test/redis-test.conf",
@@ -41,7 +43,8 @@ Gem::Specification.new do |s|
   s.test_files = [
     "test/test_helper.rb",
      "test/test_resque-job_with_status.rb",
-     "test/test_resque-status.rb"
+     "test/test_resque-status.rb",
+     "examples/sleep_job.rb"
   ]
 
   if s.respond_to? :specification_version then

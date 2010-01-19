@@ -1,3 +1,5 @@
+<%= status_view :status_styles, :layout => false %>
+
 <h1 class='wi'>Statuses</h1>
 <p class='intro'>These are recent jobs created with the JobWithStatus class</p>
 <table>
@@ -6,17 +8,26 @@
     <th>Name</th>
     <th>Status</th>
     <th>Last Updated</th>
-    <th>% Complete</th>
+    <th class="progress">% Complete</th>
     <th>Message</th>
   </tr>
-  <% @statuses.each do |uuid, status| %>
+  <% unless @statuses.empty? %>
+    <% @statuses.each do |status| %>
+    <tr>
+      <td><a href="/statuses/<%= status.uuid %>"><%= status.uuid %></a></td>
+      <td><%= status.name %></td>
+      <td class="status status-<%= status.status %>"><%= status.status %></td>
+      <td class="time"><%= status.time %></td>
+      <td class="progress">
+        <div class="progress-bar" style="width:<%= status.pct_complete %>%">&nbsp;</div>
+        <div class="progress-pct"><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></div>
+      </td>
+      <td><%= status.message %></td>
+    </tr>
+    <% end %>
+  <% else %>  
   <tr>
-    <td><%= status.uuid %></td>
-    <td><%= status.name %></td>
-    <td class="status-<%= status.status %>"><%= status.status %></td>
-    <td class="time"><%= status.time %></td>
-    <td><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></td>
-    <td><%= status.message %></td>
+    <td colspan="6" class='no-data'>No Statuses right now...</td>
   </tr>
   <% end %>
 </table>
