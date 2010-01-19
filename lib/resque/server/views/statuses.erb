@@ -10,6 +10,7 @@
     <th>Last Updated</th>
     <th class="progress">% Complete</th>
     <th>Message</th>
+    <th>Kill</th>
   </tr>
   <% unless @statuses.empty? %>
     <% @statuses.each do |status| %>
@@ -23,11 +24,37 @@
         <div class="progress-pct"><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></div>
       </td>
       <td><%= status.message %></td>
+      <td><% if status.killable? %><a href="/statuses/<%= status.uuid %>/kill" class="kill">Kill</a><% end %></td>
     </tr>
     <% end %>
   <% else %>  
   <tr>
-    <td colspan="6" class='no-data'>No Statuses right now...</td>
+    <td colspan="7" class='no-data'>No Statuses right now...</td>
   </tr>
   <% end %>
 </table>
+
+<script type="text/javascript" charset="utf-8">
+  jQuery(function($) {
+    
+    $('a.kill').click(function(e) {
+      e.preventDefault();
+      var $link = $(this),
+          url = $link.attr('href'),
+          confirmed = confirm("Are you sure you want to kill this job? There is no undo.");
+      if (confirmed) {
+        $link.animate({opacity: 0.5});
+        $.ajax({
+          url: url,
+          type: 'post',
+          success: function() {
+            $link.remove();
+          }
+        });
+      } else {
+        return false
+      }
+    });
+    
+  });
+</script>

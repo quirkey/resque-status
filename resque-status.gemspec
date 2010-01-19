@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
      "init.rb",
      "lib/resque/job_with_status.rb",
      "lib/resque/server/views/status.erb",
+     "lib/resque/server/views/status_styles.erb",
      "lib/resque/server/views/statuses.erb",
      "lib/resque/status.rb",
      "lib/resque/status_server.rb",

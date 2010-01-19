@@ -156,6 +156,10 @@ module Resque
         self['status'] === status 
       end
     end
+    
+    def killable?
+      !['failed', 'completed', 'killed'].include?(self.status)
+    end
 
     def to_json
       h = self.dup

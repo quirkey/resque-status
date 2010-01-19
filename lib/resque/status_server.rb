@@ -23,6 +23,11 @@ module Resque
         status_view(:status)
       end
       
+      app.post '/statuses/:id/kill' do
+        Resque::Status.kill(params[:id])
+        redirect '/statuses'
+      end
+      
       app.helpers do
         def status_view(filename, options = {}, locals = {})
           erb(File.read(File.join(VIEW_PATH, "#{filename}.erb")), options, locals)
