@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'rake'
 require 'lib/resque/status'
+require 'resque/tasks'
 
 begin
   require 'jeweler'
