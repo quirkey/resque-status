@@ -3,7 +3,7 @@
 <h1 class='wi'>Statuses: <%= @status.uuid %>/<%= @status.name %></h1>
 <p class='intro'>Viewing a specific job created with JobWithStatus. <a href="/statuses">Return to the list of statuses</a></p>
 
-<div class="status-holder" rel="<%= @status.status %>" id="job_<%= @status.uuid %>">
+<div class="status-holder" rel="<%= @status.status %>" id="status_<%= @status.uuid %>">
   <div class="status-progress">
     <div class="status-progress-bar status-<%= @status.status %>" style="width: <%= @status.pct_complete %>%;"></div>
     <p><%= @status.pct_complete %>%</p>
@@ -11,3 +11,47 @@
   <div class="status-message"><%= @status.message %></div>
   <div class="status-time"><%= @status.time? ? @status.time : 'Not started' %></div>
 </div>
+
+<script type="text/javascript" charset="utf-8">
+  jQuery(function($) {
+
+    // itterate over the holders
+    $('.status-holder').each(function() {
+      checkStatus($(this));
+    });
+
+    function checkStatus($status) {
+      var status_id = $status.attr('id').replace('status_', '');
+      $.getJSON('/statuses/' + status_id + '.js', function(json) {
+        if (json) {
+          var pct = "0%";
+          if (json.pct_complete) {
+            var pct = json.pct_complete + "%";
+          }
+          $status.find('.status-progress-bar').animate({width: pct});
+          $status.find('.status-progress-bar p').text(pct)        
+          if (json.message) {
+            $status.find('.status-message').html(json.message)
+          }
+          if (json.status) {
+            $status
+              .attr('rel', json.status)
+              .find('.status-progress-bar')
+                .attr('class', '')
+                .addClass('status-progress-bar status-' + json.status);
+          }
+          if (json.time) {
+            $status.find('.status-time').text(new Date(json.time * 1000).toString())
+          }
+        };
+        var status = $status.attr('rel');
+        if (status == 'working' || status == 'queued' || status == "") {
+          setTimeout(function() {
+            checkStatus($status)
+          }, 1500);
+        }
+      });
+    };
+
+  });
+</script>

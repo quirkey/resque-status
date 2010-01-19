@@ -12,7 +12,7 @@ module Resque
         status_view(:statuses)
       end
       
-      app.get '/statuses/:id.json' do
+      app.get '/statuses/:id.js' do
         @status = Resque::Status.get(params[:id])
         content_type :js
         @status.to_json
