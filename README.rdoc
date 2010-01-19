@@ -124,7 +124,7 @@ The start resque-web with your config:
   
 This should launch resque-web in your browser and you should see a 'Statuses' tab.
 
-http://img.skitch.com/20100119-qyskhtswmq5qjjeh1jtd7ey7d.jpg
+http://img.skitch.com/20100119-k166xyijcjpkk6xtwnw3854a8g.jpg
             
 == Thanks
 
