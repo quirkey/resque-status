@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
   s.date = %q{2010-01-19}
-  s.description = %q{resque-status is an extension to the resque queue system that provides trackable jobs. It provides a Resque::Status class which can set/get the statuses of jobs and a Resque::JobWithStatus class that when subclassed provides easily trackable/killable jobs.}
+  s.description = %q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Status class which can set/get the statuses of jobs and a Resque::JobWithStatus class that when subclassed provides easily trackable/killable jobs.}
   s.email = %q{aaron@quirkey.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -39,8 +39,9 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/quirkey/resque-status}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
+  s.rubyforge_project = %q{quirkey}
   s.rubygems_version = %q{1.3.5}
-  s.summary = %q{resque-status is an extension to the resque queue system that provides trackable jobs}
+  s.summary = %q{resque-status is an extension to the resque queue system that provides simple trackable jobs.}
   s.test_files = [
     "test/test_helper.rb",
      "test/test_resque-job_with_status.rb",
@@ -53,18 +54,21 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<uuid>, [">= 0"])
+      s.add_runtime_dependency(%q<uuid>, [">= 2.0.2"])
       s.add_runtime_dependency(%q<resque>, [">= 1.3.1"])
-      s.add_development_dependency(%q<shoulda>, [">= 0"])
+      s.add_runtime_dependency(%q<redisk>, [">= 0.2.0"])
+      s.add_development_dependency(%q<shoulda>, [">= 2.10.2"])
     else
-      s.add_dependency(%q<uuid>, [">= 0"])
+      s.add_dependency(%q<uuid>, [">= 2.0.2"])
       s.add_dependency(%q<resque>, [">= 1.3.1"])
-      s.add_dependency(%q<shoulda>, [">= 0"])
+      s.add_dependency(%q<redisk>, [">= 0.2.0"])
+      s.add_dependency(%q<shoulda>, [">= 2.10.2"])
     end
   else
-    s.add_dependency(%q<uuid>, [">= 0"])
+    s.add_dependency(%q<uuid>, [">= 2.0.2"])
     s.add_dependency(%q<resque>, [">= 1.3.1"])
-    s.add_dependency(%q<shoulda>, [">= 0"])
+    s.add_dependency(%q<redisk>, [">= 0.2.0"])
+    s.add_dependency(%q<shoulda>, [">= 2.10.2"])
   end
 end
 
