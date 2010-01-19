@@ -94,6 +94,8 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
       
       should "set the status to killed" do
         assert_equal 'killed', @status.status
+        assert @status.killed?
+        assert !@status.completed?
       end
       
       should "only perform iterations up to kill" do

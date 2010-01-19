@@ -111,6 +111,8 @@ module Resque
 
     end
 
+    STATUSES = %w{queued working completed failed killed}.freeze
+
     hash_accessor :uuid
     hash_accessor :name
     hash_accessor :status
@@ -147,6 +149,12 @@ module Resque
     
     def time
       time? ? Time.at(self['time']) : nil
+    end
+    
+    STATUSES.each do |status|
+      define_method("#{status}?") do
+        self['status'] === status 
+      end
     end
 
     def to_json
