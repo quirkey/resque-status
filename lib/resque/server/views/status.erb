@@ -29,7 +29,7 @@
             var pct = json.pct_complete + "%";
           }
           $status.find('.status-progress-bar').animate({width: pct});
-          $status.find('.status-progress-bar p').text(pct)        
+          $status.find('.status-progress p').text(pct)        
           if (json.message) {
             $status.find('.status-message').html(json.message)
           }
