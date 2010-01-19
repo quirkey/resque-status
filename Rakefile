@@ -8,8 +8,8 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "resque-status"
     gem.version = Resque::Status::VERSION
-    gem.summary = %Q{resque-status is an extension to the resque queue system that provides trackable jobs}
-    gem.description = %Q{resque-status is an extension to the resque queue system that provides trackable jobs. It provides a Resque::Status class which can set/get the statuses of jobs and a Resque::JobWithStatus class that when subclassed provides easily trackable/killable jobs.}
+    gem.summary = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs.}
+    gem.description = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Status class which can set/get the statuses of jobs and a Resque::JobWithStatus class that when subclassed provides easily trackable/killable jobs.}
     gem.email = "aaron@quirkey.com"
     gem.homepage = "http://github.com/quirkey/resque-status"
     gem.authors = ["Aaron Quint"]

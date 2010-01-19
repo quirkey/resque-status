@@ -1,7 +1,135 @@
 = resque-status
 
-Description goes here.
+resque-status is an extension to the resque queue system that provides simple trackable jobs.
 
+== About
+
+resque-status provides a set of simple classes that extend resque's default 
+functionality (with 0% monkey patching) to give apps a way to track specific
+job instances and their status. It achieves this by giving job instances UUID's
+and allowing the job instances to report their status from within their iterations.
+
+== Installation
+
+  gem install resque-status
+  
+To use with Rails, you can install as a plugin or add the gem to you're config:
+  
+  # environment.rb
+  config.gem 'resque-status', :lib => 'resque/status'
+  
+Then in an initializer:
+  
+  # config/initializers/resque.rb
+  require 'resque/job_with_status'
+  
+  Resque.redis = "your/redis/socket" # default localhost:6379
+  Resque::Status.expire_in = (24 * 60 * 60) # 24hrs in seconds
+  
+== Usage
+
+The most direct way to use resque-status is to create your jobs using the 
+Resque::JobWithStatus class. An example job would look something like:
+
+  class SleepJob < Resque::JobWithStatus
+  
+    def perform
+      total = options['length'].to_i || 1000
+      num = 0
+      while num < total
+        at(num, total, "At #{num} of #{total}")
+        sleep(1)
+        num += 1
+      end
+      completed
+    end
+  
+  end
+
+Instead of normal Resque job classes, we inherit from the JobWithStatus class. 
+Another major difference is that intead of implementing <tt>perform</tt> as a 
+class method, we do our job implementation within instances of the job class.
+
+In order to queue a SleepJob up, we also won't use <tt>Resque.enqueue</tt>, instead
+we'll use the <tt>create</tt> class method which will wrap <tt>enqueue</tt> and 
+creating a unique id (UUID) for us to track the job with.
+
+  job_id = SleepJob.create(:length => 100)
+  
+This will create a UUID enqueue the job and pass the :length option on the SleepJob
+instance as options['length'] (as you can see above).
+
+Now that we have a UUID its really easy to get the status:
+
+  status = Resque::Status.get(job_id)
+  
+This returns a Resque::Status object, which is a Hash (with benefits).
+
+  status.pct_complete #=> 0
+  status.status #=> 'queued'
+  status.queued? #=> true
+  status.working? #=> false
+  status.time #=> Time object        
+  status.message #=> "Created at ..."
+
+Once the worker reserves the job, the instance of SleepJob updates the status at
+each iteration using <tt>at()</tt>
+
+  status = Resque::Status.get(job_id)
+  status.working? #=> true
+  status.num #=> 5
+  status.total => 100
+  status.pct_complete => 5
+
+If an error occurs within the job instance, the status is set to 'failed' and then
+the error is re-raised so that Resque can capture it.
+
+Its also possible to get a list of current/recent job statuses:
+
+  Resque::Status.statuses #=> [#<Resque::Status>, ...]
+
+=== Kill! Kill! Kill!
+
+Because we're tracking UUIDs per instance, and we're checking in/updating the status
+on each iteration (using <tt>at</tt> or <tt>tick</tt>) we can kill specific jobs
+by UUID.
+
+  Resque::Status.kill(job_id)
+
+The next time the job at job_id calls <tt>at</tt> or tick, it will raise a Killed 
+error and set the status to killed.
+
+=== Expiration
+
+Since Redis is RAM based, we probably don't want to keep these statuses around forever 
+(at least until @antirez releases the VM feature). By setting expire_in, all statuses
+and thier related keys will expire in expire_in seconds from the last time theyre updated:
+
+  Resque::Status.expire_in = (60 * 60) # 1 hour
+
+=== resque-web
+
+Though the main purpose of these trackable jobs is to allow you to surface the status
+of user created jobs through you're apps' own UI, I've added a simple example UI
+as a plugin to resque-web.
+
+To use, you need to setup a resque-web config file:
+
+  # ~/resque_conf.rb  
+  require 'resque/status_server'
+  
+The start resque-web with your config:
+
+  resque-web ~/resque_conf.rb
+  
+This should launch resque-web in your browser and you should see a 'Statuses' tab.
+
+http://img.skitch.com/20100119-qyskhtswmq5qjjeh1jtd7ey7d.jpg
+            
+== Thanks
+
+Resque is awesome, @defunkt needs a shout-out. 
+  
 == Note on Patches/Pull Requests
  
 * Fork the project.
