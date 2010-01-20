@@ -106,7 +106,7 @@ module Resque
       Resque::Status.killed(uuid)
     rescue => e
       logger.error e
-      failed("The task failed because of an error: #{e.inspect}")
+      failed("The task failed because of an error: #{e}")
       raise e
     end
 
@@ -173,7 +173,7 @@ module Resque
     def kill!
       set_status({
         'status' => 'killed',
-        'message' => "Killed"
+        'message' => "Killed at #{Time.now}"
       })
       raise Killed
     end
