@@ -125,6 +125,13 @@ The start resque-web with your config:
 This should launch resque-web in your browser and you should see a 'Statuses' tab.
 
 http://img.skitch.com/20100119-k166xyijcjpkk6xtwnw3854a8g.jpg
+      
+== More
+
+Source: http://github.com/quirkey/resque-status
+API Docs: http://rdoc.info/projects/quirkey/resque-status
+Examples: http://github.com/quirkey/resque-status/tree/master/examples
+Resque: http://github.com/defunkt/resque
             
 == Thanks
 
