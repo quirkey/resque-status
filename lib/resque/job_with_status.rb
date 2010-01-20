@@ -180,7 +180,7 @@ module Resque
     
     private
     def set_status(*args)
-      self.status = [{'name'  => self.name}, args].flatten
+      self.status = [status, {'name'  => self.name}, args].flatten
     end
     
   end
