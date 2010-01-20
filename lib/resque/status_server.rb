@@ -28,6 +28,11 @@ module Resque
         redirect '/statuses'
       end
       
+      app.post '/statuses/clear' do
+        Resque::Status.clear
+        redirect '/statuses'
+      end
+      
       app.helpers do
         def status_view(filename, options = {}, locals = {})
           erb(File.read(File.join(VIEW_PATH, "#{filename}.erb")), options, locals)

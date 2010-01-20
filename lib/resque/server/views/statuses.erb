@@ -1,6 +1,11 @@
 <%= status_view :status_styles, :layout => false %>
 
 <h1 class='wi'>Statuses</h1>
+<%unless @statuses.empty?%>
+<form method="POST" action="<%=u 'statuses/clear'%>" class='clear-failed'>
+  <input type='submit' name='' value='Clear Statuses' />
+</form>
+<%end%>
 <p class='intro'>These are recent jobs created with the JobWithStatus class</p>
 <table>
   <tr>
