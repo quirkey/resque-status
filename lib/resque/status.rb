@@ -38,6 +38,13 @@ module Resque
       val
     end
     
+    def self.clear
+      status_ids.each do |id|
+        redis.del(status_key(id))
+        redis.zrem(set_key, id)
+      end
+    end
+    
     # returns a Redisk::Logger scoped to the UUID. Any options passed are passed
     # to the logger initialization.
     def self.logger(uuid, options = {})

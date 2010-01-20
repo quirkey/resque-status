@@ -71,6 +71,21 @@ class TestResqueStatus < Test::Unit::TestCase
       end
     end
     
+    context ".clear" do
+      setup do
+        Resque::Status.clear
+      end
+      
+      should "clear any statuses" do
+        assert_nil Resque::Status.get(@uuid)
+      end
+      
+      should "clear any recent statuses" do
+        assert Resque::Status.status_ids.empty?
+      end
+      
+    end
+    
     context ".status_ids" do
       should "return an array of job ids" do
         assert Resque::Status.status_ids.is_a?(Array)
