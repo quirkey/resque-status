@@ -11,6 +11,12 @@ and allowing the job instances to report their status from within their iteratio
 
 == Installation
 
+resque-status *requires Redis >= 1.1* (though I recommend getting the latest stable version). 
+You can download Redis here: http://code.google.com/p/redis/ or install it 
+using homebrew (brew install redis).
+
+Install the resque-status gem (which will pull in the dependencies).
+
   gem install resque-status
   
 To use with Rails, you can install as a plugin or add the gem to you're config:
