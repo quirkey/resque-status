@@ -2,7 +2,7 @@
 
 <h1 class='wi'>Statuses</h1>
 <%unless @statuses.empty?%>
-<form method="POST" action="<%=u 'statuses/clear'%>" class='clear-failed'>
+  <form method="POST" action="<%= url(:statuses) %>/clear" class='clear-failed'>
   <input type='submit' name='' value='Clear Statuses' />
 </form>
 <%end%>
@@ -20,7 +20,7 @@
   <% unless @statuses.empty? %>
     <% @statuses.each do |status| %>
     <tr>
-      <td><a href="/statuses/<%= status.uuid %>"><%= status.uuid %></a></td>
+      <td><a href="<%= url(:statuses) %>/<%= status.uuid %>"><%= status.uuid %></a></td>
       <td><%= status.name %></td>
       <td class="status status-<%= status.status %>"><%= status.status %></td>
       <td class="time"><%= status.time %></td>
@@ -29,7 +29,7 @@
         <div class="progress-pct"><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></div>
       </td>
       <td><%= status.message %></td>
-      <td><% if status.killable? %><a href="/statuses/<%= status.uuid %>/kill" class="kill">Kill</a><% end %></td>
+      <td><% if status.killable? %><a href="<%= url(:statuses) %>/<%= status.uuid %>/kill" class="kill">Kill</a><% end %></td>
     </tr>
     <% end %>
   <% else %>  

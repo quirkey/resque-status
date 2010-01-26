@@ -1,7 +1,7 @@
 <%= status_view :status_styles, :layout => false %>
 
 <h1 class='wi'>Statuses: <%= @status.uuid %>/<%= @status.name %></h1>
-<p class='intro'>Viewing a specific job created with JobWithStatus. <a href="/statuses">Return to the list of statuses</a></p>
+<p class='intro'>Viewing a specific job created with JobWithStatus. <a href="<%= url(:statuses) %>">Return to the list of statuses</a></p>
 
 <div class="status-holder" rel="<%= @status.status %>" id="status_<%= @status.uuid %>">
   <div class="status-progress">
@@ -22,7 +22,7 @@
 
     function checkStatus($status) {
       var status_id = $status.attr('id').replace('status_', '');
-      $.getJSON('/statuses/' + status_id + '.js', function(json) {
+      $.getJSON('<%= url(:statuses) %>/' + status_id + '.js', function(json) {
         if (json) {
           var pct = "0%";
           if (json.pct_complete) {
