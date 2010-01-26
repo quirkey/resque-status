@@ -25,12 +25,12 @@ module Resque
       
       app.post '/statuses/:id/kill' do
         Resque::Status.kill(params[:id])
-        redirect '/statuses'
+        redirect url(:statuses)
       end
       
       app.post '/statuses/clear' do
         Resque::Status.clear
-        redirect '/statuses'
+        redirect url(:statuses)
       end
       
       app.helpers do
