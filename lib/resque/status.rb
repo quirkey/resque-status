@@ -198,8 +198,14 @@ module Resque
       !['failed', 'completed', 'killed'].include?(self.status)
     end
     
+    unless method_defined?(:to_json)
+      def to_json(*args)
+        json
+      end
+    end
+    
     # Return a JSON representation of the current object.
-    def to_json
+    def json
       h = self.dup
       h['pct_complete'] = pct_complete
       self.class.encode(h)
