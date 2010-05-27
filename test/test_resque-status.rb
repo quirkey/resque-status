@@ -4,7 +4,7 @@ class TestResqueStatus < Test::Unit::TestCase
 
   context "Resque::Status" do
     setup do
-      Resque.redis.flush_all
+      Resque.redis.flushall
       Resque::Status.expire_in = nil
       @uuid = Resque::Status.create
       Resque::Status.set(@uuid, "my status")

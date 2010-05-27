@@ -4,7 +4,7 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
   
   context "Resque::JobWithStatus" do
     setup do
-      Resque.redis.flush_all
+      Resque.redis.flushall
     end
     
     context ".create" do
