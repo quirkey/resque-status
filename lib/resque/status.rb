@@ -7,7 +7,7 @@ module Resque
   # the common status attributes. It also has a number of class methods for 
   # creating/updating/retrieving status objects from Redis
   class Status < Hash
-    VERSION = '0.1.3'
+    VERSION = '0.1.4'
 
     extend Resque::Helpers
 
