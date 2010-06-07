@@ -61,7 +61,7 @@ module Resque
     
     # Return the <tt>num</tt> most recent status/job UUIDs in reverse chronological order.
     def self.status_ids(num = -1)
-      redis.zrevrange set_key, 0, num
+      redis.zrevrange(set_key, 0, num) || []
     end
                                                                                           
     # Kill the job at UUID on its next iteration this works by adding the UUID to a
