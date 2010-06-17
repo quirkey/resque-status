@@ -124,7 +124,7 @@ To use, you need to setup a resque-web config file:
   # ~/resque_conf.rb  
   require 'resque/status_server'
   
-The start resque-web with your config:
+Then start resque-web with your config:
 
   resque-web ~/resque_conf.rb
   
