@@ -33,6 +33,14 @@ module Resque
         redirect url(:statuses)
       end
       
+      app.get "/statuses.poll" do
+        content_type "text/plain"
+        @polling = true
+
+        @statuses = Resque::Status.statuses
+        status_view(:statuses, {:layout => false})
+      end
+      
       app.helpers do
         def status_view(filename, options = {}, locals = {})
           erb(File.read(File.join(VIEW_PATH, "#{filename}.erb")), options, locals)
