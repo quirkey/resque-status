@@ -109,13 +109,19 @@ module Resque
       set_status({'status' => 'working'})
       perform
       completed unless status && status.completed?
+      on_success if respond_to?(:on_success)
     rescue Killed
       logger.info "Job #{self} Killed at #{Time.now}"
       Resque::Status.killed(uuid)
+      on_killed if respond_to?(:on_killed)
     rescue => e
       logger.error e
       failed("The task failed because of an error: #{e}")
-      raise e
+      if respond_to?(:on_failure)
+        on_failure(e)
+      else
+        raise e
+      end
     end
 
     # Returns a Redisk::Logger object scoped to this paticular job/uuid
