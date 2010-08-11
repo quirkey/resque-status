@@ -106,6 +106,7 @@ module Resque
     # If an error occurs within the job's work, it will set the status as failed and 
     # re-raise the error.
     def safe_perform!
+      set_status({'status' => 'working'})
       perform
       completed unless status && status.completed?
     rescue Killed
