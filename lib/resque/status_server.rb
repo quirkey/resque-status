@@ -15,7 +15,7 @@ module Resque
       app.get '/statuses/:id.js' do
         @status = Resque::Status.get(params[:id])
         content_type :js
-        @status.to_json
+        @status.json
       end
       
       app.get '/statuses/:id' do
