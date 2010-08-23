@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'rake'
-require 'lib/resque/status'
+require File.join(File.expand_path('.'), 'lib/resque/status')
 require 'resque/tasks'
 
 begin
