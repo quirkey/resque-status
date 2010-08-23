@@ -43,7 +43,7 @@ module Resque
       
       app.helpers do
         def status_view(filename, options = {}, locals = {})
-          erb(File.read(File.join(VIEW_PATH, "#{filename}.erb")), options, locals)
+          erb(File.read(File.join(::Resque::StatusServer::VIEW_PATH, "#{filename}.erb")), options, locals)
         end
       end
       
