@@ -47,7 +47,10 @@ module Resque
     
     # returns a Redisk::Logger scoped to the UUID. Any options passed are passed
     # to the logger initialization.
+    #
+    # Ensures that Redisk is logging to the same Redis connection as Resque.
     def self.logger(uuid, options = {})
+      Redisk.redis = redis
       Redisk::Logger.new(logger_key(uuid), options)
     end
 
