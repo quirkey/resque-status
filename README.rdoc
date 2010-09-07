@@ -94,6 +94,21 @@ Its also possible to get a list of current/recent job statuses:
 
   Resque::Status.statuses #=> [#<Resque::Status>, ...]
 
+=== Passing back data from the job
+
+You may want to save data from inside the job to access it from outside the job.
+
+A common use-case is web-triggered jobs that create files, later available for
+download by the user.
+
+A Status is actually just a hash, so inside a job you can do:
+
+    status['filename'] = '/myfilename'
+
+Also, all the status setting methods take any number of hash arguments. So you could do:
+
+    complete('filename' => '/myfilename')
+
 === Kill! Kill! Kill!
 
 Because we're tracking UUIDs per instance, and we're checking in/updating the status
