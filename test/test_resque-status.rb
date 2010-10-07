@@ -87,8 +87,21 @@ class TestResqueStatus < Test::Unit::TestCase
     end
     
     context ".status_ids" do
+      
+      setup do
+        @uuids = []
+        30.times{ Resque::Status.create }
+      end
+    
       should "return an array of job ids" do
         assert Resque::Status.status_ids.is_a?(Array)
+        assert_equal 32, Resque::Status.status_ids.size # 30 + 2
+      end
+      
+      should "let you paginate through the statuses" do
+        assert_equal Resque::Status.status_ids.reverse[0, 10], Resque::Status.status_ids(0, 10)
+        assert_equal Resque::Status.status_ids.reverse[9, 10], Resque::Status.status_ids(10, 20)
+        # assert_equal Resque::Status.status_ids.reverse[0, 10], Resque::Status.status_ids(0, 10)
       end
     end
     
@@ -101,6 +114,16 @@ class TestResqueStatus < Test::Unit::TestCase
       end
       
     end
+    
+    # context ".count" do
+    #   
+    #   should "return a count of statuses" do
+    #     statuses = Resque::Status.statuses
+    #     assert_equal 2, statuses.size
+    #     assert_equal statuses.size, Resque::Status.count
+    #   end
+    #   
+    # end
     
     context ".logger" do
       setup do

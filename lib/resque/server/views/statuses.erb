@@ -39,6 +39,10 @@
   <% end %>
 </table>
 
+<% unless @statuses.empty? %>
+	<%= partial :next_more, :start => @start, :size => @size %>
+<% end %>
+
 <%= poll %>
 
 <script type="text/javascript" charset="utf-8">

@@ -8,7 +8,10 @@ module Resque
     def self.registered(app)
       
       app.get '/statuses' do
-        @statuses = Resque::Status.statuses
+        @start = params[:start].to_i
+        @end = @start + (params[:per_page] || 50)
+        @statuses = Resque::Status.statuses(@start, @end)
+        @size = @statuses.size
         status_view(:statuses)
       end
       

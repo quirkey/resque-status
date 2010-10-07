@@ -53,18 +53,42 @@ module Resque
       Redisk.redis = redis
       Redisk::Logger.new(logger_key(uuid), options)
     end
+    
+    def self.count
+      redis.zcard(set_key)
+    end
 
     # Return <tt>num</tt> Resque::Status objects in reverse chronological order.
     # By default returns the entire set.
-    def self.statuses(num = -1)
-      status_ids(num).collect do |id|
+    # @param [Numeric] range_start The optional starting range
+    # @param [Numeric] range_end The optional ending range
+    # @example retuning the last 20 statuses
+    #   Resque::Status.statuses(0, 20)
+    def self.statuses(range_start=nil, range_end=nil)
+      status_ids(range_start, range_end).collect do |id|
         get(id)
       end.compact
     end
     
     # Return the <tt>num</tt> most recent status/job UUIDs in reverse chronological order.
-    def self.status_ids(num = -1)
-      redis.zrevrange(set_key, 0, num) || []
+    def self.status_ids(range_start=nil, range_end=nil)
+      unless range_end && range_start
+        # Because we want a reverse chronological order, we need to get a range starting
+        # by the higest negative number.
+        redis.zrevrange(set_key, 0, -1) || []
+      else
+        # Because we want a reverse chronological order, we need to get a range starting
+        # by the higest negative number. The ordering is transparent from the API user's
+        # perspective so we need to convert the passed params
+        if range_start == 0
+          range_start = -1 
+        else
+          range_end -= 1
+        end
+        
+
+        (redis.zrevrange(set_key, -(range_end.abs), -(range_start.abs)) || []).reverse
+      end
     end
                                                                                           
     # Kill the job at UUID on its next iteration this works by adding the UUID to a
