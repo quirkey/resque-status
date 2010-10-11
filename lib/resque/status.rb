@@ -3,11 +3,11 @@ require 'redisk'
 require 'uuid'
 
 module Resque
-  # Resque::Status is a Hash object that has helper methods for dealing with 
-  # the common status attributes. It also has a number of class methods for 
+  # Resque::Status is a Hash object that has helper methods for dealing with
+  # the common status attributes. It also has a number of class methods for
   # creating/updating/retrieving status objects from Redis
   class Status < Hash
-    VERSION = '0.1.5'
+    VERSION = '0.2.0'
 
     extend Resque::Helpers
 
@@ -33,18 +33,18 @@ module Resque
       val = Resque::Status.new(uuid, *messages)
       redis.set(status_key(uuid), encode(val))
       if expire_in
-        redis.expire(status_key(uuid), expire_in) 
+        redis.expire(status_key(uuid), expire_in)
       end
       val
     end
-    
+
     def self.clear
       status_ids.each do |id|
         redis.del(status_key(id))
         redis.zrem(set_key, id)
       end
     end
-    
+
     # returns a Redisk::Logger scoped to the UUID. Any options passed are passed
     # to the logger initialization.
     #
@@ -53,7 +53,7 @@ module Resque
       Redisk.redis = redis
       Redisk::Logger.new(logger_key(uuid), options)
     end
-    
+
     def self.count
       redis.zcard(set_key)
     end
@@ -69,7 +69,7 @@ module Resque
         get(id)
       end.compact
     end
-    
+
     # Return the <tt>num</tt> most recent status/job UUIDs in reverse chronological order.
     def self.status_ids(range_start=nil, range_end=nil)
       unless range_end && range_start
@@ -81,50 +81,50 @@ module Resque
         # by the higest negative number. The ordering is transparent from the API user's
         # perspective so we need to convert the passed params
         if range_start == 0
-          range_start = -1 
+          range_start = -1
         else
           range_end -= 1
         end
-        
+
 
         (redis.zrevrange(set_key, -(range_end.abs), -(range_start.abs)) || []).reverse
       end
     end
-                                                                                          
+
     # Kill the job at UUID on its next iteration this works by adding the UUID to a
-    # kill list (a.k.a. a list of jobs to be killed. Each iteration the job checks 
+    # kill list (a.k.a. a list of jobs to be killed. Each iteration the job checks
     # if it _should_ be killed by calling <tt>tick</tt> or <tt>at</tt>. If so, it raises
     # a <tt>Resque::JobWithStatus::Killed</tt> error and sets the status to 'killed'.
-    def self.kill(uuid)                 
+    def self.kill(uuid)
       redis.sadd(kill_key, uuid)
     end
-    
+
     # Remove the job at UUID from the kill list
     def self.killed(uuid)
       redis.srem(kill_key, uuid)
     end
-    
+
     # Return the UUIDs of the jobs on the kill list
     def self.kill_ids
       redis.smembers(kill_key)
     end
-    
+
     # Check whether a job with UUID is on the kill list
     def self.should_kill?(uuid)
       redis.sismember(kill_key, uuid)
     end
-    
+
     # The time in seconds that jobs and statuses should expire from Redis (after
     # the last time they are touched/updated)
     def self.expire_in
       @expire_in
     end
-    
+
     # Set the <tt>expire_in</tt> time in seconds
     def self.expire_in=(seconds)
       @expire_in = seconds.nil? ? nil : seconds.to_i
     end
-    
+
     def self.status_key(uuid)
       "status:#{uuid}"
     end
@@ -135,7 +135,7 @@ module Resque
 
     def self.kill_key
       "_kill"
-    end 
+    end
 
     def self.logger_key(uuid)
       "_log:#{uuid}"
@@ -146,7 +146,7 @@ module Resque
     end
 
     def self.hash_accessor(name, options = {})
-      options[:default] ||= nil 
+      options[:default] ||= nil
       coerce = options[:coerce] ? ".#{options[:coerce]}" : ""
       module_eval <<-EOT
       def #{name}
@@ -175,10 +175,10 @@ module Resque
 
     hash_accessor :num
     hash_accessor :total
-    
+
     # Create a new Resque::Status object. If multiple arguments are passed
     # it is assumed the first argument is the UUID and the rest are status objects.
-    # All arguments are subsequentily merged in order. Strings are assumed to 
+    # All arguments are subsequentily merged in order. Strings are assumed to
     # be messages.
     def initialize(*args)
       super nil
@@ -193,7 +193,7 @@ module Resque
       end
       self.replace(status_hash)
     end
-    
+
     # calculate the % completion of the job based on <tt>status</tt>, <tt>num</tt>
     # and <tt>total</tt>
     def pct_complete
@@ -206,7 +206,7 @@ module Resque
         (((num || 0).to_f / t.to_f) * 100).to_i
       end
     end
-    
+
     # Return the time of the status initialization. If set returns a <tt>Time</tt>
     # object, otherwise returns nil
     def time
@@ -215,22 +215,22 @@ module Resque
 
     STATUSES.each do |status|
       define_method("#{status}?") do
-        self['status'] === status 
+        self['status'] === status
       end
     end
-    
+
     # Can the job be killed? 'failed', 'completed', and 'killed' jobs cant be killed
     # (for pretty obvious reasons)
     def killable?
       !['failed', 'completed', 'killed'].include?(self.status)
     end
-    
+
     unless method_defined?(:to_json)
       def to_json(*args)
         json
       end
     end
-    
+
     # Return a JSON representation of the current object.
     def json
       h = self.dup
