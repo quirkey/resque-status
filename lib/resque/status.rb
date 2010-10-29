@@ -200,7 +200,6 @@ module Resque
       case status
       when 'completed' then 100
       when 'queued' then 0
-      when 'failed' then 100
       else
         t = (total == 0 || total.nil?) ? 1 : total
         (((num || 0).to_f / t.to_f) * 100).to_i
