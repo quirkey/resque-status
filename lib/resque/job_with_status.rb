@@ -82,7 +82,8 @@ module Resque
     # options.
     #
     # You should not override this method, rahter the <tt>perform</tt> instance method.
-    def self.perform(uuid, options = {})
+    def self.perform(uuid=nil, options = {})
+      uuid ||= Resque::Status.generate_uuid
       instance = new(uuid, options)
       instance.safe_perform!
       instance
