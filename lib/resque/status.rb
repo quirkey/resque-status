@@ -38,8 +38,10 @@ module Resque
       val
     end
 
-    def self.clear
-      status_ids.each do |id|
+    # clear statuses from redis passing an optional range. See `statuses` for info
+    # about ranges
+    def self.clear(range_start = nil, range_end = nil)
+      status_ids(range_start, range_end).each do |id|
         redis.del(status_key(id))
         redis.zrem(set_key, id)
       end
@@ -64,14 +66,14 @@ module Resque
     # @param [Numeric] range_end The optional ending range
     # @example retuning the last 20 statuses
     #   Resque::Status.statuses(0, 20)
-    def self.statuses(range_start=nil, range_end=nil)
+    def self.statuses(range_start = nil, range_end = nil)
       status_ids(range_start, range_end).collect do |id|
         get(id)
       end.compact
     end
 
     # Return the <tt>num</tt> most recent status/job UUIDs in reverse chronological order.
-    def self.status_ids(range_start=nil, range_end=nil)
+    def self.status_ids(range_start = nil, range_end = nil)
       unless range_end && range_start
         # Because we want a reverse chronological order, we need to get a range starting
         # by the higest negative number.
@@ -85,8 +87,6 @@ module Resque
         else
           range_end -= 1
         end
-
-
         (redis.zrevrange(set_key, -(range_end.abs), -(range_start.abs)) || []).reverse
       end
     end
