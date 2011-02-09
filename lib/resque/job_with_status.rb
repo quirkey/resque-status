@@ -72,7 +72,7 @@ module Resque
     # Adds a job of type <tt>klass<tt> to the queue with <tt>options<tt>.
     # Returns the UUID of the job
     def self.enqueue(klass, options = {})
-      uuid = Resque::Status.create
+      uuid = Resque::Status.create :options => options
       Resque.enqueue(klass, uuid, options)
       uuid
     end
