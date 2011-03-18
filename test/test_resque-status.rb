@@ -107,8 +107,8 @@ class TestResqueStatus < Test::Unit::TestCase
       end
 
       should "let you paginate through the statuses" do
-        assert_equal Resque::Status.status_ids.reverse[0, 10], Resque::Status.status_ids(0, 10)
-        assert_equal Resque::Status.status_ids.reverse[9, 10], Resque::Status.status_ids(10, 20)
+        assert_equal Resque::Status.status_ids[0, 10], Resque::Status.status_ids(0, 9)
+        assert_equal Resque::Status.status_ids[10, 10], Resque::Status.status_ids(10, 19)
         # assert_equal Resque::Status.status_ids.reverse[0, 10], Resque::Status.status_ids(0, 10)
       end
     end
