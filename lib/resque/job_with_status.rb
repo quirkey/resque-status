@@ -93,7 +93,7 @@ module Resque
     # This is needed to be used with resque scheduler
     # http://github.com/bvandenbos/resque-scheduler
     def self.scheduled(queue, klass, *args)
-      create(args)
+      create(*args)
     end
 
     # Create a new instance with <tt>uuid</tt> and <tt>options</tt>

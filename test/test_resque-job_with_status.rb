@@ -32,6 +32,20 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
 
     end
 
+    context ".scheduled" do
+      setup do
+        @job_args = {'num' => 100}
+        @uuid = WorkingJob.scheduled(:queue_name, WorkingJob, @job_args)
+      end
+
+      should "create the job with the provided arguments" do
+
+        job = Resque.pop(:statused)
+
+        assert_equal @job_args, job['args'].last
+      end
+    end
+
     context ".enqueue" do
       setup do
         @uuid = Resque::JobWithStatus.enqueue(WorkingJob, :num => 100)
