@@ -142,7 +142,7 @@ module Resque
     end
 
     def name
-      "#{self.class.name}(#{options unless options.empty?})"
+      "#{self.class.name}(#{options.inspect unless options.empty?})"
     end
 
     # Checks against the kill list if this specific job instance should be killed
