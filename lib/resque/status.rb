@@ -82,12 +82,7 @@ module Resque
         # Because we want a reverse chronological order, we need to get a range starting
         # by the higest negative number. The ordering is transparent from the API user's
         # perspective so we need to convert the passed params
-        if range_start == 0
-          range_start = -1
-        else
-          range_end -= 1
-        end
-        (redis.zrevrange(set_key, -(range_end.abs), -(range_start.abs)) || []).reverse
+        (redis.zrevrange(set_key, (range_start.abs), ((range_end || 1).abs)) || [])
       end
     end
 
