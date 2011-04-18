@@ -11,7 +11,7 @@ module Resque
         @start = params[:start].to_i
         @end = @start + 20
         @statuses = Resque::Status.statuses(@start, @end)
-        @size = @statuses.size
+        @size = Resque::Status.count
         status_view(:statuses)
       end
       
@@ -43,7 +43,7 @@ module Resque
         @start = params[:start].to_i
         @end = @start + 20
         @statuses = Resque::Status.statuses(@start, @end)
-        @size = @statuses.size
+        @size = Resque::Status.count
 
         status_view(:statuses, {:layout => false})
       end
