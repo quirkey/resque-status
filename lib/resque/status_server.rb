@@ -28,12 +28,12 @@ module Resque
       
       app.post '/statuses/:id/kill' do
         Resque::Status.kill(params[:id])
-        redirect url(:statuses)
+        redirect u(:statuses)
       end
       
       app.post '/statuses/clear' do
         Resque::Status.clear
-        redirect url(:statuses)
+        redirect u(:statuses)
       end
       
       app.get "/statuses.poll" do
@@ -57,7 +57,7 @@ module Resque
           if @polling
             text = "Last Updated: #{Time.now.strftime("%H:%M:%S")}"
           else
-            text = "<a href='#{url(request.path_info)}.poll?start=#{start}' rel='poll'>Live Poll</a>"
+            text = "<a href='#{u(request.path_info)}.poll?start=#{start}' rel='poll'>Live Poll</a>"
           end
           "<p class='poll'>#{text}</p>"
         end
