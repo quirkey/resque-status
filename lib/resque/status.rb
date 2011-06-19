@@ -94,7 +94,7 @@ module Resque
     # @param [Numeric] range_start The optional starting range
     # @param [Numeric] range_end The optional ending range
     # @example killing the last 20 submitted jobs
-    #   Resque::Status.killall(0, 20)
+    #   Resque::Status.killall(0, 19)
     def self.killall(range_start = nil, range_end = nil)
       status_ids(range_start, range_end).collect do |id|
         kill(id)

@@ -168,10 +168,10 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
         @uuid1    = KillableJob.create(:num => 100)
         @uuid2    = KillableJob.create(:num => 100)
 
-        Resque::Status.killall(0,1) # only @uuid2 should be killed
+        Resque::Status.killall(0,0) # only @uuid2 should be killed
 
+        assert_does_not_contain Resque::Status.kill_ids, @uuid1
         assert_contains Resque::Status.kill_ids, @uuid2
-        assert_does_not_contain Resque::Status.kill_ids, @uuid2
 
         @payload1   = Resque.pop(:statused)
         @payload2   = Resque.pop(:statused)
@@ -194,7 +194,7 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
       end
 
       should "only perform iterations up to kill" do
-        assert_equal 1, Resque.redis.get("#{@uuid1}:iterations").to_i
+        assert_equal 100, Resque.redis.get("#{@uuid1}:iterations").to_i
         assert_equal 1, Resque.redis.get("#{@uuid2}:iterations").to_i
       end
 
