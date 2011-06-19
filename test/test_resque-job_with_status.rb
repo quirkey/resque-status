@@ -121,6 +121,48 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
       end
     end
 
+    context "killing all jobs" do
+      setup do
+        @uuid1    = KillableJob.create(:num => 100)
+        @uuid2    = KillableJob.create(:num => 100)
+
+        Resque::Status.killall
+
+        assert_contains Resque::Status.kill_ids, @uuid1
+        assert_contains Resque::Status.kill_ids, @uuid2
+
+        @payload1   = Resque.pop(:statused)
+        @payload2   = Resque.pop(:statused)
+
+        @performed = KillableJob.perform(*@payload1['args'])
+        @performed = KillableJob.perform(*@payload2['args'])
+
+        @status1 = Resque::Status.get(@uuid1)
+        @status2 = Resque::Status.get(@uuid2)
+      end
+
+      should "set the status to killed" do
+        assert_equal 'killed', @status1.status
+        assert @status1.killed?
+        assert !@status1.completed?
+
+        assert_equal 'killed', @status2.status
+        assert @status2.killed?
+        assert !@status2.completed?
+      end
+
+      should "only perform iterations up to kill" do
+        assert_equal 1, Resque.redis.get("#{@uuid1}:iterations").to_i
+        assert_equal 1, Resque.redis.get("#{@uuid2}:iterations").to_i
+      end
+
+      should "not persist the kill key" do
+        assert_does_not_contain Resque::Status.kill_ids, @uuid1
+        assert_does_not_contain Resque::Status.kill_ids, @uuid2
+      end
+
+    end
+
     context "with an invoked job" do
       setup do
         @job = WorkingJob.new('123', {'num' => 100})
