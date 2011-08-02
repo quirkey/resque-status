@@ -19,25 +19,29 @@ Install the resque-status gem (which will pull in the dependencies).
 
   gem install resque-status
   
-To use with Rails, you can install as a plugin or add the gem to you're config:
+To use with Rails 2.x, you can install as a plugin or add the gem to you're config:
   
   # environment.rb
-  config.gem 'resque-status', :lib => 'resque/status'
-  
+  config.gem 'resque-status'
+
+With newer Rails add this to your Gemfile:
+
+  # Gemfile
+  gem 'resque-status'
+
 Then in an initializer:
   
   # config/initializers/resque.rb
-  require 'resque/job_with_status'
-  
   Resque.redis = "your/redis/socket" # default localhost:6379
   Resque::Plugins::Status::Hash.expire_in = (24 * 60 * 60) # 24hrs in seconds
   
 == Usage
 
 The most direct way to use resque-status is to create your jobs using the 
-Resque::Resque::Plugins::Status class. An example job would look something like:
+Resque::Plugins::Status class. An example job would look something like:
 
-  class SleepJob < Resque::Resque::Plugins::Status
+  class SleepJob
+    include Resque::Plugins::Status
   
     def perform
       total = options['length'].to_i || 1000
