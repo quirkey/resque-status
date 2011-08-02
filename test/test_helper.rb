@@ -6,8 +6,7 @@ require 'rubygems'
 require 'shoulda'
 require 'mocha'
 
-require 'resque/status'
-require 'resque/job_with_status'
+require 'resque-status'
 
 class Test::Unit::TestCase
 end
@@ -50,7 +49,9 @@ Redisk.redis = 'localhost:9736'
 
 #### Fixtures
 
-class WorkingJob < Resque::JobWithStatus
+class WorkingJob
+
+  include Resque::Plugins::Status
 
   def perform
     total = options['num']
@@ -61,7 +62,9 @@ class WorkingJob < Resque::JobWithStatus
 
 end
 
-class ErrorJob < Resque::JobWithStatus
+class ErrorJob
+
+  include Resque::Plugins::Status
 
   def perform
     raise "I'm a bad little job"
@@ -69,7 +72,9 @@ class ErrorJob < Resque::JobWithStatus
 
 end
 
-class KillableJob < Resque::JobWithStatus
+class KillableJob
+
+  include Resque::Plugins::Status
 
   def perform
     Resque.redis.set("#{uuid}:iterations", 0)
@@ -79,4 +84,8 @@ class KillableJob < Resque::JobWithStatus
     end
   end
 
+end
+
+class BasicJob
+  include Resque::Plugins::Status
 end

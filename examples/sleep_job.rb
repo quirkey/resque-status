@@ -2,7 +2,9 @@ require 'resque/job_with_status' # in rails you would probably do this in an ini
 
 # sleeps for _length_ seconds updating the status every second
 
-class SleepJob < Resque::JobWithStatus
+class SleepJob
+
+  include Resque::Plugins::Status
   
   def perform
     total = options['length'].to_i || 1000
@@ -28,7 +30,7 @@ if __FILE__ == $0
   puts "Got back #{job_id}"
   
   # check the status until its complete
-  while status = Resque::Status.get(job_id) and !status.completed? && !status.failed?
+  while status = Resque::Plugins::Status::Hash.get(job_id) and !status.completed? && !status.failed?
     sleep 1
     puts status.inspect
   end

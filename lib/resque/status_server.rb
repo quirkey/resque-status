@@ -10,29 +10,29 @@ module Resque
       app.get '/statuses' do
         @start = params[:start].to_i
         @end = @start + (params[:per_page] || 50)
-        @statuses = Resque::Status.statuses(@start, @end)
+        @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
         @size = @statuses.size
         status_view(:statuses)
       end
       
       app.get '/statuses/:id.js' do
-        @status = Resque::Status.get(params[:id])
+        @status = Resque::Plugins::Status::Hash.get(params[:id])
         content_type :js
         @status.json
       end
       
       app.get '/statuses/:id' do
-        @status = Resque::Status.get(params[:id])
+        @status = Resque::Plugins::Status::Hash.get(params[:id])
         status_view(:status)
       end
       
       app.post '/statuses/:id/kill' do
-        Resque::Status.kill(params[:id])
+        Resque::Plugins::Status::Hash.kill(params[:id])
         redirect u(:statuses)
       end
       
       app.post '/statuses/clear' do
-        Resque::Status.clear
+        Resque::Plugins::Status::Hash.clear
         redirect u(:statuses)
       end
       
@@ -42,7 +42,7 @@ module Resque
 
         @start = params[:start].to_i
         @end = @start + (params[:per_page] || 50)
-        @statuses = Resque::Status.statuses(@start, @end)
+        @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
         @size = @statuses.size
 
         status_view(:statuses, {:layout => false})
@@ -50,7 +50,7 @@ module Resque
       
       app.helpers do
         def status_view(filename, options = {}, locals = {})
-          erb(File.read(File.join(::Resque::StatusServer::VIEW_PATH, "#{filename}.erb")), options, locals)
+          erb(File.read(File.join(::Resque::Plugins::Status::HashServer::VIEW_PATH, "#{filename}.erb")), options, locals)
         end
 
         def status_poll(start)
@@ -70,4 +70,4 @@ module Resque
   end
 end
 
-Resque::Server.register Resque::StatusServer
+Resque::Server.register Resque::Plugins::Status::HashServer

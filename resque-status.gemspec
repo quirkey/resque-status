@@ -9,8 +9,8 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-  s.date = %q{2011-04-02}
-  s.description = %q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Status class which can set/get the statuses of jobs and a Resque::JobWithStatus class that when subclassed provides easily trackable/killable jobs.}
+  s.date = %q{2011-08-02}
+  s.description = %q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when included provides easily trackable/killable jobs.}
   s.email = %q{aaron@quirkey.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -18,46 +18,54 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".document",
+    "Gemfile",
+    "Gemfile.lock",
     "LICENSE",
     "README.rdoc",
     "Rakefile",
     "examples/sleep_job.rb",
     "init.rb",
-    "lib/resque/job_with_status.rb",
+    "lib/resque-status.rb",
+    "lib/resque/plugins/status.rb",
+    "lib/resque/plugins/status/hash.rb",
     "lib/resque/server/views/status.erb",
     "lib/resque/server/views/status_styles.erb",
     "lib/resque/server/views/statuses.erb",
-    "lib/resque/status.rb",
     "lib/resque/status_server.rb",
     "resque-status.gemspec",
     "test/redis-test.conf",
     "test/test_helper.rb",
-    "test/test_resque-job_with_status.rb",
-    "test/test_resque-status.rb"
+    "test/test_resque_plugins_status.rb",
+    "test/test_resque_plugins_status_hash.rb"
   ]
   s.homepage = %q{http://github.com/quirkey/resque-status}
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{quirkey}
-  s.rubygems_version = %q{1.3.7}
+  s.rubygems_version = %q{1.6.2}
   s.summary = %q{resque-status is an extension to the resque queue system that provides simple trackable jobs.}
-  s.test_files = [
-    "examples/sleep_job.rb",
-    "test/test_helper.rb",
-    "test/test_resque-job_with_status.rb",
-    "test/test_resque-status.rb"
-  ]
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<redisk>, [">= 0.2.1"])
+      s.add_runtime_dependency(%q<resque>, [">= 1.3.1"])
+      s.add_runtime_dependency(%q<uuid>, [">= 2.0.2"])
+      s.add_runtime_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_runtime_dependency(%q<shoulda>, [">= 2.10.2"])
+      s.add_runtime_dependency(%q<jeweler>, [">= 0"])
       s.add_runtime_dependency(%q<uuid>, [">= 2.0.2"])
       s.add_runtime_dependency(%q<resque>, [">= 1.3.1"])
       s.add_runtime_dependency(%q<redisk>, [">= 0.2.1"])
       s.add_development_dependency(%q<shoulda>, [">= 2.10.2"])
       s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
     else
+      s.add_dependency(%q<redisk>, [">= 0.2.1"])
+      s.add_dependency(%q<resque>, [">= 1.3.1"])
+      s.add_dependency(%q<uuid>, [">= 2.0.2"])
+      s.add_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_dependency(%q<shoulda>, [">= 2.10.2"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<uuid>, [">= 2.0.2"])
       s.add_dependency(%q<resque>, [">= 1.3.1"])
       s.add_dependency(%q<redisk>, [">= 0.2.1"])
@@ -65,6 +73,12 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<mocha>, [">= 0.9.8"])
     end
   else
+    s.add_dependency(%q<redisk>, [">= 0.2.1"])
+    s.add_dependency(%q<resque>, [">= 1.3.1"])
+    s.add_dependency(%q<uuid>, [">= 2.0.2"])
+    s.add_dependency(%q<mocha>, [">= 0.9.8"])
+    s.add_dependency(%q<shoulda>, [">= 2.10.2"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<uuid>, [">= 2.0.2"])
     s.add_dependency(%q<resque>, [">= 1.3.1"])
     s.add_dependency(%q<redisk>, [">= 0.2.1"])
