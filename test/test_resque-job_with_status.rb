@@ -2,7 +2,7 @@ require 'test_helper'
 
 class TestResqueJobWithStatus < Test::Unit::TestCase
 
-  context "Resque::JobWithStatus" do
+  context "Resque::Plugins::Status" do
     setup do
       Resque.redis.flushall
     end
@@ -48,7 +48,7 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
 
     context ".enqueue" do
       setup do
-        @uuid = Resque::JobWithStatus.enqueue(WorkingJob, :num => 100)
+        @uuid = BasicJob.enqueue(WorkingJob, :num => 100)
         @payload = Resque.pop(:statused)
       end
 
