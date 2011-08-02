@@ -1,18 +1,18 @@
-require 'resque/status'
+require 'resque/plugins/status/hash'
 
 module Resque
   module Plugins
 
-    # JobWithStatus is a base class that you're jobs will inherit from.
+    # Resque::Plugins::Status is a base class that you're jobs will inherit from.
     # It provides helper methods for updating the status/etc from within an
     # instance as well as class methods for creating and queuing the jobs.
     #
-    # All you have to do to get this functionality is inherit from JobWithStatus
+    # All you have to do to get this functionality is inherit from Resque::Plugins::Status
     # and then implement a <tt>perform<tt> method.
     #
     # For example
     #
-    #       class ExampleJob < Resque::JobWithStatus
+    #       class ExampleJob < Resque::Plugins::Status
     #
     #         def perform
     #           num = options['num']
@@ -62,7 +62,7 @@ module Resque
         #
         # == Example:
         #
-        #       class ExampleJob < Resque::JobWithStatus
+        #       class ExampleJob < Resque::Plugins::Status
         #
         #         def perform
         #           set_status "Hey I'm a job num #{options['num']}"
@@ -79,7 +79,7 @@ module Resque
         # Adds a job of type <tt>klass<tt> to the queue with <tt>options<tt>.
         # Returns the UUID of the job
         def enqueue(klass, options = {})
-          uuid = Resque::Status.create :options => options
+          uuid = Resque::Plugins::Status::Hash.create :options => options
           Resque.enqueue(klass, uuid, options)
           uuid
         end
@@ -90,13 +90,13 @@ module Resque
         #
         # You should not override this method, rahter the <tt>perform</tt> instance method.
         def perform(uuid=nil, options = {})
-          uuid ||= Resque::Status.generate_uuid
+          uuid ||= Resque::Plugins::Status::Hash.generate_uuid
           instance = new(uuid, options)
           instance.safe_perform!
           instance
         end
 
-        # Wrapper API to forward a Resque::Job creation API call into a JobWithStatus call.
+        # Wrapper API to forward a Resque::Job creation API call into a Resque::Plugins::Status call.
         # This is needed to be used with resque scheduler
         # http://github.com/bvandenbos/resque-scheduler
         def scheduled(queue, klass, *args)
@@ -121,7 +121,7 @@ module Resque
         on_success if respond_to?(:on_success)
       rescue Killed
         logger.info "Job #{self} Killed at #{Time.now}"
-        Resque::Status.killed(uuid)
+        Resque::Plugins::Status::Hash.killed(uuid)
         on_killed if respond_to?(:on_killed)
       rescue => e
         logger.error e
@@ -135,18 +135,18 @@ module Resque
 
       # Returns a Redisk::Logger object scoped to this paticular job/uuid
       def logger
-        @logger ||= Resque::Status.logger(uuid)
+        @logger ||= Resque::Plugins::Status::Hash.logger(uuid)
       end
 
       # Set the jobs status. Can take an array of strings or hashes that are merged
       # (in order) into a final status hash.
       def status=(new_status)
-        Resque::Status.set(uuid, *new_status)
+        Resque::Plugins::Status::Hash.set(uuid, *new_status)
       end
 
-      # get the Resque::Status object for the current uuid
+      # get the Resque::Plugins::Status::Hash object for the current uuid
       def status
-        Resque::Status.get(uuid)
+        Resque::Plugins::Status::Hash.get(uuid)
       end
 
       def name
@@ -156,13 +156,13 @@ module Resque
       # Checks against the kill list if this specific job instance should be killed
       # on the next iteration
       def should_kill?
-        Resque::Status.should_kill?(uuid)
+        Resque::Plugins::Status::Hash.should_kill?(uuid)
       end
 
       # set the status of the job for the current itteration. <tt>num</tt> and
       # <tt>total</tt> are passed to the status as well as any messages.
       # This will kill the job if it has been added to the kill list with
-      # <tt>Resque::Status.kill()</tt>
+      # <tt>Resque::Plugins::Status::Hash.kill()</tt>
       def at(num, total, *messages)
         tick({
           'num' => num,
@@ -173,7 +173,7 @@ module Resque
       # sets the status of the job for the current itteration. You should use
       # the <tt>at</tt> method if you have actual numbers to track the iteration count.
       # This will kill the job if it has been added to the kill list with
-      # <tt>Resque::Status.kill()</tt>
+      # <tt>Resque::Plugins::Status::Hash.kill()</tt>
       def tick(*messages)
         kill! if should_kill?
         set_status({'status' => 'working'}, *messages)

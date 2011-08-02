@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class TestResqueJobWithStatus < Test::Unit::TestCase
+class TestResquePluginsStatus < Test::Unit::TestCase
 
   context "Resque::Plugins::Status" do
     setup do
@@ -23,7 +23,7 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
       end
 
       should "add the uuid to the statuses" do
-        assert_contains Resque::Status.status_ids, @uuid
+        assert_contains Resque::Plugins::Status::Hash.status_ids, @uuid
       end
 
       should "return a UUID" do
@@ -61,7 +61,7 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
       end
 
       should "add the uuid to the statuses" do
-        assert_contains Resque::Status.status_ids, @uuid
+        assert_contains Resque::Plugins::Status::Hash.status_ids, @uuid
       end
 
       should "return UUID" do
@@ -86,7 +86,7 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
       end
 
       should "set the status" do
-        assert @performed.status.is_a?(Resque::Status)
+        assert @performed.status.is_a?(Resque::Plugins::Status::Hash)
         assert_equal 'WorkingJob({"num"=>100})', @performed.status.name
       end
 
@@ -100,10 +100,10 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
       setup do
         @uuid      = KillableJob.create(:num => 100)
         @payload   = Resque.pop(:statused)
-        Resque::Status.kill(@uuid)
-        assert_contains Resque::Status.kill_ids, @uuid
+        Resque::Plugins::Status::Hash.kill(@uuid)
+        assert_contains Resque::Plugins::Status::Hash.kill_ids, @uuid
         @performed = KillableJob.perform(*@payload['args'])
-        @status = Resque::Status.get(@uuid)
+        @status = Resque::Plugins::Status::Hash.get(@uuid)
       end
 
       should "set the status to killed" do
@@ -117,7 +117,7 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
       end
 
       should "not persist the kill key" do
-        assert_does_not_contain Resque::Status.kill_ids, @uuid
+        assert_does_not_contain Resque::Plugins::Status::Hash.kill_ids, @uuid
       end
     end
 

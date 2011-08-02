@@ -1,7 +1,7 @@
 <%= status_view :status_styles, :layout => false %>
 
 <h1 class='wi'>Statuses: <%= @status.uuid %>/<%= @status.name %></h1>
-<p class='intro'>Viewing a specific job created with JobWithStatus. <a href="<%= u(:statuses) %>">Return to the list of statuses</a></p>
+<p class='intro'>Viewing a specific job created with Resque::Plugins::Status. <a href="<%= u(:statuses) %>">Return to the list of statuses</a></p>
 
 <div class="status-holder" rel="<%= @status.status %>" id="status_<%= @status.uuid %>">
   <div class="status-progress">
