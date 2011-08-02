@@ -11,7 +11,7 @@ begin
     gem.name = "resque-status"
     gem.version = Resque::Plugins::Status::Hash::VERSION
     gem.summary = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs.}
-    gem.description = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when subclassed provides easily trackable/killable jobs.}
+    gem.description = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when included provides easily trackable/killable jobs.}
     gem.email = "aaron@quirkey.com"
     gem.homepage = "http://github.com/quirkey/resque-status"
     gem.rubyforge_project = "quirkey"
