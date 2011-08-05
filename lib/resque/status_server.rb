@@ -50,7 +50,7 @@ module Resque
       
       app.helpers do
         def status_view(filename, options = {}, locals = {})
-          erb(File.read(File.join(::Resque::Plugins::Status::HashServer::VIEW_PATH, "#{filename}.erb")), options, locals)
+          erb(File.read(File.join(::Resque::StatusServer::VIEW_PATH, "#{filename}.erb")), options, locals)
         end
 
         def status_poll(start)
@@ -70,4 +70,4 @@ module Resque
   end
 end
 
-Resque::Server.register Resque::Plugins::Status::HashServer
+Resque::Server.register Resque::StatusServer
