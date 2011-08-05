@@ -1,4 +1,4 @@
-require 'resque/status'
+require 'resque-status'
 
 module Resque
   module StatusServer
