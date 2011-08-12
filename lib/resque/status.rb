@@ -205,7 +205,7 @@ module Resque
     # Return the time of the status initialization. If set returns a <tt>Time</tt>
     # object, otherwise returns nil
     def time
-      time? ? Time.at(self['time']).strftime("%Y/%m/%d %H:%M:%S") : nil
+      time? ? Time.at(self['time']).strftime("%Y/%m/%d %H:%M:%S %Z") : nil
     end
 
     STATUSES.each do |status|
