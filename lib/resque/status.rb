@@ -52,6 +52,7 @@ module Resque
     def self.clear_completed(range_start = nil, range_end = nil)
       status_ids_with_status('completed', range_start, range_end).each do |id|
         redis.del(status_key(id))
+        redis.zrem(set_key, id)
       end
     end
 
