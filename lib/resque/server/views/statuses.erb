@@ -2,8 +2,11 @@
 
 <h1 class='wi'>Statuses</h1>
 <%unless @statuses.empty?%>
-  <form method="POST" action="<%= u(:statuses) %>/clear" class='clear-failed'>
+<form method="POST" action="<%= u(:statuses) %>/clear" class='clear-failed'>
   <input type='submit' name='' value='Clear Statuses' />
+</form>
+<form method="POST" action="<%= u(:statuses) %>/clear/completed" class='clear-failed'>
+  <input type='submit' name='' value='Clear Completed Statuses' />
 </form>
 <%end%>
 <p class='intro'>These are recent jobs created with the JobWithStatus class</p>

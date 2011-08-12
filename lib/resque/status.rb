@@ -47,6 +47,14 @@ module Resque
       end
     end
 
+    # clear only completed statuses from redis passing an optional range. See `statuses` for info
+    # about ranges
+    def self.clear_completed(range_start = nil, range_end = nil)
+      status_ids_with_status('completed', range_start, range_end).each do |id|
+        redis.del(status_key(id))
+      end
+    end
+
     # returns a Redisk::Logger scoped to the UUID. Any options passed are passed
     # to the logger initialization.
     #
@@ -84,6 +92,11 @@ module Resque
         # perspective so we need to convert the passed params
         (redis.zrevrange(set_key, (range_start.abs), ((range_end || 1).abs)) || [])
       end
+    end
+
+    # Return the <tt>num</tt> most recent status/job UUIDs which have a given status in reverse chronological order.
+    def self.status_ids_with_status(status_name, range_start = nil, range_end = nil)
+      statuses(range_start = nil, range_end = nil).select { |status| status.status == status_name }.collect { |status| status.uuid }
     end
 
     # Kill the job at UUID on its next iteration this works by adding the UUID to a
