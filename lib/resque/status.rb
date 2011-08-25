@@ -86,6 +86,21 @@ module Resque
       end
     end
 
+
+    # Kills <tt>num</tt> jobs within range starting with the most recent first. 
+    # By default kills all jobs. 
+    # Note that the same conditions apply as <tt>kill</tt>, i.e. only jobs that check
+    # on each iteration by calling <tt>tick</tt> or <tt>at</tt> are eligible to killed.
+    # @param [Numeric] range_start The optional starting range
+    # @param [Numeric] range_end The optional ending range
+    # @example killing the last 20 submitted jobs
+    #   Resque::Status.killall(0, 19)
+    def self.killall(range_start = nil, range_end = nil)
+      status_ids(range_start, range_end).collect do |id|
+        kill(id)
+      end
+    end
+
     # Kill the job at UUID on its next iteration this works by adding the UUID to a
     # kill list (a.k.a. a list of jobs to be killed. Each iteration the job checks
     # if it _should_ be killed by calling <tt>tick</tt> or <tt>at</tt>. If so, it raises
