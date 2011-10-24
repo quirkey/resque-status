@@ -39,8 +39,6 @@ module Resque
     # Class variable so it's private.
     @@LOCK_METHOD_REDIRECT = Proc.new { |klass| class << klass; alias_method :lock, :resque_status_lock; end }
 
-    @@queued = false
-
     # The default queue is :statused, this can be ovveridden in the specific job
     # class to put the jobs on a specific worker queue
     def self.queue
@@ -81,7 +79,11 @@ module Resque
     def self.enqueue(klass, options = {})
       uuid = Resque::Status.generate_uuid
       self.class_eval &@@LOCK_METHOD_REDIRECT if respond_to?(:lock)
+      @@queued = false
       Resque.enqueue(klass, uuid, options)
+      # TODO Resque master now has enqueue returning true or false if queued.
+      # Once that version has been fully released, the after_enqueue and @@queued could be retired
+      # in favor of checking the return value.
       @@queued ? uuid : nil
     end
 
