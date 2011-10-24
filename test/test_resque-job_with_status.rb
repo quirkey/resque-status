@@ -46,6 +46,17 @@ class TestResqueJobWithStatus < Test::Unit::TestCase
       end
     end
 
+    context ".lock" do
+      setup do
+        @num = 100
+        @job = WorkingJobWithLock.new('123', {'num' => @num})
+      end
+
+      should "provide self.lock as resque-lock expects" do
+        assert_equal "lock:working_job_with_lock-#{@num}", @job.class.lock(@job.uuid, @job.options)
+      end
+    end
+
     context ".enqueue" do
       setup do
         @uuid = Resque::JobWithStatus.enqueue(WorkingJob, :num => 100)

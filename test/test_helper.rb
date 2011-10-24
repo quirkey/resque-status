@@ -61,6 +61,26 @@ class WorkingJob < Resque::JobWithStatus
 
 end
 
+class WorkingJobWithLock < Resque::JobWithStatus
+
+  # Need to fake out as if we had extended with Resque::Plugins::Lock
+  def self.lock(*args)
+   return 'not_my_lock'
+  end
+
+  def lock
+    return "lock:working_job_with_lock-#{options['num']}"
+  end
+
+  def perform
+    total = options['num']
+    (1..total).each do |num|
+      at(num, total, "At #{num}")
+    end
+  end
+
+end
+
 class ErrorJob < Resque::JobWithStatus
 
   def perform
