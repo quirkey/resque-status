@@ -5,7 +5,7 @@ require 'resque/job_with_status' # in rails you would probably do this in an ini
 class SleepJob < Resque::JobWithStatus
   
   def perform
-    total = options['length'].to_i || 1000
+    total = options.has_key?('length') ? options['length'].to_i : 1000
     num = 0
     while num < total
       at(num, total, "At #{num} of #{total}")
