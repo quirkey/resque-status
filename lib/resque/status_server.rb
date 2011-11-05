@@ -35,6 +35,11 @@ module Resque
         Resque::Status.clear
         redirect u(:statuses)
       end
+
+      app.post '/statuses/clear/completed' do
+        Resque::Status.clear_completed
+        redirect u(:statuses)
+      end
       
       app.get "/statuses.poll" do
         content_type "text/plain"
