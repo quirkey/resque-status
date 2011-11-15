@@ -2,8 +2,11 @@
 
 <h1 class='wi'>Statuses</h1>
 <%unless @statuses.empty?%>
-  <form method="POST" action="<%= u(:statuses) %>/clear" class='clear-failed'>
-  <input type='submit' name='' value='Clear Statuses' />
+<form method="POST" action="<%= u(:statuses) %>/clear" class='clear-failed'>
+  <input type='submit' name='' value='Clear Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
+</form>
+<form method="POST" action="<%= u(:statuses) %>/clear/completed" class='clear-failed'>
+  <input type='submit' name='' value='Clear Completed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
 </form>
 <%end%>
 <p class='intro'>These are recent jobs created with the JobWithStatus class</p>
@@ -32,7 +35,7 @@
       <td><% if status.killable? %><a href="<%= u(:statuses) %>/<%= status.uuid %>/kill" class="kill">Kill</a><% end %></td>
     </tr>
     <% end %>
-  <% else %>  
+  <% else %>
   <tr>
     <td colspan="7" class='no-data'>No Statuses right now...</td>
   </tr>
@@ -40,14 +43,14 @@
 </table>
 
 <% unless @statuses.empty? %>
-	<%= partial :next_more, :start => @start, :size => @size %>
+  <%= partial :next_more, :start => @start, :size => @size %>
 <% end %>
 
 <%= status_poll(@start) %>
 
 <script type="text/javascript" charset="utf-8">
   jQuery(function($) {
-    
+
     $('a.kill').click(function(e) {
       e.preventDefault();
       var $link = $(this),
@@ -66,6 +69,6 @@
         return false
       }
     });
-    
+
   });
 </script>

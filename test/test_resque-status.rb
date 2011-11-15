@@ -94,6 +94,25 @@ class TestResqueStatus < Test::Unit::TestCase
 
     end
 
+    context ".clear_completed" do
+      setup do
+        @uuids = []
+        15.times{ Resque::Status.create }
+        15.times{ Resque::Status.create(:status => 'completed') }
+        Resque::Status.clear_completed
+      end
+
+      should "clear completed statuses" do
+        assert Resque::Status.status_ids.is_a?(Array)
+        assert_equal 17, Resque::Status.status_ids.size # 15 + 2
+      end
+
+      should "clear any completed statuses" do
+        assert Resque::Status.status_ids_with_status('completed').empty?
+      end
+
+    end
+
     context ".status_ids" do
 
       setup do
@@ -110,6 +129,20 @@ class TestResqueStatus < Test::Unit::TestCase
         assert_equal Resque::Status.status_ids[0, 10], Resque::Status.status_ids(0, 9)
         assert_equal Resque::Status.status_ids[10, 10], Resque::Status.status_ids(10, 19)
         # assert_equal Resque::Status.status_ids.reverse[0, 10], Resque::Status.status_ids(0, 10)
+      end
+    end
+
+    context ".status_ids_with_status" do
+
+      setup do
+        @uuids = []
+        15.times{ Resque::Status.create }
+        15.times{ Resque::Status.create(:status => 'completed') }
+      end
+
+      should "return an array of completed job ids" do
+        assert Resque::Status.status_ids_with_status('completed').is_a?(Array)
+        assert_equal 15, Resque::Status.status_ids_with_status('completed').size # 15
       end
     end
 
