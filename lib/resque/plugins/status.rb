@@ -3,16 +3,17 @@ require 'resque/plugins/status/hash'
 module Resque
   module Plugins
 
-    # Resque::Plugins::Status is a base class that you're jobs will inherit from.
+    # Resque::Plugins::Status is a module you're jobs will include.
     # It provides helper methods for updating the status/etc from within an
     # instance as well as class methods for creating and queuing the jobs.
     #
-    # All you have to do to get this functionality is inherit from Resque::Plugins::Status
+    # All you have to do to get this functionality is include Resque::Plugins::Status
     # and then implement a <tt>perform<tt> method.
     #
     # For example
     #
-    #       class ExampleJob < Resque::Plugins::Status
+    #       class ExampleJob
+    #         include Resque::Plugins::Status
     #
     #         def perform
     #           num = options['num']
@@ -62,7 +63,8 @@ module Resque
         #
         # == Example:
         #
-        #       class ExampleJob < Resque::Plugins::Status
+        #       class ExampleJob
+        #         include Resque::Plugins::Status
         #
         #         def perform
         #           set_status "Hey I'm a job num #{options['num']}"
