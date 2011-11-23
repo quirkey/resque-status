@@ -38,7 +38,7 @@ Then in an initializer:
 == Usage
 
 The most direct way to use resque-status is to create your jobs using the 
-Resque::Plugins::Status class. An example job would look something like:
+Resque::Plugins::Status module. An example job would look something like:
 
   class SleepJob
     include Resque::Plugins::Status
@@ -55,8 +55,7 @@ Resque::Plugins::Status class. An example job would look something like:
   
   end
 
-Instead of normal Resque job classes, we inherit from the Resque::Plugins::Status class. 
-Another major difference is that intead of implementing <tt>perform</tt> as a 
+One major difference is that intead of implementing <tt>perform</tt> as a 
 class method, we do our job implementation within instances of the job class.
 
 In order to queue a SleepJob up, we also won't use <tt>Resque.enqueue</tt>, instead
