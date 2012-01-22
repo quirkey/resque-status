@@ -4,19 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{resque-status}
-  s.version = "0.2.4"
+  s.name = "resque-status"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-<<<<<<< HEAD
-  s.date = %q{2011-08-10}
-  s.description = %q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Status class which can set/get the statuses of jobs and a Resque::JobWithStatus class that when subclassed provides easily trackable/killable jobs.}
-=======
-  s.date = %q{2011-08-02}
-  s.description = %q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when included provides easily trackable/killable jobs.}
->>>>>>> bukowskis/status-plugin
-  s.email = %q{aaron@quirkey.com}
+  s.date = "2012-01-22"
+  s.description = "resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when included provides easily trackable/killable jobs."
+  s.email = "aaron@quirkey.com"
   s.extra_rdoc_files = [
     "LICENSE",
     "README.rdoc"
@@ -31,11 +26,13 @@ Gem::Specification.new do |s|
     "examples/sleep_job.rb",
     "init.rb",
     "lib/resque-status.rb",
+    "lib/resque/job_with_status.rb",
     "lib/resque/plugins/status.rb",
     "lib/resque/plugins/status/hash.rb",
     "lib/resque/server/views/status.erb",
     "lib/resque/server/views/status_styles.erb",
     "lib/resque/server/views/statuses.erb",
+    "lib/resque/status.rb",
     "lib/resque/status_server.rb",
     "resque-status.gemspec",
     "test/redis-test.conf",
@@ -43,11 +40,11 @@ Gem::Specification.new do |s|
     "test/test_resque_plugins_status.rb",
     "test/test_resque_plugins_status_hash.rb"
   ]
-  s.homepage = %q{http://github.com/quirkey/resque-status}
+  s.homepage = "http://github.com/quirkey/resque-status"
   s.require_paths = ["lib"]
-  s.rubyforge_project = %q{quirkey}
-  s.rubygems_version = %q{1.6.2}
-  s.summary = %q{resque-status is an extension to the resque queue system that provides simple trackable jobs.}
+  s.rubyforge_project = "quirkey"
+  s.rubygems_version = "1.8.10"
+  s.summary = "resque-status is an extension to the resque queue system that provides simple trackable jobs."
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
