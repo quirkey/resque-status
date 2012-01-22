@@ -33,6 +33,11 @@ module Resque
     class Killed < RuntimeError; end
 
     attr_reader :uuid, :options
+    
+    # Reusable block to open eigenclass/metaclass so that we can alias the local class method for resque-lock.
+    # We must do this at runtime due to the JobWithStatus class being extended in advance with Resque::Plugins::Lock.
+    # Class variable so it's private.
+    @@LOCK_METHOD_REDIRECT = Proc.new { |klass| class << klass; alias_method :lock, :resque_status_lock; end }
 
     # The default queue is :statused, this can be ovveridden in the specific job
     # class to put the jobs on a specific worker queue
@@ -72,21 +77,44 @@ module Resque
     # Adds a job of type <tt>klass<tt> to the queue with <tt>options<tt>.
     # Returns the UUID of the job
     def self.enqueue(klass, options = {})
-      uuid = Resque::Status.create :options => options
+      uuid = Resque::Status.generate_uuid
+      self.class_eval &@@LOCK_METHOD_REDIRECT if respond_to?(:lock)
+      @@queued = false
       Resque.enqueue(klass, uuid, options)
-      uuid
+      # TODO Resque master now has enqueue returning true or false if queued.
+      # Once that version has been fully released, the after_enqueue and @@queued could be retired
+      # in favor of checking the return value.
+      @@queued ? uuid : nil
+    end
+
+    # Due to resque-lock or other plugins, this job may not be queued.
+    # Therefore, wait to create the status objects in redis until we know the job is queued.
+    def self.after_enqueue_job_with_status(uuid, options)
+      @@queued = true
+      Resque::Status.create(uuid, :options => options)
     end
 
     # This is the method called by Resque::Worker when processing jobs. It
     # creates a new instance of the job class and populates it with the uuid and
     # options.
     #
-    # You should not override this method, rahter the <tt>perform</tt> instance method.
+    # You should not override this method, rather the <tt>perform</tt> instance method.
     def self.perform(uuid=nil, options = {})
       uuid ||= Resque::Status.generate_uuid
       instance = new(uuid, options)
       instance.safe_perform!
       instance
+    end
+
+    # resque-lock checks for the lock key using a class method on job classes.
+    # This method will be aliased if the class method exists.
+    # options.
+    # http://github.com/defunkt/resque-lock
+    #
+    # You should not override this method, rather the <tt>lock</tt> instance method.
+    def self.resque_status_lock(uuid, options)
+      instance = new(uuid, options)
+      instance.lock
     end
 
     # Wrapper API to forward a Resque::Job creation API call into a JobWithStatus call.
@@ -98,8 +126,12 @@ module Resque
 
     # Create a new instance with <tt>uuid</tt> and <tt>options</tt>
     def initialize(uuid, options = {})
+      # Stringify keys so that the lock instance method will get strings rather than symbols.
       @uuid    = uuid
-      @options = options
+      @options = begin; options.keys.each { |key| options[key.to_s] = options.delete(key) }; options; end;
+
+      # Redirect the lock class method to our method.
+      self.class.class_eval &@@LOCK_METHOD_REDIRECT if self.class.respond_to?(:lock)
     end
 
     # Run by the Resque::Worker when processing this job. It wraps the <tt>perform</tt>
@@ -197,6 +229,5 @@ module Resque
     def set_status(*args)
       self.status = [status, {'name'  => self.name}, args].flatten
     end
-
   end
 end

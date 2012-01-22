@@ -154,6 +154,34 @@ API Docs: http://rdoc.info/projects/quirkey/resque-status
 Examples: http://github.com/quirkey/resque-status/tree/master/examples
 Resque: http://github.com/defunkt/resque
             
+== resque-lock
+
+Support for resque-lock is built-in. If you extend JobWithStatus, then provide
+an instance method called <tt>lock</tt> just like <tt>perform</tt>.
+
+  class SleepJobLock < Resque::JobWithStatus
+    extend Resque::Plugins::Lock
+
+    def lock
+      return "lock:sleep_job-#{options['length'].to_i || 1000}"
+    end
+  
+    def perform
+      total = options['length'].to_i || 1000
+      num = 0
+      while num < total
+        at(num, total, "At #{num} of #{total}")
+        sleep(1)
+        num += 1
+      end
+      completed
+    end
+  
+  end
+
+When calling <tt>create</tt> on these types of jobs, the return value will be nil instead of a uuid
+if a job with the same lock value already is queued.
+
 == Thanks
 
 Resque is awesome, @defunkt needs a shout-out. 
