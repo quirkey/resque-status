@@ -19,41 +19,43 @@ Install the resque-status gem (which will pull in the dependencies).
 
   gem install resque-status
   
-To use with Rails, you can install as a plugin or add the gem to you're config:
+To use with Rails 2.x, you can install as a plugin or add the gem to you're config:
   
   # environment.rb
-  config.gem 'resque-status', :lib => 'resque/status'
-  
+  config.gem 'resque-status'
+
+With newer Rails add this to your Gemfile:
+
+  # Gemfile
+  gem 'resque-status'
+
 Then in an initializer:
   
   # config/initializers/resque.rb
-  require 'resque/job_with_status'
-  
   Resque.redis = "your/redis/socket" # default localhost:6379
-  Resque::Status.expire_in = (24 * 60 * 60) # 24hrs in seconds
+  Resque::Plugins::Status::Hash.expire_in = (24 * 60 * 60) # 24hrs in seconds
   
 == Usage
 
 The most direct way to use resque-status is to create your jobs using the 
-Resque::JobWithStatus class. An example job would look something like:
+Resque::Plugins::Status module. An example job would look something like:
 
-  class SleepJob < Resque::JobWithStatus
+  class SleepJob
+    include Resque::Plugins::Status
   
     def perform
-      total = options['length'].to_i || 1000
+      total = (options['length'] || 1000).to_i
       num = 0
       while num < total
         at(num, total, "At #{num} of #{total}")
         sleep(1)
         num += 1
       end
-      completed
     end
   
   end
 
-Instead of normal Resque job classes, we inherit from the JobWithStatus class. 
-Another major difference is that intead of implementing <tt>perform</tt> as a 
+One major difference is that intead of implementing <tt>perform</tt> as a 
 class method, we do our job implementation within instances of the job class.
 
 In order to queue a SleepJob up, we also won't use <tt>Resque.enqueue</tt>, instead
@@ -67,9 +69,9 @@ instance as options['length'] (as you can see above).
 
 Now that we have a UUID its really easy to get the status:
 
-  status = Resque::Status.get(job_id)
+  status = Resque::Plugins::Status::Hash.get(job_id)
   
-This returns a Resque::Status object, which is a Hash (with benefits).
+This returns a Resque::Plugins::Status::Hash object, which is a Hash (with benefits).
 
   status.pct_complete #=> 0
   status.status #=> 'queued'
@@ -81,7 +83,7 @@ This returns a Resque::Status object, which is a Hash (with benefits).
 Once the worker reserves the job, the instance of SleepJob updates the status at
 each iteration using <tt>at()</tt>
 
-  status = Resque::Status.get(job_id)
+  status = Resque::Plugins::Status::Hash.get(job_id)
   status.working? #=> true
   status.num #=> 5
   status.total => 100
@@ -92,7 +94,7 @@ the error is re-raised so that Resque can capture it.
 
 Its also possible to get a list of current/recent job statuses:
 
-  Resque::Status.statuses #=> [#<Resque::Status>, ...]
+  Resque::Plugins::Status::Hash.statuses #=> [#<Resque::Plugins::Status::Hash>, ...]
 
 === Passing back data from the job
 
@@ -115,7 +117,7 @@ Because we're tracking UUIDs per instance, and we're checking in/updating the st
 on each iteration (using <tt>at</tt> or <tt>tick</tt>) we can kill specific jobs
 by UUID.
 
-  Resque::Status.kill(job_id)
+  Resque::Plugins::Status::Hash.kill(job_id)
 
 The next time the job at job_id calls <tt>at</tt> or tick, it will raise a Killed 
 error and set the status to killed.
@@ -126,7 +128,7 @@ Since Redis is RAM based, we probably don't want to keep these statuses around f
 (at least until @antirez releases the VM feature). By setting expire_in, all statuses
 and thier related keys will expire in expire_in seconds from the last time theyre updated:
 
-  Resque::Status.expire_in = (60 * 60) # 1 hour
+  Resque::Plugins::Status::Hash.expire_in = (60 * 60) # 1 hour
 
 === resque-web
 

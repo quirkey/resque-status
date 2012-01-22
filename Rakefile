@@ -1,15 +1,17 @@
+$LOAD_PATH.unshift './lib'
+
 require 'rubygems'
 require 'rake'
-require File.join(File.expand_path('.'), 'lib/resque/status')
+require 'resque-status'
 require 'resque/tasks'
 
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "resque-status"
-    gem.version = Resque::Status::VERSION
+    gem.version = Resque::Plugins::Status::VERSION
     gem.summary = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs.}
-    gem.description = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Status class which can set/get the statuses of jobs and a Resque::JobWithStatus class that when subclassed provides easily trackable/killable jobs.}
+    gem.description = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when included provides easily trackable/killable jobs.}
     gem.email = "aaron@quirkey.com"
     gem.homepage = "http://github.com/quirkey/resque-status"
     gem.rubyforge_project = "quirkey"
@@ -46,7 +48,7 @@ rescue LoadError
   end
 end
 
-task :test => :check_dependencies
+task :test
 
 task :default => :test
 

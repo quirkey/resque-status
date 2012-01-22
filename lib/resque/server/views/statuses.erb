@@ -6,7 +6,7 @@
   <input type='submit' name='' value='Clear Statuses' />
 </form>
 <%end%>
-<p class='intro'>These are recent jobs created with the JobWithStatus class</p>
+<p class='intro'>These are recent jobs created with the Resque::Plugins::Status class</p>
 <table>
   <tr>
     <th>ID</th>
@@ -32,7 +32,7 @@
       <td><% if status.killable? %><a href="<%= u(:statuses) %>/<%= status.uuid %>/kill" class="kill">Kill</a><% end %></td>
     </tr>
     <% end %>
-  <% else %>  
+  <% else %>
   <tr>
     <td colspan="7" class='no-data'>No Statuses right now...</td>
   </tr>
@@ -40,14 +40,14 @@
 </table>
 
 <% unless @statuses.empty? %>
-	<%= partial :next_more, :start => @start, :size => @size %>
+  <%= partial :next_more, :start => @start, :size => @size %>
 <% end %>
 
 <%= status_poll(@start) %>
 
 <script type="text/javascript" charset="utf-8">
   jQuery(function($) {
-    
+
     $('a.kill').click(function(e) {
       e.preventDefault();
       var $link = $(this),
@@ -66,6 +66,6 @@
         return false
       }
     });
-    
+
   });
 </script>
