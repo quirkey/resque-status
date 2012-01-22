@@ -44,8 +44,8 @@ end
 
 puts "Starting redis for testing at localhost:9736..."
 `redis-server #{dir}/redis-test.conf`
-Resque.redis = 'localhost:9736'
-Redisk.redis = 'localhost:9736'
+Resque.redis = 'localhost:9736/1'
+Redisk.redis = 'localhost:9736/1'
 
 #### Fixtures
 
