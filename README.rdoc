@@ -34,6 +34,16 @@ Then in an initializer:
   # config/initializers/resque.rb
   Resque.redis = "your/redis/socket" # default localhost:6379
   Resque::Plugins::Status::Hash.expire_in = (24 * 60 * 60) # 24hrs in seconds
+
+== NOTES ABOUT UPGRADING TO >= v0.3 
+
+Even though this was one of the first resque plugins, later versions of resque added stricter plugin conventions 
+that resque-status did not completely conform to (See: https://github.com/defunkt/resque/blob/master/docs/PLUGINS.md)
+
+Thanks to some work from @EugZol and @bukowskis v0.3 moved around some code to conform:
+
+`Resque::Status` is now `Resque::Plugins::Status` and is now an `include`able module.
+`Resque::Status.get/etc` have been moved to `Resque::Plugins::Status::Hash`
   
 == Usage
 
