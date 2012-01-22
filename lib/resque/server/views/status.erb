@@ -1,6 +1,7 @@
+<% require 'yaml' %>
 <%= status_view :status_styles, :layout => false %>
 
-<h1 class='wi'>Statuses: <%= @status.uuid %>/<%= @status.name %></h1>
+<h1 class='wi'>Statuses: <%= @status.uuid %>/<%= @status.name.split(/\(/)[0] if not @status.name.nil? %></h1>
 <p class='intro'>Viewing a specific job created with JobWithStatus. <a href="<%= u(:statuses) %>">Return to the list of statuses</a></p>
 
 <div class="status-holder" rel="<%= @status.status %>" id="status_<%= @status.uuid %>">
@@ -10,6 +11,18 @@
   </div>
   <div class="status-message"><%= @status.message %></div>
   <div class="status-time"><%= @status.time? ? @status.time : 'Not started' %></div>
+  <div class="status-options"><%
+  if @status.options.nil?
+    if (not @status.name.nil?) and (not @status.name.split(/\(/, 2)[1].nil?)
+    %>
+      <code><%= eval(@status.name.split(/\(/, 2)[1][0..-2]).to_yaml.gsub("\n","<br/>") %></code>
+    <% else %>
+      <code><%= @status.name %></code>
+    <% end %>
+  <% else %>
+    <pre><%= @status.options.inspect %></pre>
+  <% end %>
+  </div>
 </div>
 
 <script type="text/javascript" charset="utf-8">
