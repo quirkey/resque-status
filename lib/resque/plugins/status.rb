@@ -119,11 +119,11 @@ module Resque
       def safe_perform!
         set_status({'status' => 'working'})
         perform
-        if status && !status.completed?
-          completed
-        elsif status.failed?
+        if status.failed?
           on_failure(status.message) if respond_to?(:on_failure)
           return
+        elsif status && !status.completed?
+          completed
         end
         on_success if respond_to?(:on_success)
       rescue Killed

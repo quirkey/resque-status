@@ -103,6 +103,20 @@ module Resque
           redis.smembers(kill_key)
         end
 
+        # Kills <tt>num</tt> jobs within range starting with the most recent first.
+        # By default kills all jobs.
+        # Note that the same conditions apply as <tt>kill</tt>, i.e. only jobs that check
+        # on each iteration by calling <tt>tick</tt> or <tt>at</tt> are eligible to killed.
+        # @param [Numeric] range_start The optional starting range
+        # @param [Numeric] range_end The optional ending range
+        # @example killing the last 20 submitted jobs
+        #   Resque::Plugins::Status::Hash.killall(0, 20)
+        def self.killall(range_start = nil, range_end = nil)
+          status_ids(range_start, range_end).collect do |id|
+            kill(id)
+          end
+        end
+
         # Check whether a job with UUID is on the kill list
         def self.should_kill?(uuid)
           redis.sismember(kill_key, uuid)

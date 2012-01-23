@@ -116,8 +116,8 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end
 
       should "be failed" do
-        assert @perfomed.status.failed?
         assert_match(/failure/, @performed.status.message)
+        assert @performed.status.failed?
       end
 
     end
@@ -152,10 +152,10 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         @uuid1    = KillableJob.create(:num => 100)
         @uuid2    = KillableJob.create(:num => 100)
 
-        Resque::Plugins::Status.killall
+        Resque::Plugins::Status::Hash.killall
 
-        assert_contains Resque::Status.kill_ids, @uuid1
-        assert_contains Resque::Status.kill_ids, @uuid2
+        assert_contains Resque::Plugins::Status::Hash.kill_ids, @uuid1
+        assert_contains Resque::Plugins::Status::Hash.kill_ids, @uuid2
 
         @payload1   = Resque.pop(:statused)
         @payload2   = Resque.pop(:statused)
@@ -163,8 +163,8 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         @performed = KillableJob.perform(*@payload1['args'])
         @performed = KillableJob.perform(*@payload2['args'])
 
-        @status1 = Resque::Status.get(@uuid1)
-        @status2 = Resque::Status.get(@uuid2)
+        @status1 = Resque::Plugins::Status::Hash.get(@uuid1)
+        @status2 = Resque::Plugins::Status::Hash.get(@uuid2)
       end
 
       should "set the status to killed" do
@@ -183,8 +183,8 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end
 
       should "not persist the kill key" do
-        assert_does_not_contain Resque::Status.kill_ids, @uuid1
-        assert_does_not_contain Resque::Status.kill_ids, @uuid2
+        assert_does_not_contain Resque::Plugins::Status::Hash.kill_ids, @uuid1
+        assert_does_not_contain Resque::Plugins::Status::Hash.kill_ids, @uuid2
       end
 
     end
@@ -194,10 +194,10 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         @uuid1    = KillableJob.create(:num => 100)
         @uuid2    = KillableJob.create(:num => 100)
 
-        Resque::Status.killall(0,0) # only @uuid2 should be killed
+        Resque::Plugins::Status::Hash.killall(0,0) # only @uuid2 should be killed
 
-        assert_does_not_contain Resque::Status.kill_ids, @uuid1
-        assert_contains Resque::Status.kill_ids, @uuid2
+        assert_does_not_contain Resque::Plugins::Status::Hash.kill_ids, @uuid1
+        assert_contains Resque::Plugins::Status::Hash.kill_ids, @uuid2
 
         @payload1   = Resque.pop(:statused)
         @payload2   = Resque.pop(:statused)
@@ -205,8 +205,8 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         @performed = KillableJob.perform(*@payload1['args'])
         @performed = KillableJob.perform(*@payload2['args'])
 
-        @status1 = Resque::Status.get(@uuid1)
-        @status2 = Resque::Status.get(@uuid2)
+        @status1 = Resque::Plugins::Status::Hash.get(@uuid1)
+        @status2 = Resque::Plugins::Status::Hash.get(@uuid2)
       end
 
       should "set the status to killed" do
@@ -225,8 +225,8 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end
 
       should "not persist the kill key" do
-        assert_does_not_contain Resque::Status.kill_ids, @uuid1
-        assert_does_not_contain Resque::Status.kill_ids, @uuid2
+        assert_does_not_contain Resque::Plugins::Status::Hash.kill_ids, @uuid1
+        assert_does_not_contain Resque::Plugins::Status::Hash.kill_ids, @uuid2
       end
 
     end
