@@ -16,11 +16,6 @@ begin
     gem.homepage = "http://github.com/quirkey/resque-status"
     gem.rubyforge_project = "quirkey"
     gem.authors = ["Aaron Quint"]
-    gem.add_dependency "uuid", ">=2.0.2"
-    gem.add_dependency "resque", ">=1.3.1"
-    gem.add_dependency "redisk", ">=0.2.1"
-    gem.add_development_dependency "shoulda", ">=2.10.2"
-    gem.add_development_dependency "mocha", ">=0.9.8"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
