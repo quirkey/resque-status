@@ -1,3 +1,4 @@
+require 'resque/server'
 require 'resque-status'
 
 module Resque
