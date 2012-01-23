@@ -93,6 +93,32 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       before_should "call perform on the inherited class" do
         WorkingJob.any_instance.expects(:perform).once
       end
+    end
+
+    context "manually failing a job" do
+      setup do
+        @uuid      = FailureJob.create(:num => 100)
+        @payload   = Resque.pop(:statused)
+        @performed = FailureJob.perform(*@payload['args'])
+      end
+
+      should "load load a new instance of the klass" do
+        assert @performed.is_a?(FailureJob)
+      end
+
+      should "set the uuid" do
+        assert_equal @uuid, @performed.uuid
+      end
+
+      should "set the status" do
+        assert @performed.status.is_a?(Resque::Plugins::Status::Hash)
+        assert_equal 'FailureJob({"num"=>100})', @performed.status.name
+      end
+
+      should "be failed" do
+        assert @perfomed.status.failed?
+        assert_match(/failure/, @performed.status.message)
+      end
 
     end
 
@@ -126,7 +152,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         @uuid1    = KillableJob.create(:num => 100)
         @uuid2    = KillableJob.create(:num => 100)
 
-        Resque::Status.killall
+        Resque::Plugins::Status.killall
 
         assert_contains Resque::Status.kill_ids, @uuid1
         assert_contains Resque::Status.kill_ids, @uuid2
@@ -268,7 +294,6 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         should "set status as failed" do
           assert_equal 'failed', @job.status.status
         end
-
       end
 
     end

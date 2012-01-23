@@ -119,7 +119,12 @@ module Resque
       def safe_perform!
         set_status({'status' => 'working'})
         perform
-        completed unless status && status.completed?
+        if status && !status.completed?
+          completed
+        elsif status.failed?
+          on_failure(status.message) if respond_to?(:on_failure)
+          return
+        end
         on_success if respond_to?(:on_success)
       rescue Killed
         logger.info "Job #{self} Killed at #{Time.now}"

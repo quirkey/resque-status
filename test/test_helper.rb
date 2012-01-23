@@ -89,3 +89,11 @@ end
 class BasicJob
   include Resque::Plugins::Status
 end
+
+class FailureJob
+  include Resque::Plugins::Status
+
+  def perform
+    failed("I'm such a failure")
+  end
+end
