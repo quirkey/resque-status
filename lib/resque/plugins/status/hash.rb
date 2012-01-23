@@ -1,7 +1,6 @@
 module Resque
   module Plugins
     module Status
-      VERSION = '0.3.0'
 
       # Resque::Plugins::Status::Hash is a Hash object that has helper methods for dealing with
       # the common status attributes. It also has a number of class methods for
