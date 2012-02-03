@@ -28,7 +28,7 @@ module Resque
     # This job would iterate num times updating the status as it goes. At the end
     # we update the status telling anyone listening to this job that its complete.
     module Status
-      VERSION = '0.3.1'
+      VERSION = '0.3.2'
 
       autoload :Hash, 'resque/plugins/status/hash'
 

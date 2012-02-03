@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-  s.date = "2012-01-23"
+  s.date = "2012-02-03"
   s.description = "resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when included provides easily trackable/killable jobs."
   s.email = "aaron@quirkey.com"
   s.extra_rdoc_files = [
@@ -52,18 +52,18 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<redisk>, [">= 0.2.1"])
       s.add_runtime_dependency(%q<resque>, ["~> 1.19"])
-      s.add_runtime_dependency(%q<uuid>, ["~> 2.0.2"])
+      s.add_runtime_dependency(%q<uuid>, ["~> 2.3"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
     else
       s.add_dependency(%q<redisk>, [">= 0.2.1"])
       s.add_dependency(%q<resque>, ["~> 1.19"])
-      s.add_dependency(%q<uuid>, ["~> 2.0.2"])
+      s.add_dependency(%q<uuid>, ["~> 2.3"])
       s.add_dependency(%q<jeweler>, [">= 0"])
     end
   else
     s.add_dependency(%q<redisk>, [">= 0.2.1"])
     s.add_dependency(%q<resque>, ["~> 1.19"])
-    s.add_dependency(%q<uuid>, ["~> 2.0.2"])
+    s.add_dependency(%q<uuid>, ["~> 2.3"])
     s.add_dependency(%q<jeweler>, [">= 0"])
   end
 end
