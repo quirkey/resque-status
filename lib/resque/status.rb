@@ -1,6 +1,8 @@
 require 'resque'
-require 'redisk'
-require 'uuid'
 
-require 'resque/plugins/status'
-require 'resque/job_with_status'
+module Resque
+  autoload :JobWithStatus, "#{File.dirname(__FILE__)}/job_with_status"
+  module Plugins
+    autoload :Status, "#{File.dirname(__FILE__)}/plugins/status"
+  end
+end

@@ -50,6 +50,7 @@ module Resque
         #
         # Ensures that Redisk is logging to the same Redis connection as Resque.
         def self.logger(uuid, options = {})
+          require 'redisk' unless defined?(Redisk)
           Redisk.redis = redis
           Redisk::Logger.new(logger_key(uuid), options)
         end
@@ -149,6 +150,7 @@ module Resque
         end
 
         def self.generate_uuid
+          require 'uuid' unless defined?(UUID)
           UUID.generate(:compact)
         end
 

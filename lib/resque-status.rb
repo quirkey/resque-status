@@ -1,1 +1,1 @@
-require 'resque/status'
+require "#{File.dirname(__FILE__)}/resque/status"

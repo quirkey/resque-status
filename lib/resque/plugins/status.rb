@@ -1,5 +1,3 @@
-require 'resque/plugins/status/hash'
-
 module Resque
   module Plugins
 
@@ -31,6 +29,8 @@ module Resque
     # we update the status telling anyone listening to this job that its complete.
     module Status
       VERSION = '0.3.1'
+
+      autoload :Hash, 'resque/plugins/status/hash'
 
       # The error class raised when a job is killed
       class Killed < RuntimeError; end
