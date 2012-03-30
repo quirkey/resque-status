@@ -6,9 +6,9 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
     setup do
       Resque.redis.flushall
       Resque::Plugins::Status::Hash.expire_in = nil
-      @uuid = Resque::Plugins::Status::Hash.create
+      @uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
       Resque::Plugins::Status::Hash.set(@uuid, "my status")
-      @uuid_with_json = Resque::Plugins::Status::Hash.create({"im" => "json"})
+      @uuid_with_json = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {"im" => "json"})
     end
 
     context ".get" do
@@ -43,17 +43,17 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
     context ".create" do
       should "add an item to a key set" do
         before = Resque::Plugins::Status::Hash.status_ids.length
-        Resque::Plugins::Status::Hash.create
+        Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
         after = Resque::Plugins::Status::Hash.status_ids.length
         assert_equal 1, after - before
       end
 
       should "return a uuid" do
-       assert_match(/^\w{32}$/, Resque::Plugins::Status::Hash.create)
+        assert_match(/^\w{32}$/, Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid))
       end
 
       should "store any status passed" do
-        uuid = Resque::Plugins::Status::Hash.create("initial status")
+        uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, "initial status")
         status = Resque::Plugins::Status::Hash.get(uuid)
         assert status.is_a?(Resque::Plugins::Status::Hash)
         assert_equal "initial status", status.message
@@ -61,17 +61,17 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
 
       should "expire keys if expire_in is set" do
         Resque::Plugins::Status::Hash.expire_in = 1
-        uuid = Resque::Plugins::Status::Hash.create("new status")
+        uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, "new status")
         assert_contains Resque::Plugins::Status::Hash.status_ids, uuid
         assert_equal "new status", Resque::Plugins::Status::Hash.get(uuid).message
         sleep 2
-        Resque::Plugins::Status::Hash.create
+        Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
         assert_does_not_contain Resque::Plugins::Status::Hash.status_ids, uuid
         assert_nil Resque::Plugins::Status::Hash.get(uuid)
       end
 
       should "store the options for the job created" do
-        uuid = Resque::Plugins::Status::Hash.create("new", :options => {'test' => '123'})
+        uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, "new", :options => {'test' => '123'})
         assert uuid
         status = Resque::Plugins::Status::Hash.get(uuid)
         assert status.is_a?(Resque::Plugins::Status::Hash)
@@ -98,7 +98,7 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
 
       setup do
         @uuids = []
-        30.times{ Resque::Plugins::Status::Hash.create }
+        30.times{ Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid) }
       end
 
       should "return an array of job ids" do

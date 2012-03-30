@@ -80,11 +80,17 @@ module Resque
         end
 
         # Adds a job of type <tt>klass<tt> to the queue with <tt>options<tt>.
-        # Returns the UUID of the job
+        #
+        # Returns the UUID of the job if the job was queued, or nil if the job was
+        # rejected by a before_enqueue hook.
         def enqueue(klass, options = {})
-          uuid = Resque::Plugins::Status::Hash.create :options => options
-          Resque.enqueue(klass, uuid, options)
-          uuid
+          uuid = Resque::Plugins::Status::Hash.generate_uuid
+          if Resque.enqueue(klass, uuid, options)
+            Resque::Plugins::Status::Hash.create uuid, :options => options
+            uuid
+          else
+            nil
+          end
         end
 
         # This is the method called by Resque::Worker when processing jobs. It
