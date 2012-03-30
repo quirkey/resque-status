@@ -65,7 +65,7 @@ Resque::Plugins::Status module. An example job would look something like:
   
   end
 
-One major difference is that intead of implementing <tt>perform</tt> as a 
+One major difference is that instead of implementing <tt>perform</tt> as a 
 class method, we do our job implementation within instances of the job class.
 
 In order to queue a SleepJob up, we also won't use <tt>Resque.enqueue</tt>, instead
