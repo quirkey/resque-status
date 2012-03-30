@@ -11,8 +11,7 @@ module Resque
 
         # Create a status, generating a new UUID, passing the message to the status
         # Returns the UUID of the new status.
-        def self.create(*messages)
-          uuid = generate_uuid
+        def self.create(uuid, *messages)
           set(uuid, *messages)
           redis.zadd(set_key, Time.now.to_i, uuid)
           redis.zremrangebyscore(set_key, 0, Time.now.to_i - @expire_in) if @expire_in

@@ -32,6 +32,26 @@ class TestResquePluginsStatus < Test::Unit::TestCase
 
     end
 
+    context ".create with a failing before_enqueue hook" do
+      setup do
+        @size = Resque.size(:statused)
+        @status_ids_size = Resque::Plugins::Status::Hash.status_ids.length
+        @res = NeverQueuedJob.create(:num => 100)
+      end
+
+      should "return nil" do
+        assert_equal nil, @res
+      end
+
+      should "not create a status" do
+        assert_equal @size, Resque.size(:statused)
+      end
+
+      should "not add the uuid to the statuses" do
+        assert_equal @status_ids_size, Resque::Plugins::Status::Hash.status_ids.length
+      end
+    end
+
     context ".scheduled" do
       setup do
         @job_args = {'num' => 100}

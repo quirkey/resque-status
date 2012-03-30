@@ -98,3 +98,15 @@ class FailureJob
     failed("I'm such a failure")
   end
 end
+
+class NeverQueuedJob
+  include Resque::Plugins::Status
+
+  def self.before_enqueue(*args)
+    false
+  end
+
+  def perform
+    # will never get called
+  end
+end
