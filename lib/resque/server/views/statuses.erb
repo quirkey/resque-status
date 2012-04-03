@@ -19,19 +19,19 @@
     <th class="progress">% Complete</th>
     <th>Message</th>
     <th>Kill</th>
-  </tr>
+  </tr>f
   <% unless @statuses.empty? %>
     <% @statuses.each do |status| %>
     <tr>
       <td><a href="<%= u(:statuses) %>/<%= status.uuid %>"><%= status.uuid %></a></td>
-      <td><%= status.name %></td>
+      <td><a class='status-info' href="#"><%= "#{status.name[0, 30]}  #{"..." unless status.message.length <= 30}  #{status.name[-5,5] unless status.message.length <= 30}" %><span><%= status.name %></span></a></td>
       <td class="status status-<%= status.status %>"><%= status.status %></td>
       <td class="time"><%= status.time %></td>
       <td class="progress">
         <div class="progress-bar" style="width:<%= status.pct_complete %>%">&nbsp;</div>
         <div class="progress-pct"><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></div>
       </td>
-      <td><%= status.message %></td>
+      <td><a class='status-info' href="#"><%= "#{status.message[0,60]} #{"..." unless status.message.length <= 60} #{status.message[-5,5] unless status.message.length <= 60}"  %><span><%= status.message %></span></a></td>
       <td><% if status.killable? %><a href="<%= u(:statuses) %>/<%= status.uuid %>/kill" class="kill">Kill</a><% end %></td>
     </tr>
     <% end %>
