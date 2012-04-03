@@ -39,11 +39,22 @@ module Resque
         # about ranges
         def self.clear(range_start = nil, range_end = nil)
           status_ids(range_start, range_end).each do |id|
-            redis.del(status_key(id))
-            redis.zrem(set_key, id)
+            clear_one(id)
           end
         end
-
+        
+        def self.clear_completed(range_start = nil, range_end = nil)
+          status_ids(range_start, range_end).select do |id|
+            get(id).completed?
+          end.each do |id|
+            clear_one(id)
+          end
+        end
+        
+        def self.clear_one(uuid)
+          redis.del(status_key(uuid))
+          redis.zrem(set_key, uuid)
+        end
         # returns a Redisk::Logger scoped to the UUID. Any options passed are passed
         # to the logger initialization.
         #
