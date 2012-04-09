@@ -94,6 +94,33 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
 
     end
 
+    context ".clear_completed" do
+      setup do
+        @completed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => "completed"})
+        @not_completed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
+        Resque::Plugins::Status::Hash.clear_completed
+      end
+      
+      should "clear completed status" do
+        assert_nil Resque::Plugins::Status::Hash.get(@completed_status_id)
+      end
+      
+      should "not clear not-completed status" do
+        status = Resque::Plugins::Status::Hash.get(@not_completed_status_id)
+        assert status.is_a?(Resque::Plugins::Status::Hash)
+      end
+    end
+    
+    context ".remove" do
+      setup do
+        Resque::Plugins::Status::Hash.remove(@uuid)
+      end
+      
+      should "clear specify status" do
+        assert_nil Resque::Plugins::Status::Hash.get(@uuid)
+      end
+    end
+
     context ".status_ids" do
 
       setup do
