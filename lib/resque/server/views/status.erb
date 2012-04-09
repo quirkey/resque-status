@@ -10,6 +10,14 @@
   </div>
   <div class="status-message"><%= @status.message %></div>
   <div class="status-time"><%= @status.time? ? @status.time : 'Not started' %></div>
+  <div class="status-options">
+    <% if @status.options && @status.options.any? %>
+      <% @status.options.each do |k, v| %>
+        <div class="status-options-key"><%= k %></div>
+        <div class="status-options-value"><%= v %></div>
+      <% end %>
+    <% end %>
+  </div>
 </div>
 
 <script type="text/javascript" charset="utf-8">
