@@ -8,28 +8,45 @@ class TestResquePluginsStatus < Test::Unit::TestCase
     end
 
     context ".create" do
-      setup do
-        @uuid = WorkingJob.create('num' => 100)
+      context "not inline" do
+        setup do
+          @uuid = WorkingJob.create('num' => 100)
+        end
+
+        should "add the job to the queue" do
+          assert_equal 1, Resque.size(:statused)
+        end
+
+        should "set the queued object to the current class" do
+          job = Resque.pop(:statused)
+          assert_equal @uuid, job['args'].first
+          assert_equal "WorkingJob", job['class']
+        end
+
+        should "add the uuid to the statuses" do
+          assert_contains Resque::Plugins::Status::Hash.status_ids, @uuid
+        end
+
+        should "return a UUID" do
+          assert_match(/^\w{32}$/, @uuid)
+        end
       end
 
-      should "add the job to the queue" do
-        assert_equal 1, Resque.size(:statused)
-      end
+      context "inline" do
+        setup do
+          Resque.stubs(:inline?).returns(true)
+        end
 
-      should "set the queued object to the current class" do
-        job = Resque.pop(:statused)
-        assert_equal @uuid, job['args'].first
-        assert_equal "WorkingJob", job['class']
-      end
+        should "not queue a job" do
+          @uuid = WorkingJob.create('num' => 100)
+          assert_equal 0, Resque.size(:statused)
+        end
 
-      should "add the uuid to the statuses" do
-        assert_contains Resque::Plugins::Status::Hash.status_ids, @uuid
+        should "call perform" do
+          WorkingJob.any_instance.expects(:perform).once
+          @uuid = WorkingJob.create('num' => 100)
+        end
       end
-
-      should "return a UUID" do
-        assert_match(/^\w{32}$/, @uuid)
-      end
-
     end
 
     context ".create with a failing before_enqueue hook" do
