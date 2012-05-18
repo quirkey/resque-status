@@ -119,7 +119,7 @@ A Status is actually just a hash, so inside a job you can do:
 
 Also, all the status setting methods take any number of hash arguments. So you could do:
 
-    complete('filename' => '/myfilename')
+    completed('filename' => '/myfilename')
 
 === Kill! Kill! Kill!
 
