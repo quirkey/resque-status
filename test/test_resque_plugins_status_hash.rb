@@ -27,6 +27,30 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
       end
     end
 
+    context ".mget" do
+      should "return statuses as array of Resque::Plugins::Status::Hash for the uuids" do
+        uuid2 = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
+        Resque::Plugins::Status::Hash.set(uuid2, "my status2")
+        statuses = Resque::Plugins::Status::Hash.mget([@uuid, uuid2])
+        assert_equal 2, statuses.size
+        assert statuses.all?{|s| s.is_a?(Resque::Plugins::Status::Hash) }
+        assert_equal ['my status', 'my status2'], statuses.map(&:message)
+      end
+
+      should "return false if a status is not set" do
+        statuses = Resque::Plugins::Status::Hash.mget(['invalid_uuid', @uuid])
+        assert_equal 2, statuses.size
+        assert_nil statuses[0]
+        assert statuses[1].is_a?(Resque::Plugins::Status::Hash)
+        assert_equal 'my status', statuses[1].message
+      end
+
+      should "decode encoded json" do
+        assert_equal ['json'],
+          Resque::Plugins::Status::Hash.mget([@uuid_with_json]).map{|h| h['im']}
+      end
+    end
+
     context ".set" do
 
       should "set the status for the uuid" do
