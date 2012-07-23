@@ -50,7 +50,7 @@
   <%= partial :next_more, :start => @start, :size => @size %>
 <% end %>
 
-<%= status_poll(@start) %>
+<%= status_poll(@start, @reverse) %>
 
 <script type="text/javascript" charset="utf-8">
   jQuery(function($) {

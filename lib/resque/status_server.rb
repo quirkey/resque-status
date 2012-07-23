@@ -49,7 +49,8 @@ module Resque
 
         @start = params[:start].to_i
         @end = @start + (params[:per_page] || 50)
-        @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
+        @reverse = params[:reverse].blank? || params[:reverse] == 'true'
+        @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end, @reverse)
         @size = @statuses.size
 
         status_view(:statuses, {:layout => false})
@@ -60,11 +61,11 @@ module Resque
           erb(File.read(File.join(::Resque::StatusServer::VIEW_PATH, "#{filename}.erb")), options, locals)
         end
 
-        def status_poll(start)
+        def status_poll(start, reverse)
           if @polling
             text = "Last Updated: #{Time.now.strftime("%H:%M:%S")}"
           else
-            text = "<a href='#{u(request.path_info)}.poll?start=#{start}' rel='poll'>Live Poll</a>"
+            text = "<a href='#{u(request.path_info)}.poll?start=#{start}&reverse=#{reverse}' rel='poll'>Live Poll</a>"
           end
           "<p class='poll'>#{text}</p>"
         end
