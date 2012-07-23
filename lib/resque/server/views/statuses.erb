@@ -8,6 +8,10 @@
 <form method="POST" action="<%= u(:statuses) %>/clear/completed" class='clear-failed'>
   <input type='submit' name='' value='Clear Completed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
 </form>
+<form method="GET" action="<%= u(:statuses) %>" class='reverse-order'>
+  <input type='hidden' name='reverse' value='<%= !@reverse %>'/>
+  <input type='submit' name='' value='Reverse Statuses Order'/>
+</form>
 <%end%>
 <p class='intro'>These are recent jobs created with the Resque::Plugins::Status class</p>
 <table>
