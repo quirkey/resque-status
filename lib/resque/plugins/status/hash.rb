@@ -42,7 +42,7 @@ module Resque
             remove(id)
           end
         end
-        
+
         def self.clear_completed(range_start = nil, range_end = nil)
           status_ids(range_start, range_end).select do |id|
             get(id).completed?
@@ -50,7 +50,7 @@ module Resque
             remove(id)
           end
         end
-        
+
         def self.remove(uuid)
           redis.del(status_key(uuid))
           redis.zrem(set_key, uuid)
@@ -75,23 +75,24 @@ module Resque
         # @param [Numeric] range_end The optional ending range
         # @example retuning the last 20 statuses
         #   Resque::Plugins::Status::Hash.statuses(0, 20)
-        def self.statuses(range_start = nil, range_end = nil)
-          status_ids(range_start, range_end).collect do |id|
+        def self.statuses(range_start = nil, range_end = nil, reverse = true)
+          status_ids(range_start, range_end, reverse).collect do |id|
             get(id)
           end.compact
         end
 
         # Return the <tt>num</tt> most recent status/job UUIDs in reverse chronological order.
-        def self.status_ids(range_start = nil, range_end = nil)
+        def self.status_ids(range_start = nil, range_end = nil, reverse = true)
+          method = reverse ? :zrevrange : :zrange
           unless range_end && range_start
             # Because we want a reverse chronological order, we need to get a range starting
             # by the higest negative number.
-            redis.zrevrange(set_key, 0, -1) || []
+            redis.send(method, set_key, 0, -1) || []
           else
             # Because we want a reverse chronological order, we need to get a range starting
             # by the higest negative number. The ordering is transparent from the API user's
             # perspective so we need to convert the passed params
-            (redis.zrevrange(set_key, (range_start.abs), ((range_end || 1).abs)) || [])
+            (redis.send(method, set_key, (range_start.abs), ((range_end || 1).abs)) || [])
           end
         end
 
