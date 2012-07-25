@@ -18,8 +18,8 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
         assert_equal 'my status', status.message
       end
 
-      should "return false if the status is not set" do
-        assert !Resque::Plugins::Status::Hash.get('whu')
+      should "return nil if the status is not set" do
+        assert_nil Resque::Plugins::Status::Hash.get('invalid_uuid')
       end
 
       should "decode encoded json" do
@@ -37,7 +37,7 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
         assert_equal ['my status', 'my status2'], statuses.map(&:message)
       end
 
-      should "return false if a status is not set" do
+      should "return nil if a status is not set" do
         statuses = Resque::Plugins::Status::Hash.mget(['invalid_uuid', @uuid])
         assert_equal 2, statuses.size
         assert_nil statuses[0]
