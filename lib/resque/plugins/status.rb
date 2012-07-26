@@ -84,8 +84,16 @@ module Resque
         # Returns the UUID of the job if the job was queued, or nil if the job was
         # rejected by a before_enqueue hook.
         def enqueue(klass, options = {})
+          self.enqueue_to(Resque.queue_from_class(klass), klass, options)
+        end
+
+        # Adds a job of type <tt>klass<tt> to a specified queue with <tt>options<tt>.
+        #
+        # Returns the UUID of the job if the job was queued, or nil if the job was
+        # rejected by a before_enqueue hook.
+        def enqueue_to(queue, klass, options = {})
           uuid = Resque::Plugins::Status::Hash.generate_uuid
-          if Resque.enqueue(klass, uuid, options)
+          if Resque.enqueue_to(queue, klass, uuid, options)
             Resque::Plugins::Status::Hash.create uuid, :options => options
             uuid
           else
@@ -109,7 +117,7 @@ module Resque
         # This is needed to be used with resque scheduler
         # http://github.com/bvandenbos/resque-scheduler
         def scheduled(queue, klass, *args)
-          create(*args)
+          self.enqueue_to(queue, self, *args)
         end
       end
 
