@@ -20,9 +20,8 @@ module Resque
 
         # Get a status by UUID. Returns a Resque::Plugins::Status::Hash
         def self.get(uuid)
-          if (val = redis.get(status_key(uuid)))
-            Resque::Plugins::Status::Hash.new(uuid, decode(val))
-          end
+          val = redis.get(status_key(uuid))
+          Resque::Plugins::Status::Hash.new(uuid, decode(val)) if val
         end
 
         # Get multiple statuses by UUID. Returns array of Resque::Plugins::Status::Hash
