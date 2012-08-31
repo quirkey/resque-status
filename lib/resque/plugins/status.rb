@@ -84,7 +84,25 @@ module Resque
         # Returns the UUID of the job if the job was queued, or nil if the job was
         # rejected by a before_enqueue hook.
         def enqueue(klass, options = {})
-          uuid = Resque::Plugins::Status::Hash.generate_uuid
+          uuid = options[:uuid] || Resque::Plugins::Status::Hash.generate_uuid
+          
+          # does a job with this uuid already exist?
+          if job = Resque::Plugins::Status::Hash.get(uuid)
+            # yes...  if it's a "killable" job (it's either yet-to-happen or 
+            # happening right now), we return nil and refuse to queue. If it's 
+            # old (not killable means completed, crashed or killed), we delete 
+            # it and queue the new job
+            
+            if job.killable?
+              return nil
+            else
+              # delete the old job
+              Resque::Plugins::Status::Hash.remove(uuid)
+            end
+          end
+          
+          # if we didn't short-circuit, queue the new job
+          
           if Resque.enqueue(klass, uuid, options)
             Resque::Plugins::Status::Hash.create uuid, :options => options
             uuid
