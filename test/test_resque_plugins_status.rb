@@ -183,8 +183,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         @performed = KillableJob.perform(*@payload1['args'])
         @performed = KillableJob.perform(*@payload2['args'])
 
-        @status1 = Resque::Plugins::Status::Hash.get(@uuid1)
-        @status2 = Resque::Plugins::Status::Hash.get(@uuid2)
+        @status1, @status2 = Resque::Plugins::Status::Hash.mget([@uuid1, @uuid2])
       end
 
       should "set the status to killed" do
@@ -225,8 +224,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         @performed = KillableJob.perform(*@payload1['args'])
         @performed = KillableJob.perform(*@payload2['args'])
 
-        @status1 = Resque::Plugins::Status::Hash.get(@uuid1)
-        @status2 = Resque::Plugins::Status::Hash.get(@uuid2)
+        @status1, @status2 = Resque::Plugins::Status::Hash.mget([@uuid1, @uuid2])
       end
 
       should "set the status to killed" do

@@ -24,7 +24,17 @@ module Resque
           val ? Resque::Plugins::Status::Hash.new(uuid, decode(val)) : nil
         end
 
-        # set a status by UUID. <tt>messages</tt> can be any number of stirngs or hashes
+        # Get multiple statuses by UUID. Returns array of Resque::Plugins::Status::Hash
+        def self.mget(uuids)
+          status_keys = uuids.map{|u| status_key(u)}
+          vals = redis.mget(*status_keys)
+
+          uuids.zip(vals).map do |uuid, val|
+            val ? Resque::Plugins::Status::Hash.new(uuid, decode(val)) : nil
+          end
+        end
+
+        # set a status by UUID. <tt>messages</tt> can be any number of strings or hashes
         # that are merged in order to create a single status.
         def self.set(uuid, *messages)
           val = Resque::Plugins::Status::Hash.new(uuid, *messages)
