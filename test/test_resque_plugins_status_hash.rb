@@ -111,6 +111,23 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
       end
     end
     
+    context ".clear_failed" do
+      setup do
+        @failed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => "failed"})
+        @not_failed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
+        Resque::Plugins::Status::Hash.clear_failed
+      end
+      
+      should "clear failed status" do
+        assert_nil Resque::Plugins::Status::Hash.get(@failed_status_id)
+      end
+      
+      should "not clear not-failed status" do
+        status = Resque::Plugins::Status::Hash.get(@not_failed_status_id)
+        assert status.is_a?(Resque::Plugins::Status::Hash)
+      end
+    end
+    
     context ".remove" do
       setup do
         Resque::Plugins::Status::Hash.remove(@uuid)

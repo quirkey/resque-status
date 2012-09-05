@@ -42,6 +42,11 @@ module Resque
         redirect u(:statuses)
       end
 
+      app.post '/statuses/clear/failed' do
+        Resque::Plugins::Status::Hash.clear_failed
+        redirect u(:statuses)
+      end
+
       app.get "/statuses.poll" do
         content_type "text/plain"
         @polling = true
