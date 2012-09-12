@@ -244,6 +244,11 @@ module Resque
           !['failed', 'completed', 'killed'].include?(self.status)
         end
 
+        # A job state is terminal if its state will not change - not 'queued' or 'working'
+        def terminal?
+          ['failed', 'completed', 'killed'].include?(self.status)
+        end
+
         unless method_defined?(:to_json)
           def to_json(*args)
             json
