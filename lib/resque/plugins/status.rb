@@ -85,14 +85,15 @@ module Resque
         # rejected by a before_enqueue hook.
         def enqueue(klass, options = {})
           uuid = Resque::Plugins::Status::Hash.generate_uuid
+          Resque::Plugins::Status::Hash.create uuid, :options => options
+
           if Resque.enqueue(klass, uuid, options)
-            Resque::Plugins::Status::Hash.create uuid, :options => options
             uuid
           else
+            Resque::Plugins::Status::Hash.remove(uuid)
             nil
           end
         end
-
         # This is the method called by Resque::Worker when processing jobs. It
         # creates a new instance of the job class and populates it with the uuid and
         # options.
