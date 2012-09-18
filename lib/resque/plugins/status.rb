@@ -38,11 +38,10 @@ module Resque
       attr_reader :uuid, :options
 
       def self.included(base)
-        base.extend(ClassMethods)
+        base.extend(ClassMethods)        
       end
 
       module ClassMethods
-
         # The default queue is :statused, this can be ovveridden in the specific job
         # class to put the jobs on a specific worker queue
         def queue
@@ -119,7 +118,9 @@ module Resque
         def perform(uuid=nil, options = {})
           uuid ||= Resque::Plugins::Status::Hash.generate_uuid
           instance = new(uuid, options)
+          instance.register_sig_handlers()
           instance.safe_perform!
+          instance.unregister_sig_handlers()
           instance
         end
 
@@ -232,6 +233,19 @@ module Resque
         })
         raise Killed
       end
+      
+      def register_sig_handlers
+        trap('TERM') { shutdown! }
+      end
+        
+      def unregister_sig_handlers
+        trap('TERM','DEFAULT')
+      end
+        
+      def shutdown!
+        kill!
+      end
+      
 
       private
       def set_status(*args)
