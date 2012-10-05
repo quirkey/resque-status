@@ -90,6 +90,23 @@ class TestResquePluginsStatus < Test::Unit::TestCase
 
     end
 
+    context ".dequeue" do
+      setup do
+        @uuid1 = BasicJob.enqueue(WorkingJob, :num => 100)
+        @uuid2 = BasicJob.enqueue(WorkingJob, :num => 100)
+      end
+
+      should "dequeue the job with the uuid from the correct queue" do
+        size = Resque.size(:statused)
+        BasicJob.dequeue(WorkingJob, @uuid2)
+        assert_equal size-1, Resque.size(:statused)
+      end
+      should "not dequeue any jobs with different uuids for same class name" do
+        BasicJob.dequeue(WorkingJob, @uuid2)
+        assert_equal @uuid1, Resque.pop(:statused)['args'].first
+      end
+    end
+
     context ".perform" do
       setup do
         @uuid      = WorkingJob.create(:num => 100)

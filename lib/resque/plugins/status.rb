@@ -93,6 +93,15 @@ module Resque
           end
         end
 
+        # Removes a job of type <tt>klass<tt> from the queue.
+        #
+        # The initially given options are retrieved from the status hash.
+        # (Resque needs the options to find the correct queue entry)
+        def dequeue(klass, uuid)
+          status = Resque::Plugins::Status::Hash.get(uuid)
+          Resque.dequeue(klass, uuid, status.options)
+        end
+
         # This is the method called by Resque::Worker when processing jobs. It
         # creates a new instance of the job class and populates it with the uuid and
         # options.
