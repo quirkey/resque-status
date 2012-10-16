@@ -1,6 +1,6 @@
 source :rubygems
 
-gem 'redisk', '>= 0.2.1'
+gem 'redisk', :git => 'git@github.com:fanhattan/redisk.git'
 gem 'resque', '~>1.19'
 gem 'uuid', '~>2.3'
 

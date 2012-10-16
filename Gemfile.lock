@@ -1,3 +1,11 @@
+GIT
+  remote: git@github.com:fanhattan/redisk.git
+  revision: c7e52ecc5cfcd956642bcb66a5ea553e0eb3b38f
+  specs:
+    redisk (0.2.2)
+      redis (>= 0.1.1)
+      redis-namespace (>= 0.1.0)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -21,9 +29,6 @@ GEM
     redis (2.2.2)
     redis-namespace (1.0.3)
       redis (< 3.0.0)
-    redisk (0.2.2)
-      redis (>= 0.1.1)
-      redis-namespace (>= 0.1.0)
     resque (1.19.0)
       multi_json (~> 1.0)
       redis-namespace (~> 1.0.2)
@@ -47,7 +52,7 @@ PLATFORMS
 DEPENDENCIES
   jeweler
   mocha (~> 0.9.8)
-  redisk (>= 0.2.1)
+  redisk!
   resque (~> 1.19)
   shoulda (~> 2.10.2)
   uuid (~> 2.3)
