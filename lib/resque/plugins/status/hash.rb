@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module Resque
   module Plugins
     module Status
@@ -178,8 +180,7 @@ module Resque
         end
 
         def self.generate_uuid
-          require 'uuid' unless defined?(UUID)
-          UUID.generate(:compact)
+          SecureRandom.hex.to_s
         end
 
         def self.hash_accessor(name, options = {})
