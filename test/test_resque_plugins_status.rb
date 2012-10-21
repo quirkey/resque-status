@@ -76,17 +76,23 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end
 
       should "create the job with the provided arguments" do
-
-        job = Resque.pop(:statused)
-
+        job = Resque.pop(:queue_name)
         assert_equal @job_args, job['args'].last
       end
     end
 
     context ".enqueue" do
-      setup do
+      should "delegate to enqueue_to, filling in the queue from the class" do
         @uuid = BasicJob.enqueue(WorkingJob, :num => 100)
         @payload = Resque.pop(:statused)
+        assert_equal "WorkingJob", @payload['class']
+      end
+    end
+
+    context ".enqueue_to" do
+      setup do
+        @uuid = BasicJob.enqueue_to(:new_queue, WorkingJob, :num => 100)
+        @payload = Resque.pop(:new_queue)
       end
 
       should "add the job with the specific class to the queue" do
