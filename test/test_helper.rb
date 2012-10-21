@@ -4,7 +4,6 @@ $TESTING = true
 require 'test/unit'
 require 'rubygems'
 require 'shoulda'
-require 'redisk'
 require 'mocha'
 
 require 'resque-status'
@@ -46,7 +45,6 @@ end
 puts "Starting redis for testing at localhost:9736..."
 `redis-server #{dir}/redis-test.conf`
 Resque.redis = 'localhost:9736/1'
-Redisk.redis = 'localhost:9736/1'
 
 #### Fixtures
 

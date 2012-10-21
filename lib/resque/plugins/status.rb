@@ -153,22 +153,15 @@ module Resque
         end
         on_success if respond_to?(:on_success)
       rescue Killed
-        logger.info "Job #{self} Killed at #{Time.now}"
         Resque::Plugins::Status::Hash.killed(uuid)
         on_killed if respond_to?(:on_killed)
       rescue => e
-        logger.error e
         failed("The task failed because of an error: #{e}")
         if respond_to?(:on_failure)
           on_failure(e)
         else
           raise e
         end
-      end
-
-      # Returns a Redisk::Logger object scoped to this paticular job/uuid
-      def logger
-        @logger ||= Resque::Plugins::Status::Hash.logger(uuid)
       end
 
       # Set the jobs status. Can take an array of strings or hashes that are merged

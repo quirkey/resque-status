@@ -190,32 +190,6 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
       end
 
     end
-
-    # context ".count" do
-    #
-    #   should "return a count of statuses" do
-    #     statuses = Resque::Plugins::Status::Hash.statuses
-    #     assert_equal 2, statuses.size
-    #     assert_equal statuses.size, Resque::Plugins::Status::Hash.count
-    #   end
-    #
-    # end
-
-    context ".logger" do
-      setup do
-        @logger = Resque::Plugins::Status::Hash.logger(@uuid)
-      end
-
-      should "return a redisk logger" do
-        assert @logger.is_a?(Redisk::Logger)
-      end
-
-      should "scope the logger to a key" do
-        assert_match(/#{@uuid}/, @logger.name)
-      end
-
-    end
-
   end
 
 end

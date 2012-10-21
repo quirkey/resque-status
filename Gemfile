@@ -1,6 +1,5 @@
 source :rubygems
 
-gem 'redisk', '>= 0.2.1'
 gem 'resque', '~>1.19'
 
 group :test do

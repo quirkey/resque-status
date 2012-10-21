@@ -75,15 +75,6 @@ module Resque
           redis.del(status_key(uuid))
           redis.zrem(set_key, uuid)
         end
-        # returns a Redisk::Logger scoped to the UUID. Any options passed are passed
-        # to the logger initialization.
-        #
-        # Ensures that Redisk is logging to the same Redis connection as Resque.
-        def self.logger(uuid, options = {})
-          require 'redisk' unless defined?(Redisk)
-          Redisk.redis = redis
-          Redisk::Logger.new(logger_key(uuid), options)
-        end
 
         def self.count
           redis.zcard(set_key)
@@ -173,10 +164,6 @@ module Resque
 
         def self.kill_key
           "_kill"
-        end
-
-        def self.logger_key(uuid)
-          "_log:#{uuid}"
         end
 
         def self.generate_uuid
