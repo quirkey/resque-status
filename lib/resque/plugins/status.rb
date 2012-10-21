@@ -89,10 +89,12 @@ module Resque
         # rejected by a before_enqueue hook.
         def enqueue(klass, options = {})
           uuid = Resque::Plugins::Status::Hash.generate_uuid
+          Resque::Plugins::Status::Hash.create uuid, :options => options
+
           if Resque.enqueue(klass, uuid, options)
-            Resque::Plugins::Status::Hash.create uuid, :options => options
             uuid
           else
+            Resque::Plugins::Status::Hash.remove(uuid)
             nil
           end
         end

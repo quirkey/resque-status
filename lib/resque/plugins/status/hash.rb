@@ -52,7 +52,7 @@ module Resque
             remove(id)
           end
         end
-        
+
         def self.clear_completed(range_start = nil, range_end = nil)
           status_ids(range_start, range_end).select do |id|
             get(id).completed?
@@ -60,7 +60,7 @@ module Resque
             remove(id)
           end
         end
-        
+
         def self.clear_failed(range_start = nil, range_end = nil)
           status_ids(range_start, range_end).select do |id|
             get(id).failed?
@@ -68,7 +68,7 @@ module Resque
             remove(id)
           end
         end
-        
+
         def self.remove(uuid)
           redis.del(status_key(uuid))
           redis.zrem(set_key, uuid)
