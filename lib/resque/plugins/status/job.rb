@@ -23,7 +23,7 @@ module Resque
             # TODO: Add NewRelic hook
             
             # don't return raw database errors except in development
-            if e.is_a? MySQL2::Error && Rails.env != :development
+            if !Mysql2.nil? && e.is_a? Mysql2::Error && Rails.env != :development
               failed "Database error"
             else
               failed e.to_s
