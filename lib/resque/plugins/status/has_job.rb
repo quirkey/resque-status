@@ -3,7 +3,7 @@ module Resque
     module Status
       module HasJob
         def uuid
-          "#{self.class.name.underscore}:#{self.id}"
+          "#{self.class.name.underscore.gsub("/","::")}:#{self.id}"
         end
 
         def job
