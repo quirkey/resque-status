@@ -94,6 +94,20 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
         assert_nil Resque::Plugins::Status::Hash.get(uuid)
       end
 
+      should "not expire keys if expire_in is set but status:uuid exists" do
+        Resque::Plugins::Status::Hash.expire_in = 1
+        uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, "new status")
+        thread = Thread.new{loop {Resque::Plugins::Status::Hash.set(uuid,"new status")}}
+        thread.run
+        assert_contains Resque::Plugins::Status::Hash.status_ids, uuid
+        assert_equal "new status", Resque::Plugins::Status::Hash.get(uuid).message
+        sleep 2
+        Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
+        assert_contains Resque::Plugins::Status::Hash.status_ids, uuid
+        assert_equal "new status", Resque::Plugins::Status::Hash.get(uuid).message
+        thread.exit
+      end
+
       should "store the options for the job created" do
         uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, "new", :options => {'test' => '123'})
         assert uuid
