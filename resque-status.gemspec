@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "resque-status"
-  s.version = "0.4.0"
+  s.version = "0.4.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aaron Quint"]
-  s.date = "2012-10-21"
+  s.date = "2013-01-26"
   s.description = "resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when included provides easily trackable/killable jobs."
   s.email = "aaron@quirkey.com"
   s.extra_rdoc_files = [
