@@ -38,12 +38,11 @@ at_exit do
   pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
   puts "Killing test redis server..."
   Process.kill("KILL", pid.to_i)
-  `rm -f #{dir}/dump.rdb`
   exit exit_code
 end
 
 puts "Starting redis for testing at localhost:9736..."
-`redis-server #{dir}/redis-test.conf`
+`rm -f #{dir}/dump.rdb && redis-server #{dir}/redis-test.conf`
 Resque.redis = 'localhost:9736/1'
 
 #### Fixtures
@@ -72,7 +71,6 @@ class ErrorJob
 end
 
 class KillableJob
-
   include Resque::Plugins::Status
 
   def perform

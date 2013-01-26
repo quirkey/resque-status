@@ -94,15 +94,15 @@ module Resque
 
         # Return the <tt>num</tt> most recent status/job UUIDs in reverse chronological order.
         def self.status_ids(range_start = nil, range_end = nil)
-          unless range_end && range_start
-            # Because we want a reverse chronological order, we need to get a range starting
-            # by the higest negative number.
-            redis.zrevrange(set_key, 0, -1) || []
-          else
+          if range_end && range_start
             # Because we want a reverse chronological order, we need to get a range starting
             # by the higest negative number. The ordering is transparent from the API user's
             # perspective so we need to convert the passed params
             (redis.zrevrange(set_key, (range_start.abs), ((range_end || 1).abs)) || [])
+          else
+            # Because we want a reverse chronological order, we need to get a range starting
+            # by the higest negative number.
+            redis.zrevrange(set_key, 0, -1) || []
           end
         end
 
