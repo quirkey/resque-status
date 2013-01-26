@@ -34,6 +34,7 @@ module Resque
 
       # The error class raised when a job is killed
       class Killed < RuntimeError; end
+      class NotANumber < RuntimeError; end
 
       attr_reader :uuid, :options
 
@@ -198,6 +199,9 @@ module Resque
       # This will kill the job if it has been added to the kill list with
       # <tt>Resque::Plugins::Status::Hash.kill()</tt>
       def at(num, total, *messages)
+        if total.to_f <= 0.0
+          raise(NotANumber, "Called at() with total=#{total} which is not a number")
+        end
         tick({
           'num' => num,
           'total' => total
