@@ -1,6 +1,17 @@
 <%= status_view :status_styles, :layout => false %>
 
 <h1 class='wi'>Statuses</h1>
+<form method="GET" action="<%= u(:statuses) %>" class='filter'>
+  <select name="filter">
+    <option value="">All Statuses</option>
+    <option value="completed" <%= 'selected' if @filter == 'completed' %>>Completed</option>
+    <option value="failed" <%= 'selected' if @filter == 'failed' %>>Failed</option>
+    <option value="working" <%= 'selected' if @filter == 'working' %>>Working</option>
+    <option value="queued" <%= 'selected' if @filter == 'queued' %>>Queued</option>
+    <option value="killed" <%= 'selected' if @filter == 'killed' %>>Killed</option>
+  </select>
+  <input type='submit' name='' value='Refresh' />
+</form>
 <%unless @statuses.empty?%>
 <form method="POST" action="<%= u(:statuses) %>/clear" class='clear-failed'>
   <input type='submit' name='' value='Clear Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
@@ -46,10 +57,10 @@
 </table>
 
 <% unless @statuses.empty? %>
-  <%= partial :next_more, :start => @start, :size => @size %>
+  <%= partial :next_more, :start => @start, :size => @size, :per_page => @end - @start %>
 <% end %>
 
-<%= status_poll(@start) %>
+<%= status_poll(@start, @filter) %>
 
 <script type="text/javascript" charset="utf-8">
   jQuery(function($) {
