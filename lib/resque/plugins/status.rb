@@ -28,12 +28,13 @@ module Resque
     # This job would iterate num times updating the status as it goes. At the end
     # we update the status telling anyone listening to this job that its complete.
     module Status
-      VERSION = '0.3.3'
+      VERSION = '0.4.1'
 
       autoload :Hash, 'resque/plugins/status/hash'
 
       # The error class raised when a job is killed
       class Killed < RuntimeError; end
+      class NotANumber < RuntimeError; end
 
       attr_reader :uuid, :options
 
@@ -84,13 +85,32 @@ module Resque
         # Returns the UUID of the job if the job was queued, or nil if the job was
         # rejected by a before_enqueue hook.
         def enqueue(klass, options = {})
+          self.enqueue_to(Resque.queue_from_class(klass) || queue, klass, options)
+        end
+
+        # Adds a job of type <tt>klass<tt> to a specified queue with <tt>options<tt>.
+        #
+        # Returns the UUID of the job if the job was queued, or nil if the job was
+        # rejected by a before_enqueue hook.
+        def enqueue_to(queue, klass, options = {})
           uuid = Resque::Plugins::Status::Hash.generate_uuid
-          if Resque.enqueue(klass, uuid, options)
-            Resque::Plugins::Status::Hash.create uuid, :options => options
+          Resque::Plugins::Status::Hash.create uuid, :options => options
+
+          if Resque.enqueue_to(queue, klass, uuid, options)
             uuid
           else
+            Resque::Plugins::Status::Hash.remove(uuid)
             nil
           end
+        end
+
+        # Removes a job of type <tt>klass<tt> from the queue.
+        #
+        # The initially given options are retrieved from the status hash.
+        # (Resque needs the options to find the correct queue entry)
+        def dequeue(klass, uuid)
+          status = Resque::Plugins::Status::Hash.get(uuid)
+          Resque.dequeue(klass, uuid, status.options)
         end
 
         # This is the method called by Resque::Worker when processing jobs. It
@@ -109,7 +129,7 @@ module Resque
         # This is needed to be used with resque scheduler
         # http://github.com/bvandenbos/resque-scheduler
         def scheduled(queue, klass, *args)
-          create(*args)
+          self.enqueue_to(queue, self, *args)
         end
       end
 
@@ -126,7 +146,7 @@ module Resque
       def safe_perform!
         set_status({'status' => 'working'})
         perform
-        if status.failed?
+        if status && status.failed?
           on_failure(status.message) if respond_to?(:on_failure)
           return
         elsif status && !status.completed?
@@ -134,22 +154,15 @@ module Resque
         end
         on_success if respond_to?(:on_success)
       rescue Killed
-        logger.info "Job #{self} Killed at #{Time.now}"
         Resque::Plugins::Status::Hash.killed(uuid)
         on_killed if respond_to?(:on_killed)
       rescue => e
-        logger.error e
         failed("The task failed because of an error: #{e}")
         if respond_to?(:on_failure)
           on_failure(e)
         else
           raise e
         end
-      end
-
-      # Returns a Redisk::Logger object scoped to this paticular job/uuid
-      def logger
-        @logger ||= Resque::Plugins::Status::Hash.logger(uuid)
       end
 
       # Set the jobs status. Can take an array of strings or hashes that are merged
@@ -178,6 +191,9 @@ module Resque
       # This will kill the job if it has been added to the kill list with
       # <tt>Resque::Plugins::Status::Hash.kill()</tt>
       def at(num, total, *messages)
+        if total.to_f <= 0.0
+          raise(NotANumber, "Called at() with total=#{total} which is not a number")
+        end
         tick({
           'num' => num,
           'total' => total

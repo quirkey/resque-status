@@ -139,6 +139,15 @@ Since Redis is RAM based, we probably don't want to keep these statuses around f
 and thier related keys will expire in expire_in seconds from the last time theyre updated:
 
   Resque::Plugins::Status::Hash.expire_in = (60 * 60) # 1 hour
+=== Testing
+
+Recent versions of Resque introduced `Resque.inline` which changes the behavior to 
+instead of enqueueing and performing jobs to just executing them inline. In Resque
+itself this removes the dependency on a Redis, however, `Resque::Status` uses Redis
+to store information about jobs, so though `inline` "works", you will still need
+to use or mock a redis connection. You should be able to use a library like 
+https://github.com/causes/mock_redis alongside `inline` if you really want to
+avoid Redis connections in your test.
 
 === resque-web
 
