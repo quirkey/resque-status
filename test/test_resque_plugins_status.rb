@@ -193,7 +193,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end
 
       should "set the status to killed" do
-        assert_equal 'killed', @status.status
+        assert_equal Resque::Plugins::Status::STATUS_KILLED, @status.status
         assert @status.killed?
         assert !@status.completed?
       end
@@ -227,11 +227,11 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end
 
       should "set the status to killed" do
-        assert_equal 'killed', @status1.status
+        assert_equal Resque::Plugins::Status::STATUS_KILLED, @status1.status
         assert @status1.killed?
         assert !@status1.completed?
 
-        assert_equal 'killed', @status2.status
+        assert_equal Resque::Plugins::Status::STATUS_KILLED, @status2.status
         assert @status2.killed?
         assert !@status2.completed?
       end
@@ -268,11 +268,11 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end
 
       should "set the status to killed" do
-        assert_equal 'completed', @status1.status
+        assert_equal Resque::Plugins::Status::STATUS_COMPLETED, @status1.status
         assert !@status1.killed?
         assert @status1.completed?
 
-        assert_equal 'killed', @status2.status
+        assert_equal Resque::Plugins::Status::STATUS_KILLED, @status2.status
         assert @status2.killed?
         assert !@status2.completed?
       end
@@ -304,7 +304,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         end
 
         should "set status" do
-          assert_equal 'working', @job.status.status
+          assert_equal Resque::Plugins::Status::STATUS_WORKING, @job.status.status
         end
 
         should "save message" do
@@ -318,7 +318,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         end
 
         should "set status" do
-          assert_equal 'failed', @job.status.status
+          assert_equal Resque::Plugins::Status::STATUS_FAILED, @job.status.status
         end
 
         should "set message" do
@@ -332,7 +332,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         end
 
         should "set status" do
-          assert_equal 'completed', @job.status.status
+          assert_equal Resque::Plugins::Status::STATUS_COMPLETED, @job.status.status
         end
 
         should "set message" do
@@ -350,7 +350,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         end
 
         should "set status as failed" do
-          assert_equal 'failed', @job.status.status
+          assert_equal Resque::Plugins::Status::STATUS_FAILED, @job.status.status
         end
       end
 

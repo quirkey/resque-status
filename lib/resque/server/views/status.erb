@@ -67,7 +67,7 @@
           }
         };
         var status = $status.attr('rel');
-        if (status == 'working' || status == 'queued' || status == "") {
+        if (status == '<%= Resque::Plugins::Status::STATUS_WORKING %>' || status == '<%= Resque::Plugins::Status::STATUS_QUEUED %>' || status == "") {
           setTimeout(function() {
             checkStatus($status)
           }, 1500);

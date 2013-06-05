@@ -30,6 +30,14 @@ module Resque
     module Status
       VERSION = '0.4.1'
 
+      STATUS_QUEUED = 'queued'
+      STATUS_WORKING = 'working'
+      STATUS_COMPLETED = 'completed'
+      STATUS_FAILED = 'failed'
+      STATUS_KILLED = 'killed'
+      STATUSES = [ STATUS_QUEUED, STATUS_WORKING, STATUS_COMPLETED,
+        STATUS_FAILED, STATUS_KILLED ]
+
       autoload :Hash, 'resque/plugins/status/hash'
 
       # The error class raised when a job is killed
@@ -144,7 +152,7 @@ module Resque
       # If an error occurs within the job's work, it will set the status as failed and
       # re-raise the error.
       def safe_perform!
-        set_status({'status' => 'working'})
+        set_status({'status' => STATUS_WORKING})
         perform
         if status && status.failed?
           on_failure(status.message) if respond_to?(:on_failure)
@@ -206,18 +214,18 @@ module Resque
       # <tt>Resque::Plugins::Status::Hash.kill()</tt>
       def tick(*messages)
         kill! if should_kill?
-        set_status({'status' => 'working'}, *messages)
+        set_status({'status' => STATUS_WORKING}, *messages)
       end
 
       # set the status to 'failed' passing along any additional messages
       def failed(*messages)
-        set_status({'status' => 'failed'}, *messages)
+        set_status({'status' => STATUS_FAILED}, *messages)
       end
 
       # set the status to 'completed' passing along any addional messages
       def completed(*messages)
         set_status({
-          'status' => 'completed',
+          'status' => STATUS_COMPLETED,
           'message' => "Completed at #{Time.now}"
         }, *messages)
       end
@@ -225,7 +233,7 @@ module Resque
       # kill the current job, setting the status to 'killed' and raising <tt>Killed</tt>
       def kill!
         set_status({
-          'status' => 'killed',
+          'status' => STATUS_KILLED,
           'message' => "Killed at #{Time.now}"
         })
         raise Killed
