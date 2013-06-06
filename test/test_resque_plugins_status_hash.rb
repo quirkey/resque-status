@@ -190,6 +190,27 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
       end
 
     end
+
+    Resque::Plugins::Status::STATUSES.each do |status_code|
+      context ".#{status_code}?" do
+
+        setup do
+          uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => status_code})
+          @status = Resque::Plugins::Status::Hash.get(uuid)
+        end
+
+        should "return true for the current status" do
+          assert @status.send("#{status_code}?"), status_code
+        end
+
+        should "return false for other statuses" do
+          (Resque::Plugins::Status::STATUSES - [status_code]).each do |other_status_code|
+            assert !@status.send("#{other_status_code}?"), other_status_code
+          end
+        end
+
+      end
+    end
   end
 
 end
