@@ -11,11 +11,7 @@ module Resque
         end
   
         def job_active?
-          if self.job && !self.job.terminal?
-            true
-          else
-            false
-          end
+          self.job && !self.job.terminal?
         end
 
         def job_class
@@ -23,8 +19,7 @@ module Resque
         end
 
         def run_job!
-          job_class.create :id => self.id, 
-            :uuid     => self.uuid
+          job_class.create id: self.id, uuid: self.uuid
         end
   
         def default_error_message
@@ -37,33 +32,29 @@ module Resque
           else
             self.default_error_message
           end
-        end  
+        end
         
       end
       
       #----------
       
       module HasJobWithState
-        # -- functions dealing with model.state -- #
-  
-        def new?
-          self.state == 'new'
+
+        def add_states *names
+          @states ||= []
+
+          names.each do |name|
+            define_method("#{name}?") { state.to_sym == name.to_sym   }
+            define_method("#{name}!") { update_attributes state: name }
+            @states << name.to_sym
+          end
         end
-  
-        def failed?
-          self.state == 'failed'
-        end
-        
-        def successful?
-          self.state == 'successful'
-        end
-  
-        def failed!
-          self.update_attributes :state => 'failed'
-        end
-  
-        def successful!
-          self.update_attributes :state => 'successful'    
+
+        def states; @states; end
+
+        def self.extended base
+          base.send :include, Resque::Plugins::Status::HasJob
+          base.add_states :new, :failed, :successful
         end
         
       end
