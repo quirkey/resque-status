@@ -9,8 +9,6 @@ module Resque
       # creating/updating/retrieving status objects from Redis
       class Hash < ::Hash
 
-        extend Resque::Helpers
-
         # Create a status, generating a new UUID, passing the message to the status
         # Returns the UUID of the new status.
         def self.create(uuid, *messages)
@@ -188,6 +186,13 @@ module Resque
             !!self['#{name}']
           end
           EOT
+        end
+
+        # Proxy deprecated methods directly back to Resque itself.
+        class << self
+          [:redis, :encode, :decode].each do |method|
+            define_method(method) { |*args| Resque.send(method, *args) }
+          end
         end
 
         STATUSES = %w{queued working completed failed killed}.freeze
