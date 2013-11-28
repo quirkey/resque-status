@@ -9,30 +9,28 @@ module Resque
       # creating/updating/retrieving status objects from Redis
       class Hash < ::Hash
 
-        extend Resque::Helpers
-
         # Create a status, generating a new UUID, passing the message to the status
         # Returns the UUID of the new status.
         def self.create(uuid, *messages)
           set(uuid, *messages)
-          redis.zadd(set_key, Time.now.to_i, uuid)
-          redis.zremrangebyscore(set_key, 0, Time.now.to_i - @expire_in) if @expire_in
+          Resque.redis.zadd(set_key, Time.now.to_i, uuid)
+          Resque.redis.zremrangebyscore(set_key, 0, Time.now.to_i - @expire_in) if @expire_in
           uuid
         end
 
         # Get a status by UUID. Returns a Resque::Plugins::Status::Hash
         def self.get(uuid)
-          val = redis.get(status_key(uuid))
-          val ? Resque::Plugins::Status::Hash.new(uuid, decode(val)) : nil
+          val = Resque.redis.get(status_key(uuid))
+          val ? Resque::Plugins::Status::Hash.new(uuid, Resque.decode(val)) : nil
         end
 
         # Get multiple statuses by UUID. Returns array of Resque::Plugins::Status::Hash
         def self.mget(uuids)
           status_keys = uuids.map{|u| status_key(u)}
-          vals = redis.mget(*status_keys)
+          vals = Resque.redis.mget(*status_keys)
 
           uuids.zip(vals).map do |uuid, val|
-            val ? Resque::Plugins::Status::Hash.new(uuid, decode(val)) : nil
+            val ? Resque::Plugins::Status::Hash.new(uuid, Resque.decode(val)) : nil
           end
         end
 
@@ -40,9 +38,9 @@ module Resque
         # that are merged in order to create a single status.
         def self.set(uuid, *messages)
           val = Resque::Plugins::Status::Hash.new(uuid, *messages)
-          redis.set(status_key(uuid), encode(val))
+          Resque.redis.set(status_key(uuid), Resque.encode(val))
           if expire_in
-            redis.expire(status_key(uuid), expire_in)
+            Resque.redis.expire(status_key(uuid), expire_in)
           end
           val
         end
@@ -72,12 +70,12 @@ module Resque
         end
 
         def self.remove(uuid)
-          redis.del(status_key(uuid))
-          redis.zrem(set_key, uuid)
+          Resque.redis.del(status_key(uuid))
+          Resque.redis.zrem(set_key, uuid)
         end
 
         def self.count
-          redis.zcard(set_key)
+          Resque.redis.zcard(set_key)
         end
 
         # Return <tt>num</tt> Resque::Plugins::Status::Hash objects in reverse chronological order.
@@ -98,11 +96,11 @@ module Resque
             # Because we want a reverse chronological order, we need to get a range starting
             # by the higest negative number. The ordering is transparent from the API user's
             # perspective so we need to convert the passed params
-            (redis.zrevrange(set_key, (range_start.abs), ((range_end || 1).abs)) || [])
+            (Resque.redis.zrevrange(set_key, (range_start.abs), ((range_end || 1).abs)) || [])
           else
             # Because we want a reverse chronological order, we need to get a range starting
             # by the higest negative number.
-            redis.zrevrange(set_key, 0, -1) || []
+            Resque.redis.zrevrange(set_key, 0, -1) || []
           end
         end
 
@@ -111,17 +109,17 @@ module Resque
         # if it _should_ be killed by calling <tt>tick</tt> or <tt>at</tt>. If so, it raises
         # a <tt>Resque::Plugins::Status::Killed</tt> error and sets the status to 'killed'.
         def self.kill(uuid)
-          redis.sadd(kill_key, uuid)
+          Resque.redis.sadd(kill_key, uuid)
         end
 
         # Remove the job at UUID from the kill list
         def self.killed(uuid)
-          redis.srem(kill_key, uuid)
+          Resque.redis.srem(kill_key, uuid)
         end
 
         # Return the UUIDs of the jobs on the kill list
         def self.kill_ids
-          redis.smembers(kill_key)
+          Resque.redis.smembers(kill_key)
         end
 
         # Kills <tt>num</tt> jobs within range starting with the most recent first.
@@ -140,7 +138,7 @@ module Resque
 
         # Check whether a job with UUID is on the kill list
         def self.should_kill?(uuid)
-          redis.sismember(kill_key, uuid)
+          Resque.redis.sismember(kill_key, uuid)
         end
 
         # The time in seconds that jobs and statuses should expire from Redis (after
