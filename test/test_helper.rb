@@ -41,9 +41,9 @@ at_exit do
   exit exit_code
 end
 
-puts "Starting redis for testing at localhost:9736..."
+puts "Starting redis for testing at localhost:6379..."
 `rm -f #{dir}/dump.rdb && redis-server #{dir}/redis-test.conf`
-Resque.redis = 'localhost:9736/1'
+Resque.redis = 'localhost:6379/1'
 
 #### Fixtures
 

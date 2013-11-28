@@ -251,6 +251,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
     context "invoking killall jobs to kill a range" do
       setup do
         @uuid1    = KillableJob.create(:num => 100)
+        sleep 1 # Race condition here 
         @uuid2    = KillableJob.create(:num => 100)
 
         Resque::Plugins::Status::Hash.killall(0,0) # only @uuid2 should be killed
