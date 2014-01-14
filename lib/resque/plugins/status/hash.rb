@@ -87,9 +87,8 @@ module Resque
         # @example retuning the last 20 statuses
         #   Resque::Plugins::Status::Hash.statuses(0, 20)
         def self.statuses(range_start = nil, range_end = nil)
-          status_ids(range_start, range_end).collect do |id|
-            get(id)
-          end.compact
+          ids = status_ids(range_start, range_end)
+          mget(ids).compact
         end
 
         # Return the <tt>num</tt> most recent status/job UUIDs in reverse chronological order.
