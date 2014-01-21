@@ -11,7 +11,8 @@ module Resque
       app.get '/statuses' do
         @start = params[:start].to_i
         @end = @start + (params[:per_page] || 50)
-        @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
+        @filter = params[:filter].blank? ? nil : params[:filter]
+        @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end, @filter)
         @size = @statuses.size
         status_view(:statuses)
       end
@@ -53,7 +54,8 @@ module Resque
 
         @start = params[:start].to_i
         @end = @start + (params[:per_page] || 50)
-        @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
+        @filter = params[:filter].blank? ? nil : params[:filter]
+        @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end, @filter)
         @size = @statuses.size
 
         status_view(:statuses, {:layout => false})
@@ -64,11 +66,13 @@ module Resque
           erb(File.read(File.join(::Resque::StatusServer::VIEW_PATH, "#{filename}.erb")), options, locals)
         end
 
-        def status_poll(start)
+        def status_poll(start, filter)
           if @polling
             text = "Last Updated: #{Time.now.strftime("%H:%M:%S")}"
           else
-            text = "<a href='#{u(request.path_info)}.poll?start=#{start}' rel='poll'>Live Poll</a>"
+            querystring = "start=#{start}"
+            querystring += "&filter=#{filter}" if filter
+            text = "<a href='#{u(request.path_info)}.poll?#{querystring}' rel='poll'>Live Poll</a>"
           end
           "<p class='poll'>#{text}</p>"
         end
