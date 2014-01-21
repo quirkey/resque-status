@@ -136,7 +136,7 @@ error and set the status to killed.
 
 Since Redis is RAM based, we probably don't want to keep these statuses around forever 
 (at least until @antirez releases the VM feature). By setting expire_in, all statuses
-and thier related keys will expire in expire_in seconds from the last time theyre updated:
+and their related keys will expire in expire_in seconds from the last time theyre updated:
 
   Resque::Plugins::Status::Hash.expire_in = (60 * 60) # 1 hour
 === Testing
