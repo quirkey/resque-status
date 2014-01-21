@@ -194,8 +194,6 @@ module Resque
           end
         end
 
-        STATUSES = %w{queued working completed failed killed}.freeze
-
         hash_accessor :uuid
         hash_accessor :name
         hash_accessor :status
@@ -214,7 +212,7 @@ module Resque
           super nil
           base_status = {
             'time' => Time.now.to_i,
-            'status' => 'queued'
+            'status' => Resque::Plugins::Status::STATUS_QUEUED
           }
           base_status['uuid'] = args.shift if args.length > 1
           status_hash = args.inject(base_status) do |final, m|
@@ -227,9 +225,10 @@ module Resque
         # calculate the % completion of the job based on <tt>status</tt>, <tt>num</tt>
         # and <tt>total</tt>
         def pct_complete
-          case status
-          when 'completed' then 100
-          when 'queued' then 0
+          if completed?
+            100
+          elsif queued?
+            0
           else
             t = (total == 0 || total.nil?) ? 1 : total
             (((num || 0).to_f / t.to_f) * 100).to_i
@@ -242,16 +241,16 @@ module Resque
           time? ? Time.at(self['time']) : nil
         end
 
-        STATUSES.each do |status|
+        Resque::Plugins::Status::STATUSES.each do |status|
           define_method("#{status}?") do
             self['status'] === status
           end
         end
 
-        # Can the job be killed? 'failed', 'completed', and 'killed' jobs cant be killed
-        # (for pretty obvious reasons)
+        # Can the job be killed? failed, completed, and killed jobs can't be
+        # killed, for obvious reasons
         def killable?
-          !['failed', 'completed', 'killed'].include?(self.status)
+          !failed? && !completed? && !killed?
         end
 
         unless method_defined?(:to_json)
