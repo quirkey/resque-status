@@ -1,5 +1,5 @@
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     git (1.2.5)
     jeweler (1.8.4)
@@ -8,7 +8,9 @@ GEM
       rake
       rdoc
     json (1.7.5)
-    mocha (0.9.12)
+    metaclass (0.0.2)
+    mocha (0.14.0)
+      metaclass (~> 0.0.1)
     multi_json (1.3.6)
     rack (1.4.1)
     rack-protection (1.2.0)
@@ -38,6 +40,6 @@ PLATFORMS
 
 DEPENDENCIES
   jeweler
-  mocha (~> 0.9.8)
+  mocha (~> 0.9)
   resque (~> 1.19)
   shoulda (~> 2.10.2)

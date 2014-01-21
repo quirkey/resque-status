@@ -4,7 +4,7 @@ $TESTING = true
 require 'test/unit'
 require 'rubygems'
 require 'shoulda'
-require 'mocha'
+require 'mocha/setup'
 
 require 'resque-status'
 
