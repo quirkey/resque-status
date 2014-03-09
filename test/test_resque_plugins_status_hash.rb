@@ -189,6 +189,12 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
         assert_same_elements [@uuid_with_json, @uuid], statuses.collect {|s| s.uuid }
       end
 
+      should "return an empty array when no statuses are available" do
+        Resque.redis.flushall
+        statuses = Resque::Plugins::Status::Hash.statuses
+        assert_equal [], statuses
+      end
+
     end
 
     Resque::Plugins::Status::STATUSES.each do |status_code|
