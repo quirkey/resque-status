@@ -27,7 +27,8 @@ module Resque
         # Get multiple statuses by UUID. Returns array of Resque::Plugins::Status::Hash
         def self.mget(uuids)
           status_keys = uuids.map{|u| status_key(u)}
-          vals = redis.mget(*status_keys)
+          vals = redis.mget(*status_keys) if status_keys.length > 0
+          vals ||=[]
 
           uuids.zip(vals).map do |uuid, val|
             val ? Resque::Plugins::Status::Hash.new(uuid, decode(val)) : nil
