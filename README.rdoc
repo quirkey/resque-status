@@ -129,8 +129,16 @@ by UUID.
 
   Resque::Plugins::Status::Hash.kill(job_id)
 
-The next time the job at job_id calls <tt>at</tt> or tick, it will raise a Killed 
+The next time the job at job_id calls <tt>at</tt> or <tt>tick</tt>, it will raise a <tt>Killed</tt> 
 error and set the status to killed.
+
+=== Percent Complete and setting the message
+
+Use <tt>at</tt> or <tt>tick</tt> to show progress in your job's <tt>perform</tt> function
+(which is displayed on the resque-web status tab). This will also be where <tt>Killed</tt>
+is raised if the job is killed.
+
+  at(steps_completed, total_steps, "${steps_completed} of #{total_steps} steps completed!")
 
 === Expiration
 
