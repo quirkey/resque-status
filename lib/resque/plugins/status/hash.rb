@@ -26,6 +26,7 @@ module Resque
 
         # Get multiple statuses by UUID. Returns array of Resque::Plugins::Status::Hash
         def self.mget(uuids)
+          return [] if uuids.empty?
           status_keys = uuids.map{|u| status_key(u)}
           vals = redis.mget(*status_keys)
 
@@ -86,7 +87,7 @@ module Resque
         #   Resque::Plugins::Status::Hash.statuses(0, 20)
         def self.statuses(range_start = nil, range_end = nil)
           ids = status_ids(range_start, range_end)
-          ids.any? ? mget(ids).compact : []
+          mget(ids).compact || []
         end
 
         # Return the <tt>num</tt> most recent status/job UUIDs in reverse chronological order.
