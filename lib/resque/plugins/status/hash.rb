@@ -257,7 +257,7 @@ module Resque
             duration = Time.now.to_i - self['started_at']
           end
 
-          Time.at(duration).utc.strftime(format)
+          duration.nil? ? nil : Time.at(duration).utc.strftime(format)
         end
 
         # Returns the time when the perform was called
