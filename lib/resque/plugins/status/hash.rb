@@ -251,7 +251,7 @@ module Resque
         # format can be given to format time
         def duration(format = "%H:%M:%S")
           duration = nil
-          if completed? or failed?
+          if completed? or failed? or killed?
             duration = self['finished_at'] - self['started_at']
           elsif working?
             duration = Time.now.to_i - self['started_at']
