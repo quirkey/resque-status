@@ -53,6 +53,7 @@
                 .attr('class', '')
                 .addClass('status-progress-bar status-' + json.status);
           }
+
           if (json.time) {
             $status.find('.status-time').text(new Date(json.time * 1000).toString())
           }
@@ -76,7 +77,7 @@
     };
 
     function printValue(key, value) {
-      if (/(^|_)time$/.test(key) && typeof value == 'number') {
+      if (/(^|_)(time|started_at|finished_at)$/.test(key) && typeof value == 'number') {
         var time = new Date();
         time.setTime(value * 1000);
         return time.toUTCString();
