@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module Resque
   module Plugins
     module Status
@@ -6,8 +8,6 @@ module Resque
       # the common status attributes. It also has a number of class methods for
       # creating/updating/retrieving status objects from Redis
       class Hash < ::Hash
-
-        extend Resque::Helpers
 
         # Create a status, generating a new UUID, passing the message to the status
         # Returns the UUID of the new status.
@@ -24,7 +24,18 @@ module Resque
           val ? Resque::Plugins::Status::Hash.new(uuid, decode(val)) : nil
         end
 
-        # set a status by UUID. <tt>messages</tt> can be any number of stirngs or hashes
+        # Get multiple statuses by UUID. Returns array of Resque::Plugins::Status::Hash
+        def self.mget(uuids)
+          return [] if uuids.empty?
+          status_keys = uuids.map{|u| status_key(u)}
+          vals = redis.mget(*status_keys)
+
+          uuids.zip(vals).map do |uuid, val|
+            val ? Resque::Plugins::Status::Hash.new(uuid, decode(val)) : nil
+          end
+        end
+
+        # set a status by UUID. <tt>messages</tt> can be any number of strings or hashes
         # that are merged in order to create a single status.
         def self.set(uuid, *messages)
           val = Resque::Plugins::Status::Hash.new(uuid, *messages)
@@ -39,19 +50,29 @@ module Resque
         # about ranges
         def self.clear(range_start = nil, range_end = nil)
           status_ids(range_start, range_end).each do |id|
-            redis.del(status_key(id))
-            redis.zrem(set_key, id)
+            remove(id)
           end
         end
 
-        # returns a Redisk::Logger scoped to the UUID. Any options passed are passed
-        # to the logger initialization.
-        #
-        # Ensures that Redisk is logging to the same Redis connection as Resque.
-        def self.logger(uuid, options = {})
-          require 'redisk' unless defined?(Redisk)
-          Redisk.redis = redis
-          Redisk::Logger.new(logger_key(uuid), options)
+        def self.clear_completed(range_start = nil, range_end = nil)
+          status_ids(range_start, range_end).select do |id|
+            get(id).completed?
+          end.each do |id|
+            remove(id)
+          end
+        end
+
+        def self.clear_failed(range_start = nil, range_end = nil)
+          status_ids(range_start, range_end).select do |id|
+            get(id).failed?
+          end.each do |id|
+            remove(id)
+          end
+        end
+
+        def self.remove(uuid)
+          redis.del(status_key(uuid))
+          redis.zrem(set_key, uuid)
         end
 
         def self.count
@@ -65,22 +86,21 @@ module Resque
         # @example retuning the last 20 statuses
         #   Resque::Plugins::Status::Hash.statuses(0, 20)
         def self.statuses(range_start = nil, range_end = nil)
-          status_ids(range_start, range_end).collect do |id|
-            get(id)
-          end.compact
+          ids = status_ids(range_start, range_end)
+          mget(ids).compact || []
         end
 
         # Return the <tt>num</tt> most recent status/job UUIDs in reverse chronological order.
         def self.status_ids(range_start = nil, range_end = nil)
-          unless range_end && range_start
-            # Because we want a reverse chronological order, we need to get a range starting
-            # by the higest negative number.
-            redis.zrevrange(set_key, 0, -1) || []
-          else
+          if range_end && range_start
             # Because we want a reverse chronological order, we need to get a range starting
             # by the higest negative number. The ordering is transparent from the API user's
             # perspective so we need to convert the passed params
             (redis.zrevrange(set_key, (range_start.abs), ((range_end || 1).abs)) || [])
+          else
+            # Because we want a reverse chronological order, we need to get a range starting
+            # by the higest negative number.
+            redis.zrevrange(set_key, 0, -1) || []
           end
         end
 
@@ -144,13 +164,8 @@ module Resque
           "_kill"
         end
 
-        def self.logger_key(uuid)
-          "_log:#{uuid}"
-        end
-
         def self.generate_uuid
-          require 'uuid' unless defined?(UUID)
-          UUID.generate(:compact)
+          SecureRandom.hex.to_s
         end
 
         def self.hash_accessor(name, options = {})
@@ -173,7 +188,12 @@ module Resque
           EOT
         end
 
-        STATUSES = %w{queued working completed failed killed}.freeze
+        # Proxy deprecated methods directly back to Resque itself.
+        class << self
+          [:redis, :encode, :decode].each do |method|
+            define_method(method) { |*args| Resque.send(method, *args) }
+          end
+        end
 
         hash_accessor :uuid
         hash_accessor :name
@@ -193,7 +213,7 @@ module Resque
           super nil
           base_status = {
             'time' => Time.now.to_i,
-            'status' => 'queued'
+            'status' => Resque::Plugins::Status::STATUS_QUEUED
           }
           base_status['uuid'] = args.shift if args.length > 1
           status_hash = args.inject(base_status) do |final, m|
@@ -206,9 +226,10 @@ module Resque
         # calculate the % completion of the job based on <tt>status</tt>, <tt>num</tt>
         # and <tt>total</tt>
         def pct_complete
-          case status
-          when 'completed' then 100
-          when 'queued' then 0
+          if completed?
+            100
+          elsif queued?
+            0
           else
             t = (total == 0 || total.nil?) ? 1 : total
             (((num || 0).to_f / t.to_f) * 100).to_i
@@ -221,16 +242,16 @@ module Resque
           time? ? Time.at(self['time']) : nil
         end
 
-        STATUSES.each do |status|
+        Resque::Plugins::Status::STATUSES.each do |status|
           define_method("#{status}?") do
             self['status'] === status
           end
         end
 
-        # Can the job be killed? 'failed', 'completed', and 'killed' jobs cant be killed
-        # (for pretty obvious reasons)
+        # Can the job be killed? failed, completed, and killed jobs can't be
+        # killed, for obvious reasons
         def killable?
-          !['failed', 'completed', 'killed'].include?(self.status)
+          !failed? && !completed? && !killed?
         end
 
         unless method_defined?(:to_json)

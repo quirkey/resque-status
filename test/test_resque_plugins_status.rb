@@ -8,28 +8,45 @@ class TestResquePluginsStatus < Test::Unit::TestCase
     end
 
     context ".create" do
-      setup do
-        @uuid = WorkingJob.create('num' => 100)
+      context "not inline" do
+        setup do
+          @uuid = WorkingJob.create('num' => 100)
+        end
+
+        should "add the job to the queue" do
+          assert_equal 1, Resque.size(:statused)
+        end
+
+        should "set the queued object to the current class" do
+          job = Resque.pop(:statused)
+          assert_equal @uuid, job['args'].first
+          assert_equal "WorkingJob", job['class']
+        end
+
+        should "add the uuid to the statuses" do
+          assert_contains Resque::Plugins::Status::Hash.status_ids, @uuid
+        end
+
+        should "return a UUID" do
+          assert_match(/^\w{32}$/, @uuid)
+        end
       end
 
-      should "add the job to the queue" do
-        assert_equal 1, Resque.size(:statused)
-      end
+      context "inline" do
+        setup do
+          Resque.stubs(:inline?).returns(true)
+        end
 
-      should "set the queued object to the current class" do
-        job = Resque.pop(:statused)
-        assert_equal @uuid, job['args'].first
-        assert_equal "WorkingJob", job['class']
-      end
+        should "not queue a job" do
+          @uuid = WorkingJob.create('num' => 100)
+          assert_equal 0, Resque.size(:statused)
+        end
 
-      should "add the uuid to the statuses" do
-        assert_contains Resque::Plugins::Status::Hash.status_ids, @uuid
+        should "call perform" do
+          WorkingJob.any_instance.expects(:perform).once
+          @uuid = WorkingJob.create('num' => 100)
+        end
       end
-
-      should "return a UUID" do
-        assert_match(/^\w{32}$/, @uuid)
-      end
-
     end
 
     context ".create with a failing before_enqueue hook" do
@@ -59,17 +76,23 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end
 
       should "create the job with the provided arguments" do
-
-        job = Resque.pop(:statused)
-
+        job = Resque.pop(:queue_name)
         assert_equal @job_args, job['args'].last
       end
     end
 
     context ".enqueue" do
-      setup do
+      should "delegate to enqueue_to, filling in the queue from the class" do
         @uuid = BasicJob.enqueue(WorkingJob, :num => 100)
         @payload = Resque.pop(:statused)
+        assert_equal "WorkingJob", @payload['class']
+      end
+    end
+
+    context ".enqueue_to" do
+      setup do
+        @uuid = BasicJob.enqueue_to(:new_queue, WorkingJob, :num => 100)
+        @payload = Resque.pop(:new_queue)
       end
 
       should "add the job with the specific class to the queue" do
@@ -88,6 +111,23 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         assert_match(/^\w{32}$/, @uuid)
       end
 
+    end
+
+    context ".dequeue" do
+      setup do
+        @uuid1 = BasicJob.enqueue(WorkingJob, :num => 100)
+        @uuid2 = BasicJob.enqueue(WorkingJob, :num => 100)
+      end
+
+      should "dequeue the job with the uuid from the correct queue" do
+        size = Resque.size(:statused)
+        BasicJob.dequeue(WorkingJob, @uuid2)
+        assert_equal size-1, Resque.size(:statused)
+      end
+      should "not dequeue any jobs with different uuids for same class name" do
+        BasicJob.dequeue(WorkingJob, @uuid2)
+        assert_equal @uuid1, Resque.pop(:statused)['args'].first
+      end
     end
 
     context ".perform" do
@@ -153,7 +193,6 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end
 
       should "set the status to killed" do
-        assert_equal 'killed', @status.status
         assert @status.killed?
         assert !@status.completed?
       end
@@ -183,16 +222,12 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         @performed = KillableJob.perform(*@payload1['args'])
         @performed = KillableJob.perform(*@payload2['args'])
 
-        @status1 = Resque::Plugins::Status::Hash.get(@uuid1)
-        @status2 = Resque::Plugins::Status::Hash.get(@uuid2)
+        @status1, @status2 = Resque::Plugins::Status::Hash.mget([@uuid1, @uuid2])
       end
 
       should "set the status to killed" do
-        assert_equal 'killed', @status1.status
         assert @status1.killed?
         assert !@status1.completed?
-
-        assert_equal 'killed', @status2.status
         assert @status2.killed?
         assert !@status2.completed?
       end
@@ -225,16 +260,12 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         @performed = KillableJob.perform(*@payload1['args'])
         @performed = KillableJob.perform(*@payload2['args'])
 
-        @status1 = Resque::Plugins::Status::Hash.get(@uuid1)
-        @status2 = Resque::Plugins::Status::Hash.get(@uuid2)
+        @status1, @status2 = Resque::Plugins::Status::Hash.mget([@uuid1, @uuid2])
       end
 
       should "set the status to killed" do
-        assert_equal 'completed', @status1.status
         assert !@status1.killed?
         assert @status1.completed?
-
-        assert_equal 'killed', @status2.status
         assert @status2.killed?
         assert !@status2.completed?
       end
@@ -266,7 +297,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         end
 
         should "set status" do
-          assert_equal 'working', @job.status.status
+          assert @job.status.working?
         end
 
         should "save message" do
@@ -280,7 +311,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         end
 
         should "set status" do
-          assert_equal 'failed', @job.status.status
+          assert @job.status.failed?
         end
 
         should "set message" do
@@ -294,7 +325,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         end
 
         should "set status" do
-          assert_equal 'completed', @job.status.status
+          assert @job.status.completed?
         end
 
         should "set message" do
@@ -312,7 +343,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         end
 
         should "set status as failed" do
-          assert_equal 'failed', @job.status.status
+          assert @job.status.failed?
         end
       end
 

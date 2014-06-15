@@ -18,7 +18,7 @@ begin
     gem.authors = ["Aaron Quint"]
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
-  Jeweler::GemcutterTasks.new
+  Jeweler::RubygemsDotOrgTasks.new
 rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
@@ -46,13 +46,3 @@ end
 task :test
 
 task :default => :test
-
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
-
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "resque-status #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end

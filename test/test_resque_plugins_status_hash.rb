@@ -18,12 +18,36 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
         assert_equal 'my status', status.message
       end
 
-      should "return false if the status is not set" do
-        assert !Resque::Plugins::Status::Hash.get('whu')
+      should "return nil if the status is not set" do
+        assert_nil Resque::Plugins::Status::Hash.get('invalid_uuid')
       end
 
       should "decode encoded json" do
         assert_equal("json", Resque::Plugins::Status::Hash.get(@uuid_with_json)['im'])
+      end
+    end
+
+    context ".mget" do
+      should "return statuses as array of Resque::Plugins::Status::Hash for the uuids" do
+        uuid2 = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
+        Resque::Plugins::Status::Hash.set(uuid2, "my status2")
+        statuses = Resque::Plugins::Status::Hash.mget([@uuid, uuid2])
+        assert_equal 2, statuses.size
+        assert statuses.all?{|s| s.is_a?(Resque::Plugins::Status::Hash) }
+        assert_equal ['my status', 'my status2'], statuses.map(&:message)
+      end
+
+      should "return nil if a status is not set" do
+        statuses = Resque::Plugins::Status::Hash.mget(['invalid_uuid', @uuid])
+        assert_equal 2, statuses.size
+        assert_nil statuses[0]
+        assert statuses[1].is_a?(Resque::Plugins::Status::Hash)
+        assert_equal 'my status', statuses[1].message
+      end
+
+      should "decode encoded json" do
+        assert_equal ['json'],
+          Resque::Plugins::Status::Hash.mget([@uuid_with_json]).map{|h| h['im']}
       end
     end
 
@@ -94,6 +118,50 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
 
     end
 
+    context ".clear_completed" do
+      setup do
+        @completed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => "completed"})
+        @not_completed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
+        Resque::Plugins::Status::Hash.clear_completed
+      end
+
+      should "clear completed status" do
+        assert_nil Resque::Plugins::Status::Hash.get(@completed_status_id)
+      end
+
+      should "not clear not-completed status" do
+        status = Resque::Plugins::Status::Hash.get(@not_completed_status_id)
+        assert status.is_a?(Resque::Plugins::Status::Hash)
+      end
+    end
+
+    context ".clear_failed" do
+      setup do
+        @failed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => "failed"})
+        @not_failed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
+        Resque::Plugins::Status::Hash.clear_failed
+      end
+
+      should "clear failed status" do
+        assert_nil Resque::Plugins::Status::Hash.get(@failed_status_id)
+      end
+
+      should "not clear not-failed status" do
+        status = Resque::Plugins::Status::Hash.get(@not_failed_status_id)
+        assert status.is_a?(Resque::Plugins::Status::Hash)
+      end
+    end
+
+    context ".remove" do
+      setup do
+        Resque::Plugins::Status::Hash.remove(@uuid)
+      end
+
+      should "clear specify status" do
+        assert_nil Resque::Plugins::Status::Hash.get(@uuid)
+      end
+    end
+
     context ".status_ids" do
 
       setup do
@@ -121,33 +189,34 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
         assert_same_elements [@uuid_with_json, @uuid], statuses.collect {|s| s.uuid }
       end
 
-    end
-
-    # context ".count" do
-    #
-    #   should "return a count of statuses" do
-    #     statuses = Resque::Plugins::Status::Hash.statuses
-    #     assert_equal 2, statuses.size
-    #     assert_equal statuses.size, Resque::Plugins::Status::Hash.count
-    #   end
-    #
-    # end
-
-    context ".logger" do
-      setup do
-        @logger = Resque::Plugins::Status::Hash.logger(@uuid)
-      end
-
-      should "return a redisk logger" do
-        assert @logger.is_a?(Redisk::Logger)
-      end
-
-      should "scope the logger to a key" do
-        assert_match(/#{@uuid}/, @logger.name)
+      should "return an empty array when no statuses are available" do
+        Resque.redis.flushall
+        statuses = Resque::Plugins::Status::Hash.statuses
+        assert_equal [], statuses
       end
 
     end
 
+    Resque::Plugins::Status::STATUSES.each do |status_code|
+      context ".#{status_code}?" do
+
+        setup do
+          uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => status_code})
+          @status = Resque::Plugins::Status::Hash.get(uuid)
+        end
+
+        should "return true for the current status" do
+          assert @status.send("#{status_code}?"), status_code
+        end
+
+        should "return false for other statuses" do
+          (Resque::Plugins::Status::STATUSES - [status_code]).each do |other_status_code|
+            assert !@status.send("#{other_status_code}?"), other_status_code
+          end
+        end
+
+      end
+    end
   end
 
 end

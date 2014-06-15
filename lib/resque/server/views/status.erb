@@ -10,6 +10,19 @@
   </div>
   <div class="status-message"><%= @status.message %></div>
   <div class="status-time"><%= @status.time? ? @status.time : 'Not started' %></div>
+  <h2>Details</h2>
+  <div class="status-details">
+    <table>
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody class="status-details-body">
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <script type="text/javascript" charset="utf-8">
@@ -43,15 +56,34 @@
           if (json.time) {
             $status.find('.status-time').text(new Date(json.time * 1000).toString())
           }
+
+          var $details = $status.find('.status-details-body');
+          $details.empty();
+
+          for (key in json) {
+            var $row = $("<tr>").appendTo($details);
+            $("<td>").text(key).appendTo($row);
+            $("<td>").text(printValue(key, json[key])).appendTo($row);
+          }
         };
         var status = $status.attr('rel');
-        if (status == 'working' || status == 'queued' || status == "") {
+        if (status == '<%= Resque::Plugins::Status::STATUS_WORKING %>' || status == '<%= Resque::Plugins::Status::STATUS_QUEUED %>' || status == "") {
           setTimeout(function() {
             checkStatus($status)
           }, 1500);
         }
       });
     };
+
+    function printValue(key, value) {
+      if (/(^|_)time$/.test(key) && typeof value == 'number') {
+        var time = new Date();
+        time.setTime(value * 1000);
+        return time.toUTCString();
+      } else {
+        return JSON.stringify(value);
+      }
+    }
 
   });
 </script>

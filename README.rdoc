@@ -119,7 +119,7 @@ A Status is actually just a hash, so inside a job you can do:
 
 Also, all the status setting methods take any number of hash arguments. So you could do:
 
-    complete('filename' => '/myfilename')
+    completed('filename' => '/myfilename')
 
 === Kill! Kill! Kill!
 
@@ -129,16 +129,33 @@ by UUID.
 
   Resque::Plugins::Status::Hash.kill(job_id)
 
-The next time the job at job_id calls <tt>at</tt> or tick, it will raise a Killed 
+The next time the job at job_id calls <tt>at</tt> or <tt>tick</tt>, it will raise a <tt>Killed</tt> 
 error and set the status to killed.
+
+=== Percent Complete and setting the message
+
+Use <tt>at</tt> or <tt>tick</tt> to show progress in your job's <tt>perform</tt> function
+(which is displayed on the resque-web status tab). This will also be where <tt>Killed</tt>
+is raised if the job is killed.
+
+  at(steps_completed, total_steps, "${steps_completed} of #{total_steps} steps completed!")
 
 === Expiration
 
 Since Redis is RAM based, we probably don't want to keep these statuses around forever 
 (at least until @antirez releases the VM feature). By setting expire_in, all statuses
-and thier related keys will expire in expire_in seconds from the last time theyre updated:
+and their related keys will expire in expire_in seconds from the last time theyre updated:
 
   Resque::Plugins::Status::Hash.expire_in = (60 * 60) # 1 hour
+=== Testing
+
+Recent versions of Resque introduced `Resque.inline` which changes the behavior to 
+instead of enqueueing and performing jobs to just executing them inline. In Resque
+itself this removes the dependency on a Redis, however, `Resque::Status` uses Redis
+to store information about jobs, so though `inline` "works", you will still need
+to use or mock a redis connection. You should be able to use a library like 
+https://github.com/causes/mock_redis alongside `inline` if you really want to
+avoid Redis connections in your test.
 
 === resque-web
 

@@ -38,7 +38,12 @@ module Resque
       end
 
       app.post '/statuses/clear/completed' do
-        Resque::Status.clear_completed
+        Resque::Plugins::Status::Hash.clear_completed
+        redirect u(:statuses)
+      end
+
+      app.post '/statuses/clear/failed' do
+        Resque::Plugins::Status::Hash.clear_failed
         redirect u(:statuses)
       end
 

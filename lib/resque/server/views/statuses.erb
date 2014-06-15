@@ -8,6 +8,9 @@
 <form method="POST" action="<%= u(:statuses) %>/clear/completed" class='clear-failed'>
   <input type='submit' name='' value='Clear Completed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
 </form>
+<form method="POST" action="<%= u(:statuses) %>/clear/failed" class='clear-failed'>
+  <input type='submit' name='' value='Clear Failed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
+</form>
 <%end%>
 <p class='intro'>These are recent jobs created with the Resque::Plugins::Status class</p>
 <table>
@@ -30,7 +33,7 @@
         <% end %>
       </td>
       <td class="status status-<%= status.status %>"><%= status.status %></td>
-      <td class="time"><%= status.time %></td>
+      <td class="time"><%= status.time.strftime("%Y/%m/%d %H:%M:%S %z") %></td>
       <td class="progress">
         <div class="progress-bar" style="width:<%= status.pct_complete %>%">&nbsp;</div>
         <div class="progress-pct"><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></div>
