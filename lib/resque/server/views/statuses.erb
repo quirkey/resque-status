@@ -11,6 +11,9 @@
 <form method="POST" action="<%= u(:statuses) %>/clear/failed" class='clear-failed'>
   <input type='submit' name='' value='Clear Failed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
 </form>
+<form method="POST" action="<%= u(:statuses) %>/clear/delayed" class='clear-delayed'>
+  <input type='submit' name='' value='Clear Delayed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
+</form>
 <%end%>
 <p class='intro'>These are recent jobs created with the Resque::Plugins::Status class</p>
 <table>

@@ -152,6 +152,23 @@ class TestResquePluginsStatusHash < Test::Unit::TestCase
       end
     end
 
+    context ".clear_delayed" do
+      setup do
+        @delayed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => "delayed"})
+        @not_delayed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
+        Resque::Plugins::Status::Hash.clear_delayed
+      end
+
+      should "clear delayed status" do
+        assert_nil Resque::Plugins::Status::Hash.get(@delayed_status_id)
+      end
+
+      should "not clear not-delayed status" do
+        status = Resque::Plugins::Status::Hash.get(@not_delayed_status_id)
+        assert status.is_a?(Resque::Plugins::Status::Hash)
+      end
+    end
+
     context ".remove" do
       setup do
         Resque::Plugins::Status::Hash.remove(@uuid)

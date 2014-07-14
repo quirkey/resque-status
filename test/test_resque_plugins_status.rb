@@ -319,6 +319,20 @@ class TestResquePluginsStatus < Test::Unit::TestCase
         end
       end
 
+      context "#delayed" do
+        setup do
+          @job.delayed("Later...")
+        end
+
+        should "set status" do
+          assert @job.status.delayed?
+        end
+
+        should "set message" do
+          assert_equal "Later...", @job.status.message
+        end
+      end
+
       context "#completed" do
         setup do
           @job.completed

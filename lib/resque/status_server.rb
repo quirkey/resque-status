@@ -47,6 +47,11 @@ module Resque
         redirect u(:statuses)
       end
 
+      app.post '/statuses/clear/delayed' do
+        Resque::Plugins::Status::Hash.clear_delayed
+        redirect u(:statuses)
+      end
+
       app.get "/statuses.poll" do
         content_type "text/plain"
         @polling = true

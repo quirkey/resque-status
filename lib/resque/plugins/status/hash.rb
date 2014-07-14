@@ -70,6 +70,14 @@ module Resque
           end
         end
 
+        def self.clear_delayed(range_start = nil, range_end = nil)
+          status_ids(range_start, range_end).select do |id|
+            get(id).delayed?
+          end.each do |id|
+            remove(id)
+          end
+        end
+
         def self.remove(uuid)
           redis.del(status_key(uuid))
           redis.zrem(set_key, uuid)
