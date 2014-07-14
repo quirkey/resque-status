@@ -165,7 +165,7 @@ module Resque
           on_failure(status.message) if respond_to?(:on_failure)
           return
         elsif status && status.delayed?
-          on_delayed(status.message) if respond_to?(:on_delayed)
+          on_delayed if respond_to?(:on_delayed)
           return
         elsif status && !status.completed?
           completed
