@@ -248,10 +248,10 @@ module Resque
           end
         end
 
-        # Can the job be killed? failed, completed, and killed jobs can't be
+        # Can the job be killed? failed, completed, delayed, and killed jobs can't be
         # killed, for obvious reasons
         def killable?
-          !failed? && !completed? && !killed?
+          !failed? && !completed? && !killed? && !delayed?
         end
 
         unless method_defined?(:to_json)
