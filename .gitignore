@@ -26,3 +26,4 @@ doc
 test/dump.rdb
 bin/
 .bundle
+*.iml

@@ -1,0 +1,71 @@
+
+th.progress {
+    width: 100px;
+}
+td.status {
+    font-weight: bold;
+}
+/*td.progress .progress-bar {*/
+    /*position: absolute;*/
+    /*top: 0px;*/
+    /*left: 0px;*/
+    /*background: #999;*/
+    /*display:block;*/
+    /*height: 100%;*/
+    /*z-index: 0;*/
+    /*opacity: 0.5;*/
+    /*-moz-opacity: 0.5;*/
+    /*-webkit-opacity: 0.5;*/
+/*}*/
+.resque-status .progress {
+    margin: 0;
+    position: relative;
+}
+.resque-status .progress .progress-pct {
+    z-index: 10;
+    /*color: #333;*/
+    color: #ffffff;
+    text-shadow: 1px 1px 2px black;
+    text-align: center;
+    position: absolute;
+    width: 100%;
+}
+
+.status-completed {
+    color:#61BF55;
+}
+.status-failed {
+    color: #E47E74;
+}
+.status-working {
+    color: #528499;
+}
+.status-killed {
+    color: #B84F16;
+}
+
+.status-holder {
+    background: #F7F7F7;
+    border: 1px solid #E5E5E5;
+    padding: 20px;
+    font-size: 110%;
+    margin-bottom: 40px;
+}
+.status-message {
+    font-weight: bold;
+}
+
+.status-time {
+    font-size: 70%;
+    padding: 10px 0px;
+    color: #999;
+}
+
+#main a.status-kill:link, #main a.status-kill:visited {
+    color: #B84F16;
+    font-weight: bold;
+}
+
+.status-clear {
+    margin-left:5px
+}

@@ -1,0 +1,31 @@
+<div class="resque-status">
+    <h1 class='wi'>Statuses: <%= @status.uuid %>/<%= @status.name %></h1>
+
+    <p class='intro'>Viewing a specific job created with Resque::Plugins::Status.
+        <a href="<%= statuses_path %>">Return to the list of statuses</a></p>
+
+    <div class="status-holder" data-url="<%= status_path(@status.uuid, :json) %>" data-status="<%= @status.status %>" id="status_<%= @status.uuid %>">
+        <div class="progress">
+            <div class="bar" style="width: <%= @status.pct_complete %>%;"></div>
+            <div class="progress-pct"><%= @status.pct_complete %>%</div>
+        </div>
+        <div class="status-message"><%= @status.message %></div>
+        <div class="status-time"><%= @status.time? ? @status.time : 'Not started' %></div>
+        <h2>Details</h2>
+
+        <div class="status-details">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                </tr>
+                </thead>
+                <tbody class="status-details-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<%= javascript_include_tag "resque_status/application" %>
+<%= stylesheet_link_tag "resque_status/application", :media => "all" %>
