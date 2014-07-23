@@ -14,7 +14,7 @@ module ResqueWeb
       end
 
       def self.tabs
-        [{'Status' => '/resque_web/statuses'}]
+        [{'Status' => Engine.app.url_helpers.statuses_path}]
       end
     end
   end
