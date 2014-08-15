@@ -144,6 +144,13 @@ module Resque
         def scheduled(queue, klass, *args)
           self.enqueue_to(queue, self, *args)
         end
+        
+        # Append any desired callbacks to the callback chain
+        def after_tick(*method_symbols)
+          # Remember this will become a class variable
+          # The varargs have been splatted, so available as a plain old array now
+          @callback_methods = method_symbols
+        end
       end
 
       # Create a new instance with <tt>uuid</tt> and <tt>options</tt>

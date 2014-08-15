@@ -355,7 +355,7 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end
       
       should "call back on tick" do
-        @job.should_receive(:report).with("123")
+        @job.expects(:report).with("123").once
         
         @job.perform
       end  
