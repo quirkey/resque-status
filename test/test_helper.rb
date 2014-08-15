@@ -106,3 +106,26 @@ class NeverQueuedJob
     # will never get called
   end
 end
+
+class TickCallbackJob
+
+  include Resque::Plugins::Status
+
+  after_tick :report
+  
+  # Note, report is an instance method
+  # so it can use the 'options' hash if needed
+  def report msg
+    # A somewhat trivial example, but in real systems
+    # this could be used to trigger Webhook callbacks,
+    # AMQP deliveries, etc. without repeating that code.
+    puts "This is my message: #{msg}"
+  end
+
+  def perform
+    msg = options['the_message']
+    
+    at(1, 1, msg)
+  end
+
+end
