@@ -111,7 +111,7 @@ class TickCallbackJob
 
   include Resque::Plugins::Status
 
-  after_tick :report
+  after_status :report
   
   # Note, report is an instance method
   # so it can use the 'options' hash if needed

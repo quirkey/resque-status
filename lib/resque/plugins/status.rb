@@ -146,7 +146,7 @@ module Resque
         end
         
         # Append any desired callbacks to the callback chain
-        def after_tick(*method_symbols)
+        def after_status(*method_symbols)
           # Remember this will become a class variable
           # The varargs have been splatted, so available as a plain old array now
           @callback_methods = method_symbols
@@ -220,7 +220,7 @@ module Resque
         }, *messages)
       end
 
-      # sets the status of the job for the current itteration. You should use
+      # sets the status of the job for the current iteration. You should use
       # the <tt>at</tt> method if you have actual numbers to track the iteration count.
       # This will kill the job if it has been added to the kill list with
       # <tt>Resque::Plugins::Status::Hash.kill()</tt>
@@ -253,7 +253,17 @@ module Resque
 
       private
       def set_status(*args)
-        self.status = [status, {'name'  => self.name}, args].flatten
+        the_status = [status, {'name'  => self.name}, args].flatten
+      
+        self.status = the_status
+        
+        # Now call the callbacks, if there are any
+        if @callback_methods
+          @callback_methods.each do |callback_method|
+            # The methods in the array are actually symbols, so use 'send'
+            self.send callback_method, the_status
+          end  
+        end
       end
 
     end
