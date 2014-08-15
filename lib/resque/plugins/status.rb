@@ -56,6 +56,9 @@ module Resque
       end
 
       module ClassMethods
+        # Contains symbols of all the instance methods on the worker that the user
+        # wants to be called after each invokation of 'set_status'.
+        @@callback_methods = []
 
         # The default queue is :statused, this can be ovveridden in the specific job
         # class to put the jobs on a specific worker queue
@@ -149,7 +152,7 @@ module Resque
         def after_status(*method_symbols)
           # Remember this will become a class variable
           # The varargs have been splatted, so available as a plain old array now
-          @callback_methods = method_symbols
+          @@callback_methods << method_symbols
         end
       end
 
@@ -258,8 +261,9 @@ module Resque
         self.status = the_status
         
         # Now call the callbacks, if there are any
-        if @callback_methods
-          @callback_methods.each do |callback_method|
+        # remember the list is on the class, not the instance
+        if defined? @@callback_methods
+          @@callback_methods.each do |callback_method|
             # The methods in the array are actually symbols, so use 'send'
             self.send callback_method, the_status
           end  
