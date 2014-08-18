@@ -360,6 +360,16 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end  
     end
 
+    context "#after_tick" do
+      setup do
+        @job = TickCallbackJob.new("123")
+      end
+      
+      should "call back on tick" do
+        @job.expects(:report).with('tick_message')
+        @job.perform
+      end  
+    end
 
     context "#after_killed" do
       setup do
@@ -384,6 +394,16 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       end  
     end
     
+    context "#after_failed" do
+      setup do
+        @job = FailedCallbackJob.new("123")
+      end
+      
+      should "call back on fail" do
+        @job.expects(:report).with("Wow, so resque, such failed")
+        @job.perform
+      end  
+    end
   end
 
 end
