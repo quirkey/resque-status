@@ -379,7 +379,11 @@ class TestResquePluginsStatus < Test::Unit::TestCase
       should "call back on kill" do
         # Kill does not cause any messages.
         @job.expects(:report).once
-        @job.perform
+        
+        # Still expecting to see 'Killed' raised after the callback fires.
+        assert_raise Resque::Plugins::Status::Killed do
+          @job.perform
+        end
       end  
     end
     
