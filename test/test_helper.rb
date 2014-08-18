@@ -141,7 +141,7 @@ class KilledCallbackJob
 
   after_killed :report
   
-  def report msg
+  def report
     puts "Dramatic death scene goes here"
   end
 
