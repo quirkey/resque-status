@@ -50,15 +50,12 @@ module Resque
       class NotANumber < RuntimeError; end
 
       attr_reader :uuid, :options
-
+      
       def self.included(base)
         base.extend(ClassMethods)
       end
 
       module ClassMethods
-        # Contains symbols of all the instance methods on the worker that the user
-        # wants to be called after each invokation of 'set_status'.
-        @@callback_methods = []
 
         # The default queue is :statused, this can be ovveridden in the specific job
         # class to put the jobs on a specific worker queue
@@ -66,6 +63,8 @@ module Resque
           :statused
         end
 
+        attr_accessor :callback_methods
+        
         # used when displaying the Job in the resque-web UI and identifiyng the job
         # type by status. By default this is the name of the job class, but can be
         # ovveridden in the specific job class to present a more user friendly job
@@ -152,7 +151,7 @@ module Resque
         def after_status(*method_symbols)
           # Remember this will become a class variable
           # The varargs have been splatted, so available as a plain old array now
-          @@callback_methods << method_symbols
+          @callback_methods = method_symbols          
         end
       end
 
@@ -259,11 +258,11 @@ module Resque
         the_status = [status, {'name'  => self.name}, args].flatten
       
         self.status = the_status
-        
+                
         # Now call the callbacks, if there are any
         # remember the list is on the class, not the instance
-        if defined? @@callback_methods
-          @@callback_methods.each do |callback_method|
+        if self.class.callback_methods
+          self.class.callback_methods.each do |callback_method|
             # The methods in the array are actually symbols, so use 'send'
             self.send callback_method, the_status
           end  
