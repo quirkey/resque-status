@@ -291,7 +291,7 @@ module Resque
         if self.class.killed_callbacks
           self.class.killed_callbacks.each do |callback_method|
             # The methods in the array are symbols, so use 'send'
-            self.send callback_method, *messages
+            self.send callback_method
           end
         end
         

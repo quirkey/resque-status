@@ -349,18 +349,41 @@ class TestResquePluginsStatus < Test::Unit::TestCase
 
     end
 
-    context "#after_status" do
+    context "#after_at" do
       setup do
-        @job = TickCallbackJob.new("123")
+        @job = AtCallbackJob.new("123")
       end
       
-      should "call back on tick" do
+      should "call back on at" do
         @job.expects(:report).with({'num' => 1, 'total' => 1}, 'report_message')
-        
         @job.perform
       end  
     end
 
+
+    context "#after_killed" do
+      setup do
+        @job = KilledCallbackJob.new("123")
+      end
+      
+      should "call back on kill" do
+        # Kill does not cause any messages.
+        @job.expects(:report).once
+        @job.perform
+      end  
+    end
+    
+    context "#after_completed" do
+      setup do
+        @job = CompletedCallbackJob.new("123")
+      end
+      
+      should "call back on complete" do
+        @job.expects(:report).with("Whether through good times or bad, our journey is at an end")
+        @job.perform
+      end  
+    end
+    
   end
 
 end
