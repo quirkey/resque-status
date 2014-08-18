@@ -351,11 +351,11 @@ class TestResquePluginsStatus < Test::Unit::TestCase
 
     context "#after_status" do
       setup do
-        @job = TickCallbackJob.new({the_message: "123"})
+        @job = TickCallbackJob.new("123")
       end
       
       should "call back on tick" do
-        @job.expects(:report)
+        @job.expects(:report).with({'num' => 1, 'total' => 1}, 'report_message')
         
         @job.perform
       end  

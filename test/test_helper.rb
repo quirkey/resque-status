@@ -111,7 +111,7 @@ class TickCallbackJob
 
   include Resque::Plugins::Status
 
-  after_status :report
+  after_tick :report
   
   # Note, report is an instance method
   # so it can use the 'options' hash if needed
@@ -122,10 +122,8 @@ class TickCallbackJob
     puts "This is my message: #{msg}"
   end
 
-  def perform
-    msg = options['the_message']
-    
-    at(1, 1, msg)
+  def perform    
+    at(1, 1, "report_message")
   end
 
 end

@@ -63,7 +63,9 @@ module Resque
           :statused
         end
 
-        attr_accessor :callback_methods
+        # Private places to store the lists of callback methods for each status type. 
+        attr_accessor :completed_callbacks, :failed_callbacks, :killed_callbacks,
+            :tick_callbacks, :at_callbacks
         
         # used when displaying the Job in the resque-web UI and identifiyng the job
         # type by status. By default this is the name of the job class, but can be
@@ -147,11 +149,25 @@ module Resque
           self.enqueue_to(queue, self, *args)
         end
         
-        # Append any desired callbacks to the callback chain
-        def after_status(*method_symbols)
-          # Remember this will become a class variable
-          # The varargs have been splatted, so available as a plain old array now
-          @callback_methods = method_symbols          
+        # Append any desired 'on tick' callbacks to the callback chain
+        # NOTE: 'at' calls 'tick' internally, so these callbacks are shared by 'at' too
+        def after_tick(*method_symbols)
+          @tick_callbacks = method_symbols          
+        end
+        
+        # Append any desired 'on kill' callbacks to the callback chain
+        def after_killed(*method_symbols)
+          @killed_callbacks = method_symbols          
+        end
+        
+        # Append any desired 'on complete' callbacks to the callback chain
+        def after_completed(*method_symbols)
+          @completed_callbacks = method_symbols          
+        end
+        
+        # Append any desired 'on fail' callbacks to the callback chain
+        def after_failed(*method_symbols)
+          @failed_callbacks = method_symbols          
         end
       end
 
@@ -229,11 +245,25 @@ module Resque
       def tick(*messages)
         kill! if should_kill?
         set_status({'status' => STATUS_WORKING}, *messages)
+        
+        if self.class.tick_callbacks
+          self.class.tick_callbacks.each do |callback_method|
+            # The methods in the array are symbols, so use 'send'
+            self.send callback_method, *messages
+          end
+        end
       end
 
       # set the status to 'failed' passing along any additional messages
       def failed(*messages)
         set_status({'status' => STATUS_FAILED}, *messages)
+        
+        if self.class.failed_callbacks
+          self.class.failed_callbacks.each do |callback_method|
+            # The methods in the array are symbols, so use 'send'
+            self.send callback_method, *messages
+          end
+        end
       end
 
       # set the status to 'completed' passing along any addional messages
@@ -242,6 +272,13 @@ module Resque
           'status' => STATUS_COMPLETED,
           'message' => "Completed at #{Time.now}"
         }, *messages)
+        
+        if self.class.completed_callbacks
+          self.class.completed_callbacks.each do |callback_method|
+            # The methods in the array are symbols, so use 'send'
+            self.send callback_method, *messages
+          end
+        end
       end
 
       # kill the current job, setting the status to 'killed' and raising <tt>Killed</tt>
@@ -250,23 +287,20 @@ module Resque
           'status' => STATUS_KILLED,
           'message' => "Killed at #{Time.now}"
         })
+        
+        if self.class.killed_callbacks
+          self.class.killed_callbacks.each do |callback_method|
+            # The methods in the array are symbols, so use 'send'
+            self.send callback_method, *messages
+          end
+        end
+        
         raise Killed
       end
 
       private
       def set_status(*args)
-        the_status = [status, {'name'  => self.name}, args].flatten
-      
-        self.status = the_status
-                
-        # Now call the callbacks, if there are any
-        # remember the list is on the class, not the instance
-        if self.class.callback_methods
-          self.class.callback_methods.each do |callback_method|
-            # The methods in the array are actually symbols, so use 'send'
-            self.send callback_method, the_status
-          end  
-        end
+        self.status = [status, {'name'  => self.name}, args].flatten      
       end
 
     end
