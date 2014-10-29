@@ -19,7 +19,7 @@ Install the resque-status gem (which will pull in the dependencies).
 
   gem install resque-status
   
-To use with Rails 2.x, you can install as a plugin or add the gem to you're config:
+To use with Rails 2.x, you can install as a plugin or add the gem to your config:
   
   # environment.rb
   config.gem 'resque-status'
@@ -160,7 +160,7 @@ avoid Redis connections in your test.
 === resque-web
 
 Though the main purpose of these trackable jobs is to allow you to surface the status
-of user created jobs through you're apps' own UI, I've added a simple example UI
+of user created jobs through your apps' own UI, I've added a simple example UI
 as a plugin to resque-web.
 
 To use, you need to setup a resque-web config file:
