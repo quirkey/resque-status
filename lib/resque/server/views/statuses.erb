@@ -46,7 +46,7 @@
 </table>
 
 <% unless @statuses.empty? %>
-  <%= partial :next_more, :start => @start, :size => @size %>
+  <%= partial :next_more, :start => @start, :size => @size, :per_page => 50 %>
 <% end %>
 
 <%= status_poll(@start) %>
