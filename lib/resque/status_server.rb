@@ -5,12 +5,13 @@ module Resque
   module StatusServer
 
     VIEW_PATH = File.join(File.dirname(__FILE__), 'server', 'views')
+    PER_PAGE = 50
 
     def self.registered(app)
 
       app.get '/statuses' do
         @start = params[:start].to_i
-        @end = @start + (params[:per_page] || 50) - 1
+        @end = @start + (params[:per_page] || per_page) - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
         @size = Resque::Plugins::Status::Hash.count
         status_view(:statuses)
@@ -52,13 +53,17 @@ module Resque
         @polling = true
 
         @start = params[:start].to_i
-        @end = @start + (params[:per_page] || 50) - 1
+        @end = @start + (params[:per_page] || per_page) - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
         @size = Resque::Plugins::Status::Hash.count
         status_view(:statuses, {:layout => false})
       end
 
       app.helpers do
+        def per_page
+          PER_PAGE
+        end
+
         def status_view(filename, options = {}, locals = {})
           erb(File.read(File.join(::Resque::StatusServer::VIEW_PATH, "#{filename}.erb")), options, locals)
         end
