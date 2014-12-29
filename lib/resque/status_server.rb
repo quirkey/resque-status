@@ -10,7 +10,7 @@ module Resque
 
       app.get '/statuses' do
         @start = params[:start].to_i
-        @end = @start + (params[:per_page] || 50)
+        @end = @start + (params[:per_page] || 50) - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
         @size = Resque::Plugins::Status::Hash.count
         status_view(:statuses)
@@ -52,10 +52,9 @@ module Resque
         @polling = true
 
         @start = params[:start].to_i
-        @end = @start + (params[:per_page] || 50)
+        @end = @start + (params[:per_page] || 50) - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
-        @size = @statuses.size
-
+        @size = Resque::Plugins::Status::Hash.count
         status_view(:statuses, {:layout => false})
       end
 
