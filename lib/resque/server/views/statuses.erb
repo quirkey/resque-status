@@ -1,19 +1,21 @@
 <%= status_view :status_styles, :layout => false %>
 
 <h1 class='wi'>Statuses</h1>
+
 <%unless @statuses.empty?%>
-<form method="POST" action="<%= u(:statuses) %>/clear" class='clear-failed'>
-  <input type='submit' name='' value='Clear Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
-</form>
-<form method="POST" action="<%= u(:statuses) %>/clear/completed" class='clear-failed'>
-  <input type='submit' name='' value='Clear Completed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
-</form>
-<form method="POST" action="<%= u(:statuses) %>/clear/failed" class='clear-failed'>
-  <input type='submit' name='' value='Clear Failed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
-</form>
+  <form method="POST" action="<%= u(:statuses) %>/clear" class='clear-failed'>
+    <input type='submit' name='' value='Clear Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
+  </form>
+  <form method="POST" action="<%= u(:statuses) %>/clear/completed" class='clear-failed'>
+    <input type='submit' name='' value='Clear Completed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
+  </form>
+  <form method="POST" action="<%= u(:statuses) %>/clear/failed" class='clear-failed'>
+    <input type='submit' name='' value='Clear Failed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
+  </form>
 <%end%>
+
 <p class='intro'>These are recent jobs created with the Resque::Plugins::Status class</p>
-<table>
+<table class="vertically-top">
   <tr>
     <th>ID</th>
     <th>Name</th>
