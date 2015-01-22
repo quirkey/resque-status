@@ -1,0 +1,88 @@
+<% unless @polling %>
+    <div id="resque-status">
+<% end %>
+<div class="resque-status">
+    <h1 class='wi'>Statuses</h1>
+    <p class='intro'>These are recent jobs created with the Resque::Plugins::Status class</p>
+
+    <% unless @statuses.empty? %>
+
+        <div class="btn-group pull-right">
+
+            <a href="<%= clear_path(:completed) %>" class='btn-small btn status-clear'>Clear Completed
+                Statuses</a>
+            <a href="<%= clear_path(:killed) %>" class='btn-small btn status-clear'>Clear Killed Statuses</a>
+
+            <a href="<%= clear_path(:failed) %>" class='btn-small btn status-clear'>Clear Failed Statuses</a>
+            <a href="<%= clear_path(:all) %>" class='btn-small btn btn-danger status-clear'>Clear All
+                Statuses</a>
+        </div>
+        <% if @has_killable && !@polling %>
+            <a href="<%= kill_status_path(:all) %>" class='btn-small btn btn-danger status-kill-all disabled'>Kill sellected</a>
+        <% end %>
+        <div class="clearfix"></div>
+    <p></p>
+    <% end %>
+
+
+    <table class="table table-bordered">
+        <tr>
+            <th class="status-check-all">
+                <% if @has_killable && !@polling%>
+                    <input type="checkbox" value="1" class="status-check-all" name="check_all">
+                <% end %>
+            </th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Last Updated</th>
+            <th class="status-progress" style="width:130px">% Complete</th>
+            <th>Message</th>
+            <th>Kill</th>
+        </tr>
+        <% unless @statuses.empty? %>
+            <% @statuses.each do |status| %>
+                <tr>
+                    <td>
+                        <% if status.killable? && !@polling %>
+                            <input type="checkbox" value="<%= status.uuid %>" class="status-jobs-option" name="jobs[]">
+                        <%end%>
+                    </td>
+                    <td><a href="<%= status_path(status.uuid) %>"><%= status.uuid %></a></td>
+                    <td><%= status.name %></td>
+                    <td class="status status-<%= status.status %>"><%= status.status %></td>
+                    <td class="time"><%= status.time.strftime("%Y/%m/%d %H:%M:%S %z") %></td>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-pct"><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></div>
+                            <div class="bar" style="width:<%= status.pct_complete %>%">
+
+                            </div>
+                        </div>
+                    </td>
+                    <td><%= status.message %></td>
+                    <td>
+                        <% if status.killable? %><a href="<%= kill_status_path(status.uuid) %>" class="status-kill">Kill</a>
+                        <% end %></td>
+                </tr>
+            <% end %>
+        <% else %>
+            <tr>
+                <td colspan="8" class='no-data'>No Statuses right now...</td>
+            </tr>
+        <% end %>
+    </table>
+
+    <% unless @statuses.empty? %>
+        <%= pagination :start => @start, :total => @size, :per_page => 20  %>
+    <% end %>
+
+    <%= status_poll(@start).html_safe%>
+</div>
+
+<% unless @polling %>
+</div>
+    <!-- Kill Host -->
+    <%= javascript_include_tag "resque_status/application" %>
+    <%= stylesheet_link_tag "resque_status/application", :media => "all" %>
+<% end %>

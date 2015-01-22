@@ -18,30 +18,7 @@ Gem::Specification.new do |s|
     "LICENSE",
     "README.rdoc"
   ]
-  s.files = [
-    ".document",
-    "Gemfile",
-    "Gemfile.lock",
-    "LICENSE",
-    "README.rdoc",
-    "Rakefile",
-    "examples/sleep_job.rb",
-    "init.rb",
-    "lib/resque-status.rb",
-    "lib/resque/job_with_status.rb",
-    "lib/resque/plugins/status.rb",
-    "lib/resque/plugins/status/hash.rb",
-    "lib/resque/server/views/status.erb",
-    "lib/resque/server/views/status_styles.erb",
-    "lib/resque/server/views/statuses.erb",
-    "lib/resque/status.rb",
-    "lib/resque/status_server.rb",
-    "resque-status.gemspec",
-    "test/redis-test.conf",
-    "test/test_helper.rb",
-    "test/test_resque_plugins_status.rb",
-    "test/test_resque_plugins_status_hash.rb"
-  ]
+  s.files = Dir['{lib,config,app}/**/*']
   s.homepage = "http://github.com/quirkey/resque-status"
   s.rubyforge_project = "quirkey"
   s.rubygems_version = "2.2.1"
