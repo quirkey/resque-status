@@ -14,8 +14,19 @@ module Resque
         def self.create(uuid, *messages)
           set(uuid, *messages)
           redis.zadd(set_key, Time.now.to_i, uuid)
-          redis.zremrangebyscore(set_key, 0, Time.now.to_i - @expire_in) if @expire_in
+          remove_out_of_time_statuses(uuid)
           uuid
+        end
+
+        def self.remove_out_of_time_statuses(uuid)
+          if @expire_in
+            statuses = redis.zrange(set_key, 0, -1, :with_scores => true)
+            can_remove = []
+            statuses.each do |status|
+              can_remove << status[0] if status[0] && status[0] != uuid && redis.get(status_key(status[0])).nil?
+            end
+            can_remove.empty? || redis.zrem(set_key, can_remove)
+          end
         end
 
         # Get a status by UUID. Returns a Resque::Plugins::Status::Hash
