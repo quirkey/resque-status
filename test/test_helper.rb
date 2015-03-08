@@ -29,10 +29,10 @@ end
 at_exit do
   next if $!
 
-  if defined?(MiniTest)
-    exit_code = MiniTest::Unit.new.run(ARGV)
+  exit_code = if defined?(MiniTest)
+    MiniTest::Unit.new.run(ARGV)
   else
-    exit_code = Test::Unit::AutoRunner.run
+    Test::Unit::AutoRunner.run
   end
 
   pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
@@ -42,7 +42,8 @@ at_exit do
 end
 
 puts "Starting redis for testing at localhost:9736..."
-`rm -f #{dir}/dump.rdb && redis-server #{dir}/redis-test.conf`
+result = `rm -f #{dir}/dump.rdb && redis-server #{dir}/redis-test.conf`
+raise "Redis failed to start: #{result}" unless $?.success?
 Resque.redis = 'localhost:9736/1'
 
 #### Fixtures
