@@ -10,9 +10,10 @@ module Resque
 
       app.get '/statuses' do
         @start = params[:start].to_i
-        @end = @start + (params[:per_page] || 50)
+        @per_page = (params[:per_page] || 50).to_i
+        @end = @start + @per_page - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
-        @size = @statuses.size
+        @size = Resque::Plugins::Status::Hash.status_ids.size
         status_view(:statuses)
       end
 
@@ -47,14 +48,20 @@ module Resque
         redirect u(:statuses)
       end
 
+      app.post '/statuses/clear/delayed' do
+        Resque::Plugins::Status::Hash.clear_delayed
+        redirect u(:statuses)
+      end
+
       app.get "/statuses.poll" do
         content_type "text/plain"
         @polling = true
 
         @start = params[:start].to_i
-        @end = @start + (params[:per_page] || 50)
+        @per_page = (params[:per_page] || 50).to_i
+        @end = @start + @per_page - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
-        @size = @statuses.size
+        @size = Resque::Plugins::Status::Hash.status_ids.size
 
         status_view(:statuses, {:layout => false})
       end

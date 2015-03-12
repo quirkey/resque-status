@@ -323,6 +323,20 @@ class TestResquePluginsStatus < Minitest::Test
         end
       end
 
+      describe "#delayed" do
+        before do
+          @job.delayed("Later...")
+        end
+
+        it "set status" do
+          assert @job.status.delayed?
+        end
+
+        it "set message" do
+          assert_equal "Later...", @job.status.message
+        end
+      end
+
       describe "#completed" do
         before do
           @job.completed

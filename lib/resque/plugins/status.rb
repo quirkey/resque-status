@@ -35,12 +35,14 @@ module Resque
       STATUS_COMPLETED = 'completed'
       STATUS_FAILED = 'failed'
       STATUS_KILLED = 'killed'
+      STATUS_DELAYED = 'delayed'
       STATUSES = [
         STATUS_QUEUED,
         STATUS_WORKING,
         STATUS_COMPLETED,
         STATUS_FAILED,
-        STATUS_KILLED
+        STATUS_KILLED,
+        STATUS_DELAYED
       ].freeze
 
       autoload :Hash, 'resque/plugins/status/hash'
@@ -162,6 +164,9 @@ module Resque
         if status && status.failed?
           on_failure(status.message) if respond_to?(:on_failure)
           return
+        elsif status && status.delayed?
+          on_delayed if respond_to?(:on_delayed)
+          return
         elsif status && !status.completed?
           completed
         end
@@ -225,6 +230,11 @@ module Resque
       # set the status to 'failed' passing along any additional messages
       def failed(*messages)
         set_status({'status' => STATUS_FAILED}, *messages)
+      end
+
+      # set the status to 'delayed' passing along any additional messages
+      def delayed(*messages)
+        set_status({'status' => STATUS_DELAYED}, *messages)
       end
 
       # set the status to 'completed' passing along any addional messages
