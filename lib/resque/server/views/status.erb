@@ -4,7 +4,7 @@
 <p class='intro'>Viewing a specific job created with Resque::Plugins::Status. <a href="<%= u(:statuses) %>">Return to the list of statuses</a></p>
 
 <div class="status-holder" rel="<%= @status.status %>" id="status_<%= @status.uuid %>">
-  <h2>Overwiev</h2>
+  <h2>Overview</h2>
   <div class="status-progress">
     <div class="status-progress-bar status-<%= @status.status %>" style="width: <%= @status.pct_complete %>%;"></div>
     <p><%= @status.pct_complete %>%</p>
