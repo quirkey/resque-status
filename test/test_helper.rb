@@ -1,15 +1,8 @@
-dir = File.dirname(File.expand_path(__FILE__))
-$LOAD_PATH.unshift dir + '/../lib'
-$TESTING = true
-require 'test/unit'
-require 'rubygems'
-require 'shoulda'
-require 'mocha/setup'
-
+require 'bundler/setup'
 require 'resque-status'
 
-class Test::Unit::TestCase
-end
+require 'minitest/autorun'
+require 'mocha/setup'
 
 #
 # make sure we can run redis
@@ -26,23 +19,20 @@ end
 # kill it when they end
 #
 
-at_exit do
-  next if $!
 
-  if defined?(MiniTest)
-    exit_code = MiniTest::Unit.new.run(ARGV)
-  else
-    exit_code = Test::Unit::AutoRunner.run
+class << Minitest
+  def exit(*args)
+    pid = `ps -e -o pid,command | grep [r]edis.*9736`.split(" ")[0]
+    puts "Killing test redis server..."
+    Process.kill("KILL", pid.to_i)
+    super
   end
-
-  pid = `ps -e -o pid,command | grep [r]edis-test`.split(" ")[0]
-  puts "Killing test redis server..."
-  Process.kill("KILL", pid.to_i)
-  exit exit_code
 end
 
+dir = File.expand_path("../", __FILE__)
 puts "Starting redis for testing at localhost:9736..."
-`rm -f #{dir}/dump.rdb && redis-server #{dir}/redis-test.conf`
+result = `rm -f #{dir}/dump.rdb && redis-server #{dir}/redis-test.conf`
+raise "Redis failed to start: #{result}" unless $?.success?
 Resque.redis = 'localhost:9736/1'
 
 #### Fixtures
