@@ -1,7 +1,7 @@
 module Resque
   module Plugins
 
-    # Resque::Plugins::Status is a module you're jobs will include.
+    # Resque::Plugins::Status is a module your jobs will include.
     # It provides helper methods for updating the status/etc from within an
     # instance as well as class methods for creating and queuing the jobs.
     #

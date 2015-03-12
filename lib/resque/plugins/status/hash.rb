@@ -56,17 +56,23 @@ module Resque
 
         def self.clear_completed(range_start = nil, range_end = nil)
           status_ids(range_start, range_end).select do |id|
-            get(id).completed?
-          end.each do |id|
-            remove(id)
+            if get(id).completed?
+              remove(id)
+              true
+            else
+              false
+            end
           end
         end
 
         def self.clear_failed(range_start = nil, range_end = nil)
           status_ids(range_start, range_end).select do |id|
-            get(id).failed?
-          end.each do |id|
-            remove(id)
+            if get(id).failed?
+              remove(id)
+              true
+            else
+              false
+            end
           end
         end
 

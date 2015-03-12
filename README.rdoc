@@ -4,25 +4,20 @@ resque-status is an extension to the resque queue system that provides simple tr
 
 == About
 
-resque-status provides a set of simple classes that extend resque's default 
+resque-status provides a set of simple classes that extend resque's default
 functionality (with 0% monkey patching) to give apps a way to track specific
 job instances and their status. It achieves this by giving job instances UUID's
 and allowing the job instances to report their status from within their iterations.
 
 == Installation
 
-resque-status *requires Redis >= 1.1* (though I recommend getting the latest stable version). 
-You can download Redis here: http://code.google.com/p/redis/ or install it 
+resque-status *requires Redis >= 1.1* (though I recommend getting the latest stable version).
+You can download Redis here: http://code.google.com/p/redis/ or install it
 using homebrew (brew install redis).
 
 Install the resque-status gem (which will pull in the dependencies).
 
   gem install resque-status
-  
-To use with Rails 2.x, you can install as a plugin or add the gem to you're config:
-  
-  # environment.rb
-  config.gem 'resque-status'
 
 With newer Rails add this to your Gemfile:
 
@@ -30,64 +25,52 @@ With newer Rails add this to your Gemfile:
   gem 'resque-status'
 
 Then in an initializer:
-  
+
   # config/initializers/resque.rb
   Resque.redis = "your/redis/socket" # default localhost:6379
   Resque::Plugins::Status::Hash.expire_in = (24 * 60 * 60) # 24hrs in seconds
 
-== NOTES ABOUT UPGRADING TO >= v0.3 
-
-Even though this was one of the first resque plugins, later versions of resque added stricter plugin conventions 
-that resque-status did not completely conform to (See: https://github.com/defunkt/resque/blob/master/docs/PLUGINS.md)
-
-Thanks to some work from @EugZol and @bukowskis v0.3 moved around some code to conform:
-
-`Resque::Status` is now `Resque::Plugins::Status` and is now an `include`able module.
-`Resque::Status.get/etc` have been moved to `Resque::Plugins::Status::Hash`
-  
 == Usage
 
-The most direct way to use resque-status is to create your jobs using the 
+The most direct way to use resque-status is to create your jobs using the
 Resque::Plugins::Status module. An example job would look something like:
 
   class SleepJob
     include Resque::Plugins::Status
-  
+
     def perform
       total = (options['length'] || 1000).to_i
-      num = 0
-      while num < total
+      total.times do |i|
+        num = i+1
         at(num, total, "At #{num} of #{total}")
         sleep(1)
-        num += 1
       end
     end
-  
   end
 
-One major difference is that instead of implementing <tt>perform</tt> as a 
+One major difference is that instead of implementing <tt>perform</tt> as a
 class method, we do our job implementation within instances of the job class.
 
 In order to queue a SleepJob up, we also won't use <tt>Resque.enqueue</tt>, instead
-we'll use the <tt>create</tt> class method which will wrap <tt>enqueue</tt> and 
+we'll use the <tt>create</tt> class method which will wrap <tt>enqueue</tt> and
 creating a unique id (UUID) for us to track the job with.
 
-  job_id = SleepJob.create(:length => 100)
-  
+  job_id = SleepJob.create(length: 100)
+
 This will create a UUID enqueue the job and pass the :length option on the SleepJob
 instance as options['length'] (as you can see above).
 
 Now that we have a UUID its really easy to get the status:
 
   status = Resque::Plugins::Status::Hash.get(job_id)
-  
+
 This returns a Resque::Plugins::Status::Hash object, which is a Hash (with benefits).
 
   status.pct_complete #=> 0
   status.status #=> 'queued'
   status.queued? #=> true
   status.working? #=> false
-  status.time #=> Time object        
+  status.time #=> Time object
   status.message #=> "Created at ..."
 
 Once the worker reserves the job, the instance of SleepJob updates the status at
@@ -96,8 +79,8 @@ each iteration using <tt>at()</tt>
   status = Resque::Plugins::Status::Hash.get(job_id)
   status.working? #=> true
   status.num #=> 5
-  status.total => 100
-  status.pct_complete => 5
+  status.total #=> 100
+  status.pct_complete #=> 5
 
 If an error occurs within the job instance, the status is set to 'failed' and then
 the error is re-raised so that Resque can capture it.
@@ -115,7 +98,7 @@ download by the user.
 
 A Status is actually just a hash, so inside a job you can do:
 
-    status['filename'] = '/myfilename'
+    set_status(filename: "myfilename")
 
 Also, all the status setting methods take any number of hash arguments. So you could do:
 
@@ -129,7 +112,7 @@ by UUID.
 
   Resque::Plugins::Status::Hash.kill(job_id)
 
-The next time the job at job_id calls <tt>at</tt> or <tt>tick</tt>, it will raise a <tt>Killed</tt> 
+The next time the job at job_id calls <tt>at</tt> or <tt>tick</tt>, it will raise a <tt>Killed</tt>
 error and set the status to killed.
 
 === Percent Complete and setting the message
@@ -142,53 +125,53 @@ is raised if the job is killed.
 
 === Expiration
 
-Since Redis is RAM based, we probably don't want to keep these statuses around forever 
+Since Redis is RAM based, we probably don't want to keep these statuses around forever
 (at least until @antirez releases the VM feature). By setting expire_in, all statuses
 and their related keys will expire in expire_in seconds from the last time theyre updated:
 
   Resque::Plugins::Status::Hash.expire_in = (60 * 60) # 1 hour
 === Testing
 
-Recent versions of Resque introduced `Resque.inline` which changes the behavior to 
+Recent versions of Resque introduced `Resque.inline` which changes the behavior to
 instead of enqueueing and performing jobs to just executing them inline. In Resque
 itself this removes the dependency on a Redis, however, `Resque::Status` uses Redis
 to store information about jobs, so though `inline` "works", you will still need
-to use or mock a redis connection. You should be able to use a library like 
+to use or mock a redis connection. You should be able to use a library like
 https://github.com/causes/mock_redis alongside `inline` if you really want to
 avoid Redis connections in your test.
 
 === resque-web
 
 Though the main purpose of these trackable jobs is to allow you to surface the status
-of user created jobs through you're apps' own UI, I've added a simple example UI
+of user created jobs through your apps' own UI, I've added a simple example UI
 as a plugin to resque-web.
 
 To use, you need to setup a resque-web config file:
 
-  # ~/resque_conf.rb  
+  # ~/resque_conf.rb
   require 'resque/status_server'
-  
+
 Then start resque-web with your config:
 
   resque-web ~/resque_conf.rb
-  
+
 This should launch resque-web in your browser and you should see a 'Statuses' tab.
 
 http://img.skitch.com/20100119-k166xyijcjpkk6xtwnw3854a8g.jpg
-      
+
 == More
 
 Source: http://github.com/quirkey/resque-status
 API Docs: http://rdoc.info/projects/quirkey/resque-status
 Examples: http://github.com/quirkey/resque-status/tree/master/examples
 Resque: http://github.com/defunkt/resque
-            
+
 == Thanks
 
-Resque is awesome, @defunkt needs a shout-out. 
-  
+Resque is awesome, @defunkt needs a shout-out.
+
 == Note on Patches/Pull Requests
- 
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a
