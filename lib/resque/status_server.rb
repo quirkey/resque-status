@@ -13,7 +13,7 @@ module Resque
         @per_page = (params[:per_page] || 50).to_i
         @end = @start + @per_page - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
-        @size = @statuses.size
+        @size = Resque::Plugins::Status::Hash.status_ids.size
         status_view(:statuses)
       end
 
@@ -61,7 +61,7 @@ module Resque
         @per_page = (params[:per_page] || 50).to_i
         @end = @start + @per_page - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
-        @size = @statuses.size
+        @size = Resque::Plugins::Status::Hash.status_ids.size
 
         status_view(:statuses, {:layout => false})
       end
