@@ -1,18 +1,20 @@
 <%= status_view :status_styles, :layout => false %>
 
-<h1 class='wi'>Statuses: <%= @status.uuid %>/<%= @status.name %></h1>
+<h1 class='wi'>Status <%= @status.uuid %></h1>
 <p class='intro'>Viewing a specific job created with Resque::Plugins::Status. <a href="<%= u(:statuses) %>">Return to the list of statuses</a></p>
 
 <div class="status-holder" rel="<%= @status.status %>" id="status_<%= @status.uuid %>">
+  <h2>Overview</h2>
   <div class="status-progress">
     <div class="status-progress-bar status-<%= @status.status %>" style="width: <%= @status.pct_complete %>%;"></div>
     <p><%= @status.pct_complete %>%</p>
   </div>
   <div class="status-message"><%= @status.message %></div>
   <div class="status-time"><%= @status.time? ? @status.time : 'Not started' %></div>
+
   <h2>Details</h2>
   <div class="status-details">
-    <table>
+    <table class="vertically-top">
       <thead>
         <tr>
           <th>Key</th>
@@ -81,7 +83,7 @@
         time.setTime(value * 1000);
         return time.toUTCString();
       } else {
-        return JSON.stringify(value);
+        return JSON.stringify(value, null, " ");
       }
     }
 
