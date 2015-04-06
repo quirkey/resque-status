@@ -23,6 +23,7 @@
     <th>Last Updated</th>
     <th class="progress">% Complete</th>
     <th>Message</th>
+    <th>Duration</th>
     <th>Kill</th>
   </tr>
   <% unless @statuses.empty? %>
@@ -37,6 +38,7 @@
         <div class="progress-pct"><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></div>
       </td>
       <td><%= status.message %></td>
+      <td><%= status.duration %></td>
       <td><% if status.killable? %><a href="<%= u(:statuses) %>/<%= status.uuid %>/kill" class="kill">Kill</a><% end %></td>
     </tr>
     <% end %>

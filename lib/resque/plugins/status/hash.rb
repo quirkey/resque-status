@@ -211,6 +211,10 @@ module Resque
         hash_accessor :num
         hash_accessor :total
 
+        #adds start- & end-time for processing
+        hash_accessor :started_at
+        hash_accessor :finished_at
+
         # Create a new Resque::Plugins::Status::Hash object. If multiple arguments are passed
         # it is assumed the first argument is the UUID and the rest are status objects.
         # All arguments are subsequentily merged in order. Strings are assumed to
@@ -246,6 +250,30 @@ module Resque
         # object, otherwise returns nil
         def time
           time? ? Time.at(self['time']) : nil
+        end
+
+        # Returns the duration the job took to be performed or to current time
+        # when it's not done yet
+        # format can be given to format time
+        def duration(format = "%H:%M:%S")
+          duration = nil
+          if completed? or failed? or killed?
+            duration = self['finished_at'] - self['started_at']
+          elsif working?
+            duration = Time.now.to_i - self['started_at']
+          end
+
+          duration.nil? ? nil : Time.at(duration).utc.strftime(format)
+        end
+
+        # Returns the time when the perform was called
+        def started_at
+          started_at? ? Time.at(self['started_at']) : nil
+        end
+
+        # Returns the time when the processing was completed / failed
+        def finished_at
+          finished_at? ? Time.at(self['finished_at']) : nil
         end
 
         Resque::Plugins::Status::STATUSES.each do |status|
