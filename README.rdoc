@@ -11,7 +11,7 @@ and allowing the job instances to report their status from within their iteratio
 
 == Installation
 
-resque-status *requires Redis >= 1.1* (though I recommend getting the latest stable version).
+resque-status <b>requires Redis >= 1.1</b> (though I recommend getting the latest stable version).
 You can download Redis here: http://code.google.com/p/redis/ or install it
 using homebrew (brew install redis).
 
@@ -132,12 +132,12 @@ and their related keys will expire in expire_in seconds from the last time theyr
   Resque::Plugins::Status::Hash.expire_in = (60 * 60) # 1 hour
 === Testing
 
-Recent versions of Resque introduced `Resque.inline` which changes the behavior to
+Recent versions of Resque introduced <tt>Resque.inline</tt> which changes the behavior to
 instead of enqueueing and performing jobs to just executing them inline. In Resque
-itself this removes the dependency on a Redis, however, `Resque::Status` uses Redis
-to store information about jobs, so though `inline` "works", you will still need
+itself this removes the dependency on a Redis, however, <tt>Resque::Status</tt> uses Redis
+to store information about jobs, so though <tt>inline</tt> "works", you will still need
 to use or mock a redis connection. You should be able to use a library like
-https://github.com/causes/mock_redis alongside `inline` if you really want to
+https://github.com/causes/mock_redis alongside <tt>inline</tt> if you really want to
 avoid Redis connections in your test.
 
 === resque-web
