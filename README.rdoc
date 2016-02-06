@@ -123,6 +123,17 @@ is raised if the job is killed.
 
   at(steps_completed, total_steps, "${steps_completed} of #{total_steps} steps completed!")
 
+=== Extending the Resque UI
+
+One of the great things about Resque is that it comes with a very handy Sinatra-based UI.
+resque-status allows you to extend this UI to take advantage of some of its added features,
+such as inspecting the state of the Status::Hash, killing a worker, or viewing the percent
+completion. To add the Statuses tab to your Resque UI, simply add:
+
+  require 'resque/status_server'
+
+to your config/routes.rb file.
+
 === Expiration
 
 Since Redis is RAM based, we probably don't want to keep these statuses around forever
