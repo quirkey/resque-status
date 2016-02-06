@@ -152,6 +152,23 @@ class TestResquePluginsStatusHash < Minitest::Test
       end
     end
 
+    describe ".clear_killed" do
+      before do
+        @killed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => "killed"})
+        @not_killed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
+        Resque::Plugins::Status::Hash.clear_killed
+      end
+
+      it "clear killed status" do
+        assert_nil Resque::Plugins::Status::Hash.get(@killed_status_id)
+      end
+
+      it "not clear not-killed status" do
+        status = Resque::Plugins::Status::Hash.get(@not_killed_status_id)
+        assert status.is_a?(Resque::Plugins::Status::Hash)
+      end
+    end
+
     describe ".remove" do
       before do
         Resque::Plugins::Status::Hash.remove(@uuid)

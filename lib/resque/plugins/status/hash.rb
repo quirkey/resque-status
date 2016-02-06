@@ -76,6 +76,17 @@ module Resque
           end
         end
 
+        def self.clear_killed(range_start = nil, range_end = nil)
+          status_ids(range_start, range_end).select do |id|
+            if get(id).killed?
+              remove(id)
+              true
+            else
+              false
+            end
+          end
+        end
+
         def self.remove(uuid)
           redis.del(status_key(uuid))
           redis.zrem(set_key, uuid)
