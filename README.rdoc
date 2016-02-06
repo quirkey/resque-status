@@ -51,6 +51,8 @@ Resque::Plugins::Status module. An example job would look something like:
 One major difference is that instead of implementing <tt>perform</tt> as a
 class method, we do our job implementation within instances of the job class.
 
+  === Queueing Jobs
+
 In order to queue a SleepJob up, we also won't use <tt>Resque.enqueue</tt>, instead
 we'll use the <tt>create</tt> class method which will wrap <tt>enqueue</tt> and
 creating a unique id (UUID) for us to track the job with.
@@ -59,6 +61,8 @@ creating a unique id (UUID) for us to track the job with.
 
 This will create a UUID enqueue the job and pass the :length option on the SleepJob
 instance as options['length'] (as you can see above).
+
+  === Finding a Status by UUID
 
 Now that we have a UUID its really easy to get the status:
 
@@ -84,6 +88,8 @@ each iteration using <tt>at()</tt>
 
 If an error occurs within the job instance, the status is set to 'failed' and then
 the error is re-raised so that Resque can capture it.
+
+  === Tracking Statuses
 
 Its also possible to get a list of current/recent job statuses:
 
