@@ -353,6 +353,65 @@ class TestResquePluginsStatus < Minitest::Test
 
     end
 
+    context "#after_at" do
+      setup do
+        @job = AtCallbackJob.new("123")
+      end
+      
+      should "call back on at" do
+        @job.expects(:report).with({'num' => 1, 'total' => 1}, 'report_message')
+        @job.perform
+      end  
+    end
+
+    context "#after_tick" do
+      setup do
+        @job = TickCallbackJob.new("123")
+      end
+      
+      should "call back on tick" do
+        @job.expects(:report).with('tick_message')
+        @job.perform
+      end  
+    end
+
+    context "#after_killed" do
+      setup do
+        @job = KilledCallbackJob.new("123")
+      end
+      
+      should "call back on kill" do
+        # Kill does not cause any messages.
+        @job.expects(:report).once
+        
+        # Still expecting to see 'Killed' raised after the callback fires.
+        assert_raise Resque::Plugins::Status::Killed do
+          @job.perform
+        end
+      end  
+    end
+    
+    context "#after_completed" do
+      setup do
+        @job = CompletedCallbackJob.new("123")
+      end
+      
+      should "call back on complete" do
+        @job.expects(:report).with("Whether through good times or bad, our journey is at an end")
+        @job.perform
+      end  
+    end
+    
+    context "#after_failed" do
+      setup do
+        @job = FailedCallbackJob.new("123")
+      end
+      
+      should "call back on fail" do
+        @job.expects(:report).with("Wow, so resque, such failed")
+        @job.perform
+      end  
+    end
   end
 
 end

@@ -50,7 +50,7 @@ module Resque
       class NotANumber < RuntimeError; end
 
       attr_reader :uuid, :options
-
+      
       def self.included(base)
         base.extend(ClassMethods)
       end
@@ -63,6 +63,10 @@ module Resque
           :statused
         end
 
+        # Private places to store the lists of callback methods for each status type. 
+        attr_accessor :completed_callbacks, :failed_callbacks, :killed_callbacks,
+            :tick_callbacks, :at_callbacks
+        
         # used when displaying the Job in the resque-web UI and identifiyng the job
         # type by status. By default this is the name of the job class, but can be
         # ovveridden in the specific job class to present a more user friendly job
@@ -144,6 +148,27 @@ module Resque
         def scheduled(queue, klass, *args)
           self.enqueue_to(queue, self, *args)
         end
+        
+        # Append any desired 'on tick' callbacks to the callback chain
+        # NOTE: 'at' calls 'tick' internally, so these callbacks are shared by 'at' too
+        def after_tick(*method_symbols)
+          @tick_callbacks = method_symbols          
+        end
+        
+        # Append any desired 'on kill' callbacks to the callback chain
+        def after_killed(*method_symbols)
+          @killed_callbacks = method_symbols          
+        end
+        
+        # Append any desired 'on complete' callbacks to the callback chain
+        def after_completed(*method_symbols)
+          @completed_callbacks = method_symbols          
+        end
+        
+        # Append any desired 'on fail' callbacks to the callback chain
+        def after_failed(*method_symbols)
+          @failed_callbacks = method_symbols          
+        end
       end
 
       # Create a new instance with <tt>uuid</tt> and <tt>options</tt>
@@ -213,18 +238,32 @@ module Resque
         }, *messages)
       end
 
-      # sets the status of the job for the current itteration. You should use
+      # sets the status of the job for the current iteration. You should use
       # the <tt>at</tt> method if you have actual numbers to track the iteration count.
       # This will kill the job if it has been added to the kill list with
       # <tt>Resque::Plugins::Status::Hash.kill()</tt>
       def tick(*messages)
         kill! if should_kill?
         set_status({'status' => STATUS_WORKING}, *messages)
+        
+        if self.class.tick_callbacks
+          self.class.tick_callbacks.each do |callback_method|
+            # The methods in the array are symbols, so use 'send'
+            self.send callback_method, *messages
+          end
+        end
       end
 
       # set the status to 'failed' passing along any additional messages
       def failed(*messages)
         set_status({'status' => STATUS_FAILED}, *messages)
+        
+        if self.class.failed_callbacks
+          self.class.failed_callbacks.each do |callback_method|
+            # The methods in the array are symbols, so use 'send'
+            self.send callback_method, *messages
+          end
+        end
       end
 
       # set the status to 'completed' passing along any addional messages
@@ -233,6 +272,13 @@ module Resque
           'status' => STATUS_COMPLETED,
           'message' => "Completed at #{Time.now}"
         }, *messages)
+        
+        if self.class.completed_callbacks
+          self.class.completed_callbacks.each do |callback_method|
+            # The methods in the array are symbols, so use 'send'
+            self.send callback_method, *messages
+          end
+        end
       end
 
       # kill the current job, setting the status to 'killed' and raising <tt>Killed</tt>
@@ -241,12 +287,20 @@ module Resque
           'status' => STATUS_KILLED,
           'message' => "Killed at #{Time.now}"
         })
+        
+        if self.class.killed_callbacks
+          self.class.killed_callbacks.each do |callback_method|
+            # The methods in the array are symbols, so use 'send'
+            self.send callback_method
+          end
+        end
+        
         raise Killed
       end
 
       private
       def set_status(*args)
-        self.status = [status, {'name'  => self.name}, args].flatten
+        self.status = [status, {'name'  => self.name}, args].flatten      
       end
 
     end

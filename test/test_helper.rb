@@ -96,3 +96,74 @@ class NeverQueuedJob
     # will never get called
   end
 end
+
+class AtCallbackJob
+  include Resque::Plugins::Status
+
+  # Remember, 'at' shares 'tick' callbacks
+  after_tick :report
+  
+  def report msg
+    puts "This is my message: #{msg}"
+  end
+
+  def perform    
+    at(1, 1, "report_message")
+  end
+end
+
+class TickCallbackJob
+  include Resque::Plugins::Status
+
+  after_tick :report
+  
+  def report msg
+    puts "This is my tick message: #{msg}"
+  end
+
+  def perform    
+    tick("tick_message")
+  end
+end
+
+class KilledCallbackJob
+  include Resque::Plugins::Status
+
+  after_killed :report
+  
+  def report
+    puts "Dramatic death scene goes here"
+  end
+
+  def perform    
+    self.kill!
+  end
+end
+
+class CompletedCallbackJob
+  include Resque::Plugins::Status
+
+  after_completed :report
+  
+  def report msg
+    puts msg
+  end
+
+  def perform    
+    self.completed "Whether through good times or bad, our journey is at an end"
+  end
+end
+
+class FailedCallbackJob
+  include Resque::Plugins::Status
+
+  after_failed :report
+  
+  def report msg
+    puts msg
+  end
+
+  def perform    
+    self.failed "Wow, so resque, such failed"
+  end
+end

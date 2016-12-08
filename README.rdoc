@@ -130,6 +130,105 @@ Since Redis is RAM based, we probably don't want to keep these statuses around f
 and their related keys will expire in expire_in seconds from the last time theyre updated:
 
   Resque::Plugins::Status::Hash.expire_in = (60 * 60) # 1 hour
+
+=== Callbacks
+
+To avoid repeating code which should fire when common behavior happens, you can use
+the following callbacks:
+
+==== after_completed
+
+  class CompletedCallbackJob
+    include Resque::Plugins::Status
+
+    after_completed :report
+
+    def report msg
+      puts msg
+    end
+
+    def perform
+      self.completed "Our journey is at an end"
+    end
+  end
+
+Often used for a job which has worked successfully.
+
+==== after_killed
+
+  class KilledCallbackJob
+    include Resque::Plugins::Status
+
+    after_killed :report
+
+    def report
+      puts "Dramatic death scene goes here"
+    end
+
+    def perform
+      self.kill!
+    end
+  end
+
+Note that 'kill' does not log any messages, so your callback is simply a no-arg
+function.
+
+==== after_failed
+
+  class FailedCallbackJob
+    include Resque::Plugins::Status
+
+    after_failed :report
+
+    def report msg
+      puts msg
+    end
+
+    def perform
+      self.failed "Wow, so resque, such failed"
+    end
+  end
+
+Remember, the 'failed' callback will only work if you are in a situation where the
+worker is still working in some fashion. If the worker gets stuck, for example if
+it runs out of RAM, it won't be able to trigger this.
+
+==== after_tick
+
+  class AtCallbackJob
+    include Resque::Plugins::Status
+
+    # Remember, 'at' shares 'tick' callbacks
+    after_tick :report
+
+    def report msg
+      puts "This is my message: #{msg}"
+    end
+
+    def perform
+      at(1, 1, "report_message")
+    end
+  end
+
+  class TickCallbackJob
+    include Resque::Plugins::Status
+
+    after_tick :report
+
+    def report msg
+      puts "This is my tick message: #{msg}"
+    end
+
+    def perform
+      tick("tick_message")
+    end
+  end
+
+Note that, since 'at' calls 'tick' internally, any callbacks you define with after_tick
+will be shared by calls to 'at' as well. However, an 'at' callback is also passed
+the numeric progress bar data, i.e. `{'num' => 1, 'total' => 1}, 'some message'`,
+whereas 'tick' callbacks just get the message.
+
 === Testing
 
 Recent versions of Resque introduced `Resque.inline` which changes the behavior to
