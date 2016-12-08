@@ -29,7 +29,7 @@
     <% @statuses.each do |status| %>
     <tr>
       <td><a href="<%= u(:statuses) %>/<%= status.uuid %>"><%= status.uuid %></a></td>
-      <td><%= status.name %></td>
+      <td><%= (status.name||"").truncate(100) %></td>
       <td class="status status-<%= status.status %>"><%= status.status %></td>
       <td class="time"><%= status.time.strftime("%Y/%m/%d %H:%M:%S %z") %></td>
       <td class="progress">
