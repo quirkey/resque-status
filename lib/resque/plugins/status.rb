@@ -224,14 +224,15 @@ module Resque
 
       # set the status to 'failed' passing along any additional messages
       def failed(*messages)
-        set_status({'status' => STATUS_FAILED}, *messages)
+        set_status({'status' => STATUS_FAILED, 'end_time' => Time.now}, *messages)
       end
 
       # set the status to 'completed' passing along any addional messages
       def completed(*messages)
         set_status({
           'status' => STATUS_COMPLETED,
-          'message' => "Completed at #{Time.now}"
+          'message' => "Completed at #{Time.now}",
+          'end_time' => Time.now
         }, *messages)
       end
 
@@ -239,7 +240,8 @@ module Resque
       def kill!
         set_status({
           'status' => STATUS_KILLED,
-          'message' => "Killed at #{Time.now}"
+          'message' => "Killed at #{Time.now}",
+          'end_time' => Time.now
         })
         raise Killed
       end
