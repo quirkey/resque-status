@@ -2,6 +2,10 @@
 
 <h1 class='wi'>Statuses</h1>
 
+<%
+  status_filters = %w[working completed failed killed]
+  filters = @filters || {}
+%>
 <%unless @statuses.empty?%>
   <form method="POST" action="<%= u(:statuses) %>/clear" class='clear-failed'>
     <input type='submit' name='' value='Clear Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
@@ -12,31 +16,43 @@
   <form method="POST" action="<%= u(:statuses) %>/clear/failed" class='clear-failed'>
     <input type='submit' name='' value='Clear Failed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
   </form>
+  <div class="filters">
+  <h4>Filters</h4>
+  <span class="filter">Status</span>
+    <select id="status_filter">
+    <option></option>
+    <% status_filters.each do |status_filter| %>
+      <option <%= status_filter == filters[:status] ? 'selected' : nil %> value=<%= status_filter %>><%= status_filter.capitalize %></option>
+    <% end %>
+    </select>
+    <span class="filter">Job Name</span>
+    <input type="text" id="job_name" value="<%= filters[:job] %>" />
+  </div>
 <%end%>
 
 <p class='intro'>These are recent jobs created with the Resque::Plugins::Status class</p>
 <table class="vertically-top">
   <tr>
-    <th>ID</th>
+    <th>Started At</th>
     <th>Name</th>
-    <th>Status</th>
-    <th>Last Updated</th>
-    <th class="progress">% Complete</th>
+    <th class="duration">Duration</th>
+    <th class="status">Status</th>
+    <th class="progress">Progress</th>
     <th>Message</th>
     <th>Kill</th>
   </tr>
   <% unless @statuses.empty? %>
     <% @statuses.each do |status| %>
     <tr>
-      <td><a href="<%= u(:statuses) %>/<%= status.uuid %>"><%= status.uuid %></a></td>
-      <td><%= status.name %></td>
-      <td class="status status-<%= status.status %>"><%= status.status %></td>
-      <td class="time"><%= status.time.strftime("%Y/%m/%d %H:%M:%S %z") %></td>
-      <td class="progress">
+      <td><%= status.time.strftime("%Y/%m/%d %H:%M:%S %z") %></td>
+      <td><a href="<%= u(:statuses) %>/<%= status.uuid %>"><%= status.name %></a></td>
+      <td class="duration"><%= status['end_time'].present? ? "#{((status['end_time'].to_time - status.time) / 60).round(2)} minutes" : nil %></td>
+      <td class="status status-<%= status.status %>"><%= status.status.capitalize %></td>
+      <td class="progress status-<%= status.status %>">
         <div class="progress-bar" style="width:<%= status.pct_complete %>%">&nbsp;</div>
         <div class="progress-pct"><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></div>
       </td>
-      <td><%= status.message %></td>
+      <td class="message"><div><%= status.message %></div></td>
       <td><% if status.killable? %><a href="<%= u(:statuses) %>/<%= status.uuid %>/kill" class="kill">Kill</a><% end %></td>
     </tr>
     <% end %>
@@ -55,7 +71,6 @@
 
 <script type="text/javascript" charset="utf-8">
   jQuery(function($) {
-
     $('a.kill').click(function(e) {
       e.preventDefault();
       var $link = $(this),
@@ -75,5 +90,32 @@
       }
     });
 
+    $('#status_filter').change(function() {
+      const params = (new URL(document.location)).searchParams;
+      
+      const status = this.value;
+      if (status) {
+      params.set("filters[status]", status);
+      }
+      else {
+        params.delete('filters[status]');
+      }
+      window.location.search = params.toString();
+    });
+
+    $('#job_name').on('keypress',function(e) {
+      const params = (new URL(document.location)).searchParams;
+      
+      if (e.which === 13) {
+        const job = $(this).val();
+        if (job) {
+          params.set("filters[job]", job);
+        }
+        else {
+          params.delete('filters[job]');
+        }
+        window.location.search = params.toString();
+      }
+    })
   });
 </script>

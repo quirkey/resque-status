@@ -10,9 +10,14 @@ module Resque
     def self.registered(app)
 
       app.get '/statuses' do
+        @filters = params[:filters]
         @start = params[:start].to_i
         @end = @start + (params[:per_page] || per_page) - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
+        if @filters
+          @statuses = @statuses.filter {|status| status.status == @filters[:status] } if @filters[:status]
+          @statuses = @statuses.select { |job| job.name =~ /#{@filters[:job]}/i } if @filters[:job]
+        end
         @size = Resque::Plugins::Status::Hash.count
         status_view(:statuses)
       end

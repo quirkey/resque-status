@@ -1,6 +1,39 @@
 <style type="text/css" media="screen">
+
+  div.filters {
+    background: #f2f2f2;
+    display: inline-block;
+    width: 500px;
+    padding: 5px;
+  }
+  
+  div.filters h4 {
+    font-weight: bold;
+    color: black;
+  }
+
+  div.filters span.filter {
+    
+  }
+
+  table {
+    line-height: 1.5;
+  }
+  tr th:first-child {
+    width: 165px;
+  }
+
   th.progress {
     width: 100px;
+    text-align: center;
+  }
+  th.status {
+    width: 100px;
+    text-align: center;
+  }
+  th.duration, td.duration {
+    width: 100px;
+    text-align:center;
   }
   td.progress {
     position: relative;
@@ -9,6 +42,16 @@
   }
   td.status {
     font-weight: bold;
+    text-align: center;
+  }
+  td.message {
+    width: 200px;
+  }
+  td.message div {
+    width: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   td.progress .progress-bar {
     position: absolute;
@@ -23,6 +66,7 @@
     -webkit-opacity: 0.5;
   }
   td.progress .progress-pct {
+    text-align: center;
     z-index: 10;
     color: #333;
   }
@@ -41,6 +85,7 @@
     margin-bottom: 40px;
   }
   .status-progress {
+    text-align: center;
     width: 100%;
     height: 30px;
     border: 1px solid #CCC;
@@ -50,6 +95,7 @@
   }
   .status-progress-bar {
     position:absolute;
+    text-align: center;
     top: 0px;
     left: 0px;
     height: 30px;
@@ -57,6 +103,7 @@
   }
   .status-progress p {
     position:absolute;
+    text-align: center;
     top: 5px;
     left: 10px;
     z-index: 15;
@@ -73,16 +120,16 @@
     padding: 10px 0px;
     color: #999;
   }
-  .status-progress-bar.status-completed {
+  td.status-completed div.progress-bar {
     background:#61BF55;
   }
-  .status-progress-bar.status-failed {
-   background: #E47E74;
+  td.status-failed div.progress-bar {
+   background: #ffc6c0;
   }
-  .status-progress-bar.status-working {
+  td.status-working div.progress-bar {
     background: #528499;
   }
-  .status-progress-bar.status-killed {
+  td.status-killed div.progress-bar {
     background: #B84F16;
   }
   .status-completed {
