@@ -1,6 +1,7 @@
 <%= status_view :status_styles, :layout => false %>
 
 <h1 class='wi'>Statuses</h1>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
 <%
   status_filters = %w[working completed failed killed]
@@ -16,44 +17,53 @@
   <form method="POST" action="<%= u(:statuses) %>/clear/failed" class='clear-failed'>
     <input type='submit' name='' value='Clear Failed Statuses' onclick='return confirm("Are you absolutely sure? This cannot be undone.");' />
   </form>
-  <div class="filters">
-  <h4>Filters</h4>
-  <span class="filter">Status</span>
-    <select id="status_filter">
-    <option></option>
-    <% status_filters.each do |status_filter| %>
-      <option <%= status_filter == filters[:status] ? 'selected' : nil %> value=<%= status_filter %>><%= status_filter.capitalize %></option>
-    <% end %>
-    </select>
-    <span class="filter">Job Name</span>
-    <input type="text" id="job_name" value="<%= filters[:job] %>" />
+  <%end%>
+  <div class="card form-inline form-group" style="width: 450px;">
+    <div class="card-body">
+      <h4>Filters</h4>
+      <span class="filter">Status</span>
+        <select class="form-control" id="status_filter">
+        <option></option>
+        <% status_filters.each do |status_filter| %>
+          <option <%= status_filter == filters[:status] ? 'selected' : nil %> value=<%= status_filter %>><%= status_filter.capitalize %></option>
+        <% end %>
+        </select>
+        <span class="filter">Job Name</span>
+        <input class="form-control" type="text" id="job_name" value="<%= filters[:job] %>" />
+      </div>
   </div>
-<%end%>
+
 
 <p class='intro'>These are recent jobs created with the Resque::Plugins::Status class</p>
-<table class="vertically-top">
+<table class="table table-bordered table-hover">
+<thead class="thead-dark">
   <tr>
     <th>Started At</th>
     <th>Name</th>
     <th class="duration">Duration</th>
     <th class="status">Status</th>
-    <th class="progress">Progress</th>
+    <th>Progress</th>
     <th>Message</th>
-    <th>Kill</th>
+    <th>Actions</th>
   </tr>
+</thead>
   <% unless @statuses.empty? %>
     <% @statuses.each do |status| %>
     <tr>
-      <td><%= status.time.strftime("%Y/%m/%d %H:%M:%S %z") %></td>
+      <td><%= status.time.strftime("%Y/%m/%d %H:%M:%S") %></td>
       <td><a href="<%= u(:statuses) %>/<%= status.uuid %>"><%= status.name %></a></td>
       <td class="duration"><%= status['end_time'].present? ? "#{((status['end_time'].to_time - status.time) / 60).round(2)} minutes" : nil %></td>
       <td class="status status-<%= status.status %>"><%= status.status.capitalize %></td>
-      <td class="progress status-<%= status.status %>">
-        <div class="progress-bar" style="width:<%= status.pct_complete %>%">&nbsp;</div>
-        <div class="progress-pct"><%= status.pct_complete ? "#{status.pct_complete}%" : '' %></div>
+      <td class="" style="width:120px">
+<div class="progress">
+  <div class="progress-bar <%= status.working? ? 'progress-bar-striped progress-bar-animated' : '' %> <%= progress[status.status.to_sym] %>" role="progressbar" style="width: <%=status.pct_complete%>%;" aria-valuenow="<%=status.pct_complete %>" aria-valuemin="0" aria-valuemax="100"><%=status.pct_complete%>%</div>
+</div>
       </td>
       <td class="message"><div><%= status.message %></div></td>
-      <td><% if status.killable? %><a href="<%= u(:statuses) %>/<%= status.uuid %>/kill" class="kill">Kill</a><% end %></td>
+      <td>
+      <% if status.killable? %><a href="<%= u(:statuses) %>/<%= status.uuid %>/kill">Kill</a><% end %>
+      <% if status.failed? || status.completed? %><a href="<%= u(:statuses) %>/<%= status.uuid %>/rerun">Rerun</a><% end %>
+      </td>
     </tr>
     <% end %>
   <% else %>
@@ -63,9 +73,7 @@
   <% end %>
 </table>
 
-<% unless @statuses.empty? %>
-  <%= partial :next_more, :start => @start, :size => @size, :per_page => per_page %>
-<% end %>
+<%= pagy_bootstrap_nav(@pagy) if @pagy.pages > 1 %>
 
 <%= status_poll(@start) %>
 

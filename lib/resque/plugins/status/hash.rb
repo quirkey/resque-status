@@ -1,4 +1,7 @@
 require 'securerandom'
+require 'pagy/extras/array'
+require 'pagy'
+require 'pagy/extras/bootstrap'
 
 module Resque
   module Plugins
@@ -8,7 +11,7 @@ module Resque
       # the common status attributes. It also has a number of class methods for
       # creating/updating/retrieving status objects from Redis
       class Hash < ::Hash
-
+        extend Pagy::Backend
         # Create a status, generating a new UUID, passing the message to the status
         # Returns the UUID of the new status.
         def self.create(uuid, *messages)
@@ -82,7 +85,7 @@ module Resque
         end
 
         def self.count
-          redis.zcard(set_key)
+          #redis.zcard(set_key)
         end
 
         # Return <tt>num</tt> Resque::Plugins::Status::Hash objects in reverse chronological order.
@@ -91,9 +94,24 @@ module Resque
         # @param [Numeric] range_end The optional ending range
         # @example retuning the last 20 statuses
         #   Resque::Plugins::Status::Hash.statuses(0, 20)
-        def self.statuses(range_start = nil, range_end = nil)
+        def self.statuses(range_start = nil, range_end = nil, filters = [], page = 0)
           ids = status_ids(range_start, range_end)
-          mget(ids).compact || []
+          statuses = mget(ids).compact || []
+          fis = filter_statuses(statuses, filters)
+          self.define_singleton_method(:params) do
+            { page: page } 
+          end
+          
+          pagy, data = pagy_array(fis)
+        end
+
+        def self.filter_statuses(statuses, filters)
+          return statuses unless filters.present?
+
+          statuses = statuses.filter {|status| status.status == filters[:status] } if filters[:status]
+          statuses = statuses.select { |job| job.name =~ /#{filters[:job]}/i } if filters[:job]
+
+          statuses
         end
 
         # Return the <tt>num</tt> most recent status/job UUIDs in reverse chronological order.

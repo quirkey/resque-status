@@ -1,24 +1,21 @@
 require 'resque/server'
 require 'resque-status'
+require 'pagy/extras/bootstrap'
+
 
 module Resque
   module StatusServer
-
     VIEW_PATH = File.join(File.dirname(__FILE__), 'server', 'views')
     PER_PAGE = 50
 
     def self.registered(app)
-
+      extend Pagy::Backend
       app.get '/statuses' do
         @filters = params[:filters]
         @start = params[:start].to_i
         @end = @start + (params[:per_page] || per_page) - 1
-        @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
-        if @filters
-          @statuses = @statuses.filter {|status| status.status == @filters[:status] } if @filters[:status]
-          @statuses = @statuses.select { |job| job.name =~ /#{@filters[:job]}/i } if @filters[:job]
-        end
-        @size = Resque::Plugins::Status::Hash.count
+        @pagy, @statuses = Resque::Plugins::Status::Hash.statuses(nil, nil, @filters, params[:page])
+        @size = @filters.present? ? -1 : Resque::Plugins::Status::Hash.count
         status_view(:statuses)
       end
 
@@ -65,8 +62,14 @@ module Resque
       end
 
       app.helpers do
+        include Pagy::Frontend
+
         def per_page
           PER_PAGE
+        end
+
+        def progress
+          { 'completed': 'bg-success', 'failed': 'bg-danger', 'working': 'bg-info' }
         end
 
         def status_view(filename, options = {}, locals = {})
