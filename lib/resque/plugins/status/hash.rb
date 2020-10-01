@@ -1,7 +1,4 @@
 require 'securerandom'
-require 'pagy/extras/array'
-require 'pagy'
-require 'pagy/extras/bootstrap'
 
 module Resque
   module Plugins
@@ -11,7 +8,6 @@ module Resque
       # the common status attributes. It also has a number of class methods for
       # creating/updating/retrieving status objects from Redis
       class Hash < ::Hash
-        extend Pagy::Backend
         # Create a status, generating a new UUID, passing the message to the status
         # Returns the UUID of the new status.
         def self.create(uuid, *messages)
@@ -97,12 +93,7 @@ module Resque
         def self.statuses(range_start = nil, range_end = nil, filters = [], page = 0)
           ids = status_ids(range_start, range_end)
           statuses = mget(ids).compact || []
-          fis = filter_statuses(statuses, filters)
-          self.define_singleton_method(:params) do
-            { page: page } 
-          end
-          
-          pagy, data = pagy_array(fis)
+          filter_statuses(statuses, filters)
         end
 
         def self.filter_statuses(statuses, filters)

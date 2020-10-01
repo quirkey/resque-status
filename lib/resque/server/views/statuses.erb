@@ -23,10 +23,10 @@
       <h4>Filters</h4>
       <span class="filter">Status</span>
         <select class="form-control" id="status_filter">
-        <option></option>
-        <% status_filters.each do |status_filter| %>
-          <option <%= status_filter == filters[:status] ? 'selected' : nil %> value=<%= status_filter %>><%= status_filter.capitalize %></option>
-        <% end %>
+          <option></option>
+          <% status_filters.each do |status_filter| %>
+            <option <%= status_filter == filters[:status] ? 'selected' : nil %> value=<%= status_filter %>><%= status_filter.capitalize %></option>
+          <% end %>
         </select>
         <span class="filter">Job Name</span>
         <input class="form-control" type="text" id="job_name" value="<%= filters[:job] %>" />
@@ -47,6 +47,7 @@
     <th>Actions</th>
   </tr>
 </thead>
+<tbody>
   <% unless @statuses.empty? %>
     <% @statuses.each do |status| %>
     <tr>
@@ -71,11 +72,13 @@
     <td colspan="7" class='no-data'>No Statuses right now...</td>
   </tr>
   <% end %>
+</tbody>
 </table>
+<div class="digg_pagination">
+  <%= will_paginate @statuses, :page_links => true %>
+</div>
 
-<%= pagy_bootstrap_nav(@pagy) if @pagy.pages > 1 %>
-
-<%= status_poll(@start) %>
+<!-- <%= status_poll(@start) %> -->
 
 <script type="text/javascript" charset="utf-8">
   jQuery(function($) {

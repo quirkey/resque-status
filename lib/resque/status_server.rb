@@ -1,7 +1,8 @@
 require 'resque/server'
 require 'resque-status'
-require 'pagy/extras/bootstrap'
-
+require 'will_paginate'
+require 'will_paginate/array'
+require 'will_paginate/view_helpers/sinatra'
 
 module Resque
   module StatusServer
@@ -9,14 +10,25 @@ module Resque
     PER_PAGE = 50
 
     def self.registered(app)
-      extend Pagy::Backend
       app.get '/statuses' do
         @filters = params[:filters]
         @start = params[:start].to_i
         @end = @start + (params[:per_page] || per_page) - 1
-        @pagy, @statuses = Resque::Plugins::Status::Hash.statuses(nil, nil, @filters, params[:page])
-        @size = @filters.present? ? -1 : Resque::Plugins::Status::Hash.count
+        @statuses = Resque::Plugins::Status::Hash.statuses(nil, nil, @filters, params[:page])
+        @statuses = @statuses.paginate(page: params[:page], per_page: 25)
+
         status_view(:statuses)
+      end
+
+      app.get '/statuses.js' do
+        @filters = params[:filters]
+        @start = params[:start].to_i
+        @end = @start + (params[:per_page] || per_page) - 1
+        @statuses = Resque::Plugins::Status::Hash.statuses(nil, nil, @filters, params[:page])
+        @statuses = @statuses.paginate(page: params[:page], per_page: 25)
+
+        content_type :js
+        @statuses.to_json
       end
 
       app.get '/statuses/:id.js' do
@@ -62,8 +74,7 @@ module Resque
       end
 
       app.helpers do
-        include Pagy::Frontend
-
+        include WillPaginate::Sinatra::Helpers
         def per_page
           PER_PAGE
         end
