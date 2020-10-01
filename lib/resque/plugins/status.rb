@@ -231,7 +231,6 @@ module Resque
       def completed(*messages)
         set_status({
           'status' => STATUS_COMPLETED,
-          'message' => "Completed at #{Time.now}",
           'end_time' => Time.now
         }, *messages)
       end
@@ -240,7 +239,6 @@ module Resque
       def kill!
         set_status({
           'status' => STATUS_KILLED,
-          'message' => "Killed at #{Time.now}",
           'end_time' => Time.now
         })
         raise Killed
