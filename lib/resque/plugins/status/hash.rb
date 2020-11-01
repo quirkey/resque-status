@@ -80,10 +80,6 @@ module Resque
           redis.zrem(set_key, uuid)
         end
 
-        def self.count
-          #redis.zcard(set_key)
-        end
-
         # Return <tt>num</tt> Resque::Plugins::Status::Hash objects in reverse chronological order.
         # By default returns the entire set.
         # @param [Numeric] range_start The optional starting range
