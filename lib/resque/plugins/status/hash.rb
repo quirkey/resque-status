@@ -13,8 +13,12 @@ module Resque
         # Returns the UUID of the new status.
         def self.create(uuid, *messages)
           set(uuid, *messages)
-          redis.zadd(set_key, Time.now.to_i, uuid)
-          redis.zremrangebyscore(set_key, 0, Time.now.to_i - @expire_in) if @expire_in
+          redis.pipelined do
+            redis.multi do
+              redis.zadd(set_key, Time.now.to_i, uuid)
+              redis.zremrangebyscore(set_key, 0, Time.now.to_i - @expire_in) if @expire_in
+            end
+          end
           uuid
         end
 
@@ -39,9 +43,12 @@ module Resque
         # that are merged in order to create a single status.
         def self.set(uuid, *messages)
           val = Resque::Plugins::Status::Hash.new(uuid, *messages)
-          redis.set(status_key(uuid), encode(val))
+          # The more modern approach is to use redis.set(status_key(uuid), encode_val, ex: expire_in)
+          # but the ex option was only added in 2.6.12, whereas setex was added in 2.0
           if expire_in
-            redis.expire(status_key(uuid), expire_in)
+            redis.setex(status_key(uuid), expire_in, encode(val))
+          else
+            redis.set(status_key(uuid), encode(val))
           end
           val
         end
@@ -77,8 +84,12 @@ module Resque
         end
 
         def self.remove(uuid)
-          redis.del(status_key(uuid))
-          redis.zrem(set_key, uuid)
+          redis.pipelined do
+            redis.multi do
+              redis.del(status_key(uuid))
+              redis.zrem(set_key, uuid)
+            end
+          end
         end
 
         def self.count
