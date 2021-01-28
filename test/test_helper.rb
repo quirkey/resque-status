@@ -51,6 +51,27 @@ class WorkingJob
 
 end
 
+class WorkingParentJob
+  include Resque::Plugins::Status
+
+  def perform
+    init_parent(3)
+    # This is a workaround to test killing job while it enqueues children with inline resque.
+    # The real use case would be that the `kill` would happen somewhere in the middle of subjob runs,
+    # long after the main job finished.
+    Resque::Plugins::Status::Hash.kill(@uuid) if options['self_kill']
+    3.times { |i| enqueue_child('job_num' => i) }
+  end
+
+  def perform_child
+    Resque.redis.sadd('child_jobs_done', options['job_num'])
+  end
+
+  def on_success
+    Resque.redis.sadd('child_on_success', options['job_num'] || 'parent')
+  end
+end
+
 class ErrorJob
 
   include Resque::Plugins::Status

@@ -355,6 +355,36 @@ class TestResquePluginsStatus < Minitest::Test
 
     end
 
-  end
+    describe 'with WorkingParentJob' do
+      before do
+        Resque.stubs(:inline?).returns(true)
+        @uuid = WorkingParentJob.create('num' => 100)
+      end
 
+      it 'should have ran all the children' do
+        assert_equal(%w[0 1 2], Resque.redis.smembers('child_jobs_done').sort)
+        onsuccess_jobs = Resque.redis.smembers('child_on_success')
+        assert_equal 1, onsuccess_jobs.size
+        assert_includes(%w[0 1 2], onsuccess_jobs[0])
+        status = Resque::Plugins::Status::Hash.get(@uuid)
+        assert_equal 3, status.num
+        assert_equal 'completed', status.status
+      end
+    end
+
+    describe 'with self killing WorkingParentJob' do
+      before do
+        Resque.stubs(:inline?).returns(true)
+        @uuid = WorkingParentJob.create('num' => 100, 'self_kill' => true)
+      end
+
+      it 'should have ran all the children' do
+        assert_equal([], Resque.redis.smembers('child_jobs_done'))
+        assert_equal([], Resque.redis.smembers('child_on_success'))
+        status = Resque::Plugins::Status::Hash.get(@uuid)
+        assert_equal 3, status.num
+        assert_equal 'killed', status.status
+      end
+    end
+  end
 end

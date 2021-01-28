@@ -46,6 +46,16 @@ module Resque
           val
         end
 
+        # Atomically update the status in block. Example:
+        # status.update { |st| st['num'] += 1; st['message'] = "finished #{st['num']}" }
+        # Note: the updating on this UUID is locking using redis for 10s, so make sure the update is immediate
+        def self.update(uuid, &block)
+          sleep(0.01) until redis.set("lock:update:#{uuid}", 1, nx: true, ex: 10)
+          set(uuid, get(uuid).tap(&block))
+        ensure
+          redis.del("lock:update:#{uuid}")
+        end
+
         # clear statuses from redis passing an optional range. See `statuses` for info
         # about ranges
         def self.clear(range_start = nil, range_end = nil)

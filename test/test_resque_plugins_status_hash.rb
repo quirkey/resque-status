@@ -162,6 +162,25 @@ class TestResquePluginsStatusHash < Minitest::Test
       end
     end
 
+    describe '.update' do
+      before do
+        @uuid = Resque::Plugins::Status::Hash.generate_uuid
+        Resque::Plugins::Status::Hash.set(@uuid, 'num' => 10)
+      end
+
+      it 'updates the hash' do
+        Resque::Plugins::Status::Hash.update(@uuid) { |h| h['num'] += 5; h['message'] = 'hello' }
+        hash = Resque::Plugins::Status::Hash.get(@uuid)
+        assert_equal 15, hash.num
+        assert_equal 'hello', hash.message
+      end
+
+      it 'is threadsafe' do
+        20.times.map { Thread.new { Resque::Plugins::Status::Hash.update(@uuid) { |h| h['num'] += 1 } } }.each(&:join)
+        assert_equal 30, Resque::Plugins::Status::Hash.get(@uuid).num
+      end
+    end
+
     describe ".status_ids" do
 
       before do
