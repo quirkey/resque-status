@@ -12,10 +12,10 @@ begin
     gem.version = Resque::Plugins::Status::VERSION
     gem.summary = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs.}
     gem.description = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when included provides easily trackable/killable jobs.}
-    gem.email = "aaron@quirkey.com"
-    gem.homepage = "http://github.com/quirkey/resque-status"
-    gem.rubyforge_project = "quirkey"
-    gem.authors = ["Aaron Quint"]
+    gem.email = "djuber@gmail.com"
+    gem.homepage = "http://github.com/djuber/resque-status"
+    gem.rubyforge_project = "djuber"
+    gem.authors = ["Aaron Quint", "Daniel Uber"]
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::RubygemsDotOrgTasks.new
