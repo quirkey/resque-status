@@ -250,8 +250,10 @@ class TestResquePluginsStatus < Minitest::Test
 
     describe "invoking killall jobs to kill a range" do
       before do
-        @uuid1    = KillableJob.create(:num => 100)
-        @uuid2    = KillableJob.create(:num => 100)
+        Timecop.travel(-1) do
+          @uuid1 = KillableJob.create(:num => 100)
+        end
+        @uuid2 = KillableJob.create(:num => 100)
 
         Resque::Plugins::Status::Hash.killall(0,0) # only @uuid2 it be killed
 

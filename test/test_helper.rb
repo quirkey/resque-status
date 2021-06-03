@@ -3,6 +3,7 @@ require 'resque-status'
 
 require 'minitest/autorun'
 require 'mocha/setup'
+require 'timecop'
 
 #
 # make sure we can run redis

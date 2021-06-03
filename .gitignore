@@ -18,6 +18,7 @@ coverage
 rdoc
 pkg
 .rvmrc
+.byebug_history
 
 ## PROJECT::SPECIFIC
 doc
