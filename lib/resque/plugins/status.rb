@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Resque
   module Plugins
 
@@ -49,7 +51,7 @@ module Resque
       class Killed < RuntimeError; end
       class NotANumber < RuntimeError; end
 
-      attr_reader :uuid, :options
+      attr_reader :uuid, :options, :parent_uuid
 
       def self.included(base)
         base.extend(ClassMethods)
@@ -131,10 +133,15 @@ module Resque
         # options.
         #
         # You should not override this method, rahter the <tt>perform</tt> instance method.
-        def perform(uuid=nil, options = {})
-          uuid ||= Resque::Plugins::Status::Hash.generate_uuid
+        def perform(uuid = nil, options = {})
+          if (!uuid || uuid.is_a?(::Hash)) && options == {}
+            options = uuid || {}
+            uuid = Resque::Plugins::Status::Hash.generate_uuid
+            Resque::Plugins::Status::Hash.create uuid, options: options
+          end
+
           instance = new(uuid, options)
-          instance.safe_perform!
+          instance.parent_uuid ? instance.child_safe_perform! : instance.safe_perform!
           instance
         end
 
@@ -150,6 +157,7 @@ module Resque
       def initialize(uuid, options = {})
         @uuid    = uuid
         @options = options
+        @parent_uuid = options['_parent_uuid']
       end
 
       # Run by the Resque::Worker when processing this job. It wraps the <tt>perform</tt>
@@ -159,10 +167,13 @@ module Resque
       def safe_perform!
         set_status({'status' => STATUS_WORKING})
         perform
-        if status && status.failed?
-          on_failure(status.message) if respond_to?(:on_failure)
+        job_status = status
+        if job_status&.failed?
+          on_failure(job_status.message) if respond_to?(:on_failure)
           return
-        elsif status && !status.completed?
+        elsif @is_parent_job
+          return
+        elsif job_status && !job_status.completed?
           completed
         end
         on_success if respond_to?(:on_success)
@@ -176,6 +187,16 @@ module Resque
         else
           raise e
         end
+      end
+
+      def child_safe_perform!
+        set_status('status' => STATUS_WORKING, 'started_at' => Time.now.to_i)
+        perform_child unless parent_should_kill?
+        completed if status&.working?
+        child_complete unless status&.failed?
+      rescue => e
+        failed("The task failed because of an error: #{e}")
+        raise e
       end
 
       # Set the jobs status. Can take an array of strings or hashes that are merged
@@ -197,6 +218,10 @@ module Resque
       # on the next iteration
       def should_kill?
         Resque::Plugins::Status::Hash.should_kill?(uuid)
+      end
+
+      def parent_should_kill?
+        Resque::Plugins::Status::Hash.should_kill?(parent_uuid)
       end
 
       # set the status of the job for the current itteration. <tt>num</tt> and
@@ -244,7 +269,58 @@ module Resque
         raise Killed
       end
 
+      # Initiates parent once total number of child jobs is known
+      # This step is essential to prevent race condition of all currently queued children finish,
+      # while parent still plans to enqueue more.
+      # When child job completes, it increments the `num` of the parent job by 1.
+      # When `num` gets == `total` the parent job marked as complete and `on_success` is called on the last child job
+      # If parent is killed, all children are prevented from running
+      # Child job statuses are deleted when complete or killed to avoid garbage in redis. It's preserved on error.
+      def init_parent(total)
+        at(0, total, "Queuing #{total} subjobs")
+        @is_parent_job = true
+      end
+
+      # Enqueues the same class with `options` as a child of the current job
+      def enqueue_child(options)
+        raise 'Parent not initiated' unless @is_parent_job
+
+        Resque.enqueue(self.class, options.merge('_parent_uuid' => uuid))
+      end
+
       private
+
+      def parent_status
+        Resque::Plugins::Status::Hash.get(parent_uuid)
+      end
+
+      def update_parent(&block)
+        Resque::Plugins::Status::Hash.update(parent_uuid, &block)
+      end
+
+      def child_complete
+        parent = update_parent do |st|
+          st['num'] += 1
+          st['message'] = "Working #{st['num']}/#{st['total']}"
+          st['time'] = Time.now.to_i
+        end
+        Resque::Plugins::Status::Hash.remove(uuid)
+        return if parent.num != parent.total
+
+        if parent_should_kill?
+          Resque::Plugins::Status::Hash.set(parent_uuid, parent, 'status' => STATUS_KILLED)
+          on_killed if respond_to?(:on_killed)
+        else
+          begin
+            on_success if respond_to?(:on_success)
+            Resque::Plugins::Status::Hash.set(parent_uuid, parent, 'status' => STATUS_COMPLETED, 'message' => "Finished in #{parent['num']} jobs")
+          rescue => e
+            Resque::Plugins::Status::Hash.set(parent_uuid, parent, 'status' => STATUS_FAILED, 'message' => "on_success failed with #{e.class}/#{e}")
+            raise
+          end
+        end
+      end
+
       def set_status(*args)
         self.status = [status, {'name'  => self.name}, args].flatten
       end
