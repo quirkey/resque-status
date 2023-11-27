@@ -1,9 +1,10 @@
 require "bundler/setup"
 require "resque-status"
-require "fakeredis"
+
 require "minitest/autorun"
 require "mocha/setup"
 
+require "fakeredis"
 Resque.redis = Redis.new
 
 #### Fixtures
