@@ -11,8 +11,9 @@ module Resque
         # Returns the UUID of the new status.
         def self.create(uuid, *messages)
           set(uuid, *messages)
-          redis.zadd(set_key, Time.now.to_i, uuid)
-          redis.zremrangebyscore(set_key, 0, Time.now.to_i - @expire_in) if @expire_in
+          score = time_in_nanoseconds
+          redis.zadd(set_key, score, uuid)
+          redis.zremrangebyscore(set_key, 0, score - seconds_to_nanoseconds(@expire_in)) if @expire_in
           uuid
         end
 
@@ -98,12 +99,12 @@ module Resque
         def self.status_ids(range_start = nil, range_end = nil)
           if range_end && range_start
             # Because we want a reverse chronological order, we need to get a range starting
-            # by the higest negative number. The ordering is transparent from the API user's
+            # by the highest negative number. The ordering is transparent from the API user's
             # perspective so we need to convert the passed params
             (redis.zrevrange(set_key, range_start.abs, (range_end || 1).abs) || [])
           else
             # Because we want a reverse chronological order, we need to get a range starting
-            # by the higest negative number.
+            # by the highest negative number.
             redis.zrevrange(set_key, 0, -1) || []
           end
         end
@@ -190,6 +191,18 @@ module Resque
             !!self['#{name}']
           end
           EOT
+        end
+
+        # `zset` scores should be in nanoseconds since the epoch
+        # to enforce chronological ordering of statuses.
+        # Add the nanoseconds after converting the time to an integer
+        # to avoid floating point errors.
+        def self.time_in_nanoseconds(time = Time.now)
+          self.seconds_to_nanoseconds(time.to_i) + time.nsec
+        end
+
+        def self.seconds_to_nanoseconds(seconds)
+          seconds * (10 ** 9)
         end
 
         # Proxy deprecated methods directly back to Resque itself.

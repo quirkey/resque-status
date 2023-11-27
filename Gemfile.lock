@@ -80,7 +80,7 @@ GEM
     rchardet (1.8.0)
     rdoc (6.6.0)
       psych (>= 4.0.0)
-    redis (3.0.2)
+    redis (3.0.7)
     redis-namespace (1.2.1)
       redis (~> 3.0.0)
     resque (1.23.0)
