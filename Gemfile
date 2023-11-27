@@ -1,6 +1,6 @@
 source "https://artifactory.infra.lksi.io/artifactory/gems"
 
-gem "resque", "~> 1.19"
+gem "resque", "= 2.0.0"
 
 group :test do
   gem "mocha", "~>0.9"
