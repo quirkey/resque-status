@@ -1,4 +1,4 @@
-require 'resque'
+require "resque"
 
 module Resque
   autoload :JobWithStatus, "#{File.dirname(__FILE__)}/job_with_status"

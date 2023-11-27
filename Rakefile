@@ -1,17 +1,17 @@
-$LOAD_PATH.unshift './lib'
+$LOAD_PATH.unshift "./lib"
 
-require 'rubygems'
-require 'rake'
-require 'resque-status'
-require 'resque/tasks'
+require "rubygems"
+require "rake"
+require "resque-status"
+require "resque/tasks"
 
 begin
-  require 'jeweler'
+  require "jeweler"
   Jeweler::Tasks.new do |gem|
     gem.name = "resque-status"
     gem.version = Resque::Plugins::Status::VERSION
-    gem.summary = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs.}
-    gem.description = %Q{resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when included provides easily trackable/killable jobs.}
+    gem.summary = %(resque-status is an extension to the resque queue system that provides simple trackable jobs.)
+    gem.description = %(resque-status is an extension to the resque queue system that provides simple trackable jobs. It provides a Resque::Plugins::Status::Hash class which can set/get the statuses of jobs and a Resque::Plugins::Status class that when included provides easily trackable/killable jobs.)
     gem.email = "aaron@quirkey.com"
     gem.homepage = "http://github.com/quirkey/resque-status"
     gem.rubyforge_project = "quirkey"
@@ -23,18 +23,18 @@ rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
 
-require 'rake/testtask'
+require "rake/testtask"
 Rake::TestTask.new(:test) do |test|
-  test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/test_*.rb'
+  test.libs << "lib" << "test"
+  test.pattern = "test/**/test_*.rb"
   test.verbose = true
 end
 
 begin
-  require 'rcov/rcovtask'
+  require "rcov/rcovtask"
   Rcov::RcovTask.new do |test|
-    test.libs << 'test'
-    test.pattern = 'test/**/test_*.rb'
+    test.libs << "test"
+    test.pattern = "test/**/test_*.rb"
     test.verbose = true
   end
 rescue LoadError
@@ -45,4 +45,4 @@ end
 
 task :test
 
-task :default => :test
+task default: :test

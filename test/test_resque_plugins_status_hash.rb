@@ -1,7 +1,6 @@
-require 'test_helper'
+require "test_helper"
 
 class TestResquePluginsStatusHash < Minitest::Test
-
   describe "Resque::Plugins::Status::Hash" do
     before do
       Resque.redis.flushall
@@ -15,15 +14,15 @@ class TestResquePluginsStatusHash < Minitest::Test
       it "return the status as a Resque::Plugins::Status::Hash for the uuid" do
         status = Resque::Plugins::Status::Hash.get(@uuid)
         assert status.is_a?(Resque::Plugins::Status::Hash)
-        assert_equal 'my status', status.message
+        assert_equal "my status", status.message
       end
 
       it "return nil if the status is not set" do
-        assert_nil Resque::Plugins::Status::Hash.get('invalid_uuid')
+        assert_nil Resque::Plugins::Status::Hash.get("invalid_uuid")
       end
 
       it "decode encoded json" do
-        assert_equal("json", Resque::Plugins::Status::Hash.get(@uuid_with_json)['im'])
+        assert_equal("json", Resque::Plugins::Status::Hash.get(@uuid_with_json)["im"])
       end
     end
 
@@ -33,26 +32,25 @@ class TestResquePluginsStatusHash < Minitest::Test
         Resque::Plugins::Status::Hash.set(uuid2, "my status2")
         statuses = Resque::Plugins::Status::Hash.mget([@uuid, uuid2])
         assert_equal 2, statuses.size
-        assert statuses.all?{|s| s.is_a?(Resque::Plugins::Status::Hash) }
-        assert_equal ['my status', 'my status2'], statuses.map(&:message)
+        assert statuses.all? { |s| s.is_a?(Resque::Plugins::Status::Hash) }
+        assert_equal ["my status", "my status2"], statuses.map(&:message)
       end
 
       it "return nil if a status is not set" do
-        statuses = Resque::Plugins::Status::Hash.mget(['invalid_uuid', @uuid])
+        statuses = Resque::Plugins::Status::Hash.mget(["invalid_uuid", @uuid])
         assert_equal 2, statuses.size
         assert_nil statuses[0]
         assert statuses[1].is_a?(Resque::Plugins::Status::Hash)
-        assert_equal 'my status', statuses[1].message
+        assert_equal "my status", statuses[1].message
       end
 
       it "decode encoded json" do
-        assert_equal ['json'],
-          Resque::Plugins::Status::Hash.mget([@uuid_with_json]).map{|h| h['im']}
+        assert_equal ["json"],
+          Resque::Plugins::Status::Hash.mget([@uuid_with_json]).map { |h| h["im"] }
       end
     end
 
     describe ".set" do
-
       it "set the status for the uuid" do
         assert Resque::Plugins::Status::Hash.set(@uuid, "updated")
         assert_equal "updated", Resque::Plugins::Status::Hash.get(@uuid).message
@@ -61,7 +59,6 @@ class TestResquePluginsStatusHash < Minitest::Test
       it "return the status" do
         assert Resque::Plugins::Status::Hash.set(@uuid, "updated").is_a?(Resque::Plugins::Status::Hash)
       end
-
     end
 
     describe ".create" do
@@ -95,11 +92,11 @@ class TestResquePluginsStatusHash < Minitest::Test
       end
 
       it "store the options for the job created" do
-        uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, "new", :options => {'test' => '123'})
+        uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, "new", options: {"test" => "123"})
         assert uuid
         status = Resque::Plugins::Status::Hash.get(uuid)
         assert status.is_a?(Resque::Plugins::Status::Hash)
-        assert_equal '123', status.options['test']
+        assert_equal "123", status.options["test"]
       end
     end
 
@@ -115,12 +112,11 @@ class TestResquePluginsStatusHash < Minitest::Test
       it "clear any recent statuses" do
         assert Resque::Plugins::Status::Hash.status_ids.empty?
       end
-
     end
 
     describe ".clear_completed" do
       before do
-        @completed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => "completed"})
+        @completed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {"status" => "completed"})
         @not_completed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
         Resque::Plugins::Status::Hash.clear_completed
       end
@@ -137,7 +133,7 @@ class TestResquePluginsStatusHash < Minitest::Test
 
     describe ".clear_failed" do
       before do
-        @failed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => "failed"})
+        @failed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {"status" => "failed"})
         @not_failed_status_id = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid)
         Resque::Plugins::Status::Hash.clear_failed
       end
@@ -163,10 +159,9 @@ class TestResquePluginsStatusHash < Minitest::Test
     end
 
     describe ".status_ids" do
-
       before do
         @uuids = []
-        30.times{ Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid) }
+        30.times { Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid) }
       end
 
       it "return an array of job ids" do
@@ -182,7 +177,6 @@ class TestResquePluginsStatusHash < Minitest::Test
     end
 
     describe ".statuses" do
-
       it "return an array status objects" do
         statuses = Resque::Plugins::Status::Hash.statuses
         assert statuses.is_a?(Array)
@@ -194,14 +188,12 @@ class TestResquePluginsStatusHash < Minitest::Test
         statuses = Resque::Plugins::Status::Hash.statuses
         assert_equal [], statuses
       end
-
     end
 
     Resque::Plugins::Status::STATUSES.each do |status_code|
       describe ".#{status_code}?" do
-
         before do
-          uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {'status' => status_code})
+          uuid = Resque::Plugins::Status::Hash.create(Resque::Plugins::Status::Hash.generate_uuid, {"status" => status_code})
           @status = Resque::Plugins::Status::Hash.get(uuid)
         end
 
@@ -214,9 +206,7 @@ class TestResquePluginsStatusHash < Minitest::Test
             assert !@status.send("#{other_status_code}?"), other_status_code
           end
         end
-
       end
     end
   end
-
 end

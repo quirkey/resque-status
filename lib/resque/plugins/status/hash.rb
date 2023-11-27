@@ -1,14 +1,12 @@
-require 'securerandom'
+require "securerandom"
 
 module Resque
   module Plugins
     module Status
-
       # Resque::Plugins::Status::Hash is a Hash object that has helper methods for dealing with
       # the common status attributes. It also has a number of class methods for
       # creating/updating/retrieving status objects from Redis
       class Hash < ::Hash
-
         # Create a status, generating a new UUID, passing the message to the status
         # Returns the UUID of the new status.
         def self.create(uuid, *messages)
@@ -27,7 +25,7 @@ module Resque
         # Get multiple statuses by UUID. Returns array of Resque::Plugins::Status::Hash
         def self.mget(uuids)
           return [] if uuids.empty?
-          status_keys = uuids.map{|u| status_key(u)}
+          status_keys = uuids.map { |u| status_key(u) }
           vals = redis.mget(*status_keys)
 
           uuids.zip(vals).map do |uuid, val|
@@ -102,7 +100,7 @@ module Resque
             # Because we want a reverse chronological order, we need to get a range starting
             # by the higest negative number. The ordering is transparent from the API user's
             # perspective so we need to convert the passed params
-            (redis.zrevrange(set_key, (range_start.abs), ((range_end || 1).abs)) || [])
+            (redis.zrevrange(set_key, range_start.abs, (range_end || 1).abs) || [])
           else
             # Because we want a reverse chronological order, we need to get a range starting
             # by the higest negative number.
@@ -155,7 +153,7 @@ module Resque
 
         # Set the <tt>expire_in</tt> time in seconds
         def self.expire_in=(seconds)
-          @expire_in = seconds.nil? ? nil : seconds.to_i
+          @expire_in = seconds&.to_i
         end
 
         def self.status_key(uuid)
@@ -177,7 +175,7 @@ module Resque
         def self.hash_accessor(name, options = {})
           options[:default] ||= nil
           coerce = options[:coerce] ? ".#{options[:coerce]}" : ""
-          module_eval <<-EOT
+          module_eval <<-EOT, __FILE__, __LINE__ + 1
           def #{name}
             value = (self['#{name}'] ? self['#{name}']#{coerce} : #{options[:default].inspect})
             yield value if block_given?
@@ -218,15 +216,15 @@ module Resque
         def initialize(*args)
           super nil
           base_status = {
-            'time' => Time.now.to_i,
-            'status' => Resque::Plugins::Status::STATUS_QUEUED
+            "time" => Time.now.to_i,
+            "status" => Resque::Plugins::Status::STATUS_QUEUED
           }
-          base_status['uuid'] = args.shift if args.length > 1
+          base_status["uuid"] = args.shift if args.length > 1
           status_hash = args.inject(base_status) do |final, m|
-            m = {'message' => m} if m.is_a?(String)
+            m = {"message" => m} if m.is_a?(String)
             final.merge(m || {})
           end
-          self.replace(status_hash)
+          replace(status_hash)
         end
 
         # calculate the % completion of the job based on <tt>status</tt>, <tt>num</tt>
@@ -245,12 +243,12 @@ module Resque
         # Return the time of the status initialization. If set returns a <tt>Time</tt>
         # object, otherwise returns nil
         def time
-          time? ? Time.at(self['time']) : nil
+          time? ? Time.at(self["time"]) : nil
         end
 
         Resque::Plugins::Status::STATUSES.each do |status|
           define_method("#{status}?") do
-            self['status'] === status
+            self["status"] === status
           end
         end
 
@@ -268,15 +266,14 @@ module Resque
 
         # Return a JSON representation of the current object.
         def json
-          h = self.dup
-          h['pct_complete'] = pct_complete
+          h = dup
+          h["pct_complete"] = pct_complete
           self.class.encode(h)
         end
 
         def inspect
           "#<Resque::Plugins::Status::Hash #{super}>"
         end
-
       end
     end
   end

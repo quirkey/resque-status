@@ -1,7 +1,6 @@
-require 'test_helper'
+require "test_helper"
 
 class TestResquePluginsStatus < Minitest::Test
-
   describe "Resque::Plugins::Status" do
     before do
       Resque.redis.flushall
@@ -10,7 +9,7 @@ class TestResquePluginsStatus < Minitest::Test
     describe ".create" do
       describe "not inline" do
         before do
-          @uuid = WorkingJob.create('num' => 100)
+          @uuid = WorkingJob.create("num" => 100)
         end
 
         it "add the job to the queue" do
@@ -19,8 +18,8 @@ class TestResquePluginsStatus < Minitest::Test
 
         it "set the queued object to the current class" do
           job = Resque.pop(:statused)
-          assert_equal @uuid, job['args'].first
-          assert_equal "WorkingJob", job['class']
+          assert_equal @uuid, job["args"].first
+          assert_equal "WorkingJob", job["class"]
         end
 
         it "add the uuid to the statuses" do
@@ -38,13 +37,13 @@ class TestResquePluginsStatus < Minitest::Test
         end
 
         it "not queue a job" do
-          @uuid = WorkingJob.create('num' => 100)
+          @uuid = WorkingJob.create("num" => 100)
           assert_equal 0, Resque.size(:statused)
         end
 
         it "call perform" do
           WorkingJob.any_instance.expects(:perform).once
-          @uuid = WorkingJob.create('num' => 100)
+          @uuid = WorkingJob.create("num" => 100)
         end
       end
     end
@@ -53,7 +52,7 @@ class TestResquePluginsStatus < Minitest::Test
       before do
         @size = Resque.size(:statused)
         @status_ids_size = Resque::Plugins::Status::Hash.status_ids.length
-        @res = NeverQueuedJob.create(:num => 100)
+        @res = NeverQueuedJob.create(num: 100)
       end
 
       it "return nil" do
@@ -71,36 +70,36 @@ class TestResquePluginsStatus < Minitest::Test
 
     describe ".scheduled" do
       before do
-        @job_args = {'num' => 100}
+        @job_args = {"num" => 100}
         @uuid = WorkingJob.scheduled(:queue_name, WorkingJob, @job_args)
       end
 
       it "create the job with the provided arguments" do
         job = Resque.pop(:queue_name)
-        assert_equal @job_args, job['args'].last
+        assert_equal @job_args, job["args"].last
       end
     end
 
     describe ".enqueue" do
       it "delegate to enqueue_to, filling in the queue from the class" do
-        @uuid = BasicJob.enqueue(WorkingJob, :num => 100)
+        @uuid = BasicJob.enqueue(WorkingJob, num: 100)
         @payload = Resque.pop(:statused)
-        assert_equal "WorkingJob", @payload['class']
+        assert_equal "WorkingJob", @payload["class"]
       end
     end
 
     describe ".enqueue_to" do
       before do
-        @uuid = BasicJob.enqueue_to(:new_queue, WorkingJob, :num => 100)
+        @uuid = BasicJob.enqueue_to(:new_queue, WorkingJob, num: 100)
         @payload = Resque.pop(:new_queue)
       end
 
       it "add the job with the specific class to the queue" do
-        assert_equal "WorkingJob", @payload['class']
+        assert_equal "WorkingJob", @payload["class"]
       end
 
       it "add the arguments to the options hash" do
-        assert_equal @uuid, @payload['args'].first
+        assert_equal @uuid, @payload["args"].first
       end
 
       it "add the uuid to the statuses" do
@@ -110,34 +109,33 @@ class TestResquePluginsStatus < Minitest::Test
       it "return UUID" do
         assert_match(/^\w{32}$/, @uuid)
       end
-
     end
 
     describe ".dequeue" do
       before do
-        @uuid1 = BasicJob.enqueue(WorkingJob, :num => 100)
-        @uuid2 = BasicJob.enqueue(WorkingJob, :num => 100)
+        @uuid1 = BasicJob.enqueue(WorkingJob, num: 100)
+        @uuid2 = BasicJob.enqueue(WorkingJob, num: 100)
       end
 
       it "dequeue the job with the uuid from the correct queue" do
         size = Resque.size(:statused)
         BasicJob.dequeue(WorkingJob, @uuid2)
-        assert_equal size-1, Resque.size(:statused)
+        assert_equal size - 1, Resque.size(:statused)
       end
       it "not dequeue any jobs with different uuids for same class name" do
         BasicJob.dequeue(WorkingJob, @uuid2)
-        assert_equal @uuid1, Resque.pop(:statused)['args'].first
+        assert_equal @uuid1, Resque.pop(:statused)["args"].first
       end
     end
 
     describe ".perform" do
-      let(:expectation) { }
+      let(:expectation) {}
 
       before do
         expectation
-        @uuid      = WorkingJob.create(:num => 100)
-        @payload   = Resque.pop(:statused)
-        @performed = WorkingJob.perform(*@payload['args'])
+        @uuid = WorkingJob.create(num: 100)
+        @payload = Resque.pop(:statused)
+        @performed = WorkingJob.perform(*@payload["args"])
       end
 
       it "load load a new instance of the klass" do
@@ -161,9 +159,9 @@ class TestResquePluginsStatus < Minitest::Test
 
     describe "manually failing a job" do
       before do
-        @uuid      = FailureJob.create(:num => 100)
-        @payload   = Resque.pop(:statused)
-        @performed = FailureJob.perform(*@payload['args'])
+        @uuid = FailureJob.create(num: 100)
+        @payload = Resque.pop(:statused)
+        @performed = FailureJob.perform(*@payload["args"])
       end
 
       it "load load a new instance of the klass" do
@@ -183,16 +181,15 @@ class TestResquePluginsStatus < Minitest::Test
         assert_match(/failure/, @performed.status.message)
         assert @performed.status.failed?
       end
-
     end
 
     describe "killing a job" do
       before do
-        @uuid      = KillableJob.create(:num => 100)
-        @payload   = Resque.pop(:statused)
+        @uuid = KillableJob.create(num: 100)
+        @payload = Resque.pop(:statused)
         Resque::Plugins::Status::Hash.kill(@uuid)
         assert_includes Resque::Plugins::Status::Hash.kill_ids, @uuid
-        @performed = KillableJob.perform(*@payload['args'])
+        @performed = KillableJob.perform(*@payload["args"])
         @status = Resque::Plugins::Status::Hash.get(@uuid)
       end
 
@@ -212,19 +209,19 @@ class TestResquePluginsStatus < Minitest::Test
 
     describe "killing all jobs" do
       before do
-        @uuid1    = KillableJob.create(:num => 100)
-        @uuid2    = KillableJob.create(:num => 100)
+        @uuid1 = KillableJob.create(num: 100)
+        @uuid2 = KillableJob.create(num: 100)
 
         Resque::Plugins::Status::Hash.killall
 
         assert_includes Resque::Plugins::Status::Hash.kill_ids, @uuid1
         assert_includes Resque::Plugins::Status::Hash.kill_ids, @uuid2
 
-        @payload1   = Resque.pop(:statused)
-        @payload2   = Resque.pop(:statused)
+        @payload1 = Resque.pop(:statused)
+        @payload2 = Resque.pop(:statused)
 
-        @performed = KillableJob.perform(*@payload1['args'])
-        @performed = KillableJob.perform(*@payload2['args'])
+        @performed = KillableJob.perform(*@payload1["args"])
+        @performed = KillableJob.perform(*@payload2["args"])
 
         @status1, @status2 = Resque::Plugins::Status::Hash.mget([@uuid1, @uuid2])
       end
@@ -245,24 +242,23 @@ class TestResquePluginsStatus < Minitest::Test
         refute_includes Resque::Plugins::Status::Hash.kill_ids, @uuid1
         refute_includes Resque::Plugins::Status::Hash.kill_ids, @uuid2
       end
-
     end
 
     describe "invoking killall jobs to kill a range" do
       before do
-        @uuid1    = KillableJob.create(:num => 100)
-        @uuid2    = KillableJob.create(:num => 100)
+        @uuid1 = KillableJob.create(num: 100)
+        @uuid2 = KillableJob.create(num: 100)
 
-        Resque::Plugins::Status::Hash.killall(0,0) # only @uuid2 it be killed
+        Resque::Plugins::Status::Hash.killall(0, 0) # only @uuid2 it be killed
 
         refute_includes Resque::Plugins::Status::Hash.kill_ids, @uuid1
         assert_includes Resque::Plugins::Status::Hash.kill_ids, @uuid2
 
-        @payload1   = Resque.pop(:statused)
-        @payload2   = Resque.pop(:statused)
+        @payload1 = Resque.pop(:statused)
+        @payload2 = Resque.pop(:statused)
 
-        @performed = KillableJob.perform(*@payload1['args'])
-        @performed = KillableJob.perform(*@payload2['args'])
+        @performed = KillableJob.perform(*@payload1["args"])
+        @performed = KillableJob.perform(*@payload2["args"])
 
         @status1, @status2 = Resque::Plugins::Status::Hash.mget([@uuid1, @uuid2])
       end
@@ -283,12 +279,11 @@ class TestResquePluginsStatus < Minitest::Test
         refute_includes Resque::Plugins::Status::Hash.kill_ids, @uuid1
         refute_includes Resque::Plugins::Status::Hash.kill_ids, @uuid2
       end
-
     end
 
     describe "with an invoked job" do
       before do
-        @job = WorkingJob.new('123', {'num' => 100})
+        @job = WorkingJob.new("123", {"num" => 100})
       end
 
       describe "#at" do
@@ -335,7 +330,6 @@ class TestResquePluginsStatus < Minitest::Test
         it "set message" do
           assert_match(/complete/i, @job.status.message)
         end
-
       end
 
       describe "#safe_perform!" do
@@ -350,9 +344,6 @@ class TestResquePluginsStatus < Minitest::Test
           assert @job.status.failed?
         end
       end
-
     end
-
   end
-
 end

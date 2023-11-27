@@ -1,4 +1,4 @@
-require 'resque/job_with_status' # in rails you would probably do this in an initializer
+require "resque/job_with_status" # in rails you would probably do this in an initializer
 
 # sleeps for _length_ seconds updating the status every second
 
@@ -6,7 +6,7 @@ class SleepJob
   include Resque::Plugins::Status
 
   def perform
-    total = options.has_key?('length') ? options['length'].to_i : 1000
+    total = options.has_key?("length") ? options["length"].to_i : 1000
     num = 0
     while num < total
       at(num, total, "At #{num} of #{total}")
@@ -15,9 +15,7 @@ class SleepJob
     end
     completed
   end
-
 end
-
 
 if __FILE__ == $0
   # Make sure you have a worker running
@@ -25,11 +23,11 @@ if __FILE__ == $0
 
   # running the job
   puts "Creating the SleepJob"
-  job_id = SleepJob.create :length => 100
+  job_id = SleepJob.create length: 100
   puts "Got back #{job_id}"
 
   # check the status until its complete
-  while status = Resque::Plugins::Status::Hash.get(job_id) and !status.completed? && !status.failed?
+  while (status = Resque::Plugins::Status::Hash.get(job_id)) && !status.completed? && !status.failed?
     sleep 1
     puts status.inspect
   end

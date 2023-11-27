@@ -1,1 +1,1 @@
-require 'resque-status'
+require "resque-status"

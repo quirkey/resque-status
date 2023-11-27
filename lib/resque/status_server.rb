@@ -1,15 +1,13 @@
-require 'resque/server'
-require 'resque-status'
+require "resque/server"
+require "resque-status"
 
 module Resque
   module StatusServer
-
-    VIEW_PATH = File.join(File.dirname(__FILE__), 'server', 'views')
+    VIEW_PATH = File.join(File.dirname(__FILE__), "server", "views")
     PER_PAGE = 50
 
     def self.registered(app)
-
-      app.get '/statuses' do
+      app.get "/statuses" do
         @start = params[:start].to_i
         @end = @start + (params[:per_page] || per_page) - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
@@ -17,33 +15,33 @@ module Resque
         status_view(:statuses)
       end
 
-      app.get '/statuses/:id.js' do
+      app.get "/statuses/:id.js" do
         @status = Resque::Plugins::Status::Hash.get(params[:id])
         content_type :js
         @status.json
       end
 
-      app.get '/statuses/:id' do
+      app.get "/statuses/:id" do
         @status = Resque::Plugins::Status::Hash.get(params[:id])
         status_view(:status)
       end
 
-      app.post '/statuses/:id/kill' do
+      app.post "/statuses/:id/kill" do
         Resque::Plugins::Status::Hash.kill(params[:id])
         redirect u(:statuses)
       end
 
-      app.post '/statuses/clear' do
+      app.post "/statuses/clear" do
         Resque::Plugins::Status::Hash.clear
         redirect u(:statuses)
       end
 
-      app.post '/statuses/clear/completed' do
+      app.post "/statuses/clear/completed" do
         Resque::Plugins::Status::Hash.clear_completed
         redirect u(:statuses)
       end
 
-      app.post '/statuses/clear/failed' do
+      app.post "/statuses/clear/failed" do
         Resque::Plugins::Status::Hash.clear_failed
         redirect u(:statuses)
       end
@@ -56,7 +54,7 @@ module Resque
         @end = @start + (params[:per_page] || per_page) - 1
         @statuses = Resque::Plugins::Status::Hash.statuses(@start, @end)
         @size = Resque::Plugins::Status::Hash.count
-        status_view(:statuses, {:layout => false})
+        status_view(:statuses, {layout: false})
       end
 
       app.helpers do
@@ -69,19 +67,17 @@ module Resque
         end
 
         def status_poll(start)
-          if @polling
-            text = "Last Updated: #{Time.now.strftime("%H:%M:%S")}"
+          text = if @polling
+            "Last Updated: #{Time.now.strftime("%H:%M:%S")}"
           else
-            text = "<a href='#{u(request.path_info)}.poll?start=#{start}' rel='poll'>Live Poll</a>"
+            "<a href='#{u(request.path_info)}.poll?start=#{start}' rel='poll'>Live Poll</a>"
           end
           "<p class='poll'>#{text}</p>"
         end
       end
 
       app.tabs << "Statuses"
-
     end
-
   end
 end
 
