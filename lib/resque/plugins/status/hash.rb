@@ -114,12 +114,12 @@ module Resque
         # if it _should_ be killed by calling <tt>tick</tt> or <tt>at</tt>. If so, it raises
         # a <tt>Resque::Plugins::Status::Killed</tt> error and sets the status to 'killed'.
         def self.kill(uuid)
-          redis.sadd(kill_key, uuid)
+          redis.sadd?(kill_key, uuid)
         end
 
         # Remove the job at UUID from the kill list
         def self.killed(uuid)
-          redis.srem(kill_key, uuid)
+          redis.srem?(kill_key, uuid)
         end
 
         # Return the UUIDs of the jobs on the kill list
